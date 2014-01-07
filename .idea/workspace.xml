@@ -4,6 +4,9 @@
     <list default="true" id="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" name="Default" comment="" />
     <ignored path="Compiler.iws" />
     <ignored path=".idea/workspace.xml" />
+    <file path="/LexicalConstants.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389053185706" ignored="false" />
+    <file path="/Token.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389053125805" ignored="false" />
+    <file path="/LexicalAnalyzer.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389055522347" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,9 +77,29 @@
         </entry>
       </file>
       <file leaf-file-name="LexicalAnalyzer.java" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/LexicalAnalyzer.java">
+        <entry file="file://$PROJECT_DIR$/src/lex/LexicalAnalyzer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="28" selection-start="180" selection-end="180" vertical-scroll-proportion="0.13869464">
+            <state line="51" column="25" selection-start="1345" selection-end="1345" vertical-scroll-proportion="0.9009324">
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Token.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lex/Token.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="11" column="0" selection-start="214" selection-end="214" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="TokenType.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lex/TokenType.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="19" column="0" selection-start="306" selection-end="306" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -88,6 +111,16 @@
     <FindUsagesManager>
       <setting name="OPEN_NEW_TAB" value="false" />
     </FindUsagesManager>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="changedFiles">
+      <list>
+        <option value="$PROJECT_DIR$/src/lex/LexicalConstants.java" />
+        <option value="$PROJECT_DIR$/src/lex/Token.java" />
+        <option value="$PROJECT_DIR$/src/lex/TokenType.java" />
+        <option value="$PROJECT_DIR$/src/lex/LexicalAnalyzer.java" />
+      </list>
+    </option>
   </component>
   <component name="ProjectFrameBounds">
     <option name="x" value="-9" />
@@ -151,6 +184,24 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Compiler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Compiler" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="lex" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -371,10 +422,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/LexicalAnalyzer.java">
+    <entry file="file://$PROJECT_DIR$/src/lex/Token.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="28" selection-start="180" selection-end="180" vertical-scroll-proportion="0.13869464">
+        <state line="11" column="0" selection-start="214" selection-end="214" vertical-scroll-proportion="0.0">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lex/TokenType.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="19" column="0" selection-start="306" selection-end="306" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/src.zip!/java/lang/String.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="1927" column="25" selection-start="76117" selection-end="76117" vertical-scroll-proportion="0.8484849">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lex/LexicalAnalyzer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="51" column="25" selection-start="1345" selection-end="1345" vertical-scroll-proportion="0.9009324">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
