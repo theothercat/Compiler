@@ -8,6 +8,11 @@ package lex;
  * To change this template use File | Settings | File Templates.
  */
 public class Token {
-    public TokenType type;
     public String lexeme;
+    public TokenType type;
+
+    public Token(String lex, TokenType t) {
+        lexeme = lex;
+        type = t;
+    }
 }
