@@ -20,7 +20,6 @@ public class LexicalAnalyzer {
     private static final List<String> KEYWORDS = Arrays.asList("if", "while", "true", "false", "return",
             // todo: these are all unconfirmed
             "int", "char", "boolean");
-    private static final int READ_AHEAD_LIMIT = 100000;
 
     private static RegularExpression numEx = new RegularExpression("^\\d+$");
     private static RegularExpression charEx = new RegularExpression("^'.'$");
@@ -30,13 +29,11 @@ public class LexicalAnalyzer {
     private List<Token> tokens;
     private Token currentToken;
     private String currentLine;
-    private int lineNumber;
 
     public LexicalAnalyzer(BufferedReader file)
     {
         this.file = file;
         this.currentLine = "";
-        this.lineNumber = 0;
     }
 
     public Token getToken() {
@@ -48,17 +45,9 @@ public class LexicalAnalyzer {
         try {
             // If we already used the last line, get a new one from the file
             // If the rest of the line is a comment, skip to the next line
-            while(currentLine != null
-                    && (currentLine.trim().isEmpty()
-                    || (currentLine.length() > 1 && currentLine.startsWith("//")))) {
-                currentLine = file.readLine();
-
-                if(currentLine != null) { currentLine = currentLine.trim(); }
-                ++lineNumber;
-            }
-            if(currentLine == null) {
-                currentToken = null;
-                return null;
+            while(currentLine == null || currentLine.isEmpty()
+                    || (currentLine.length() > 1 && currentLine.startsWith("//"))) {
+                currentLine = file.readLine().trim();
             }
 
             // Build the token and remove it from the line
@@ -68,40 +57,6 @@ public class LexicalAnalyzer {
             return currentToken;
         }
         catch(Exception e) {
-            e.printStackTrace();
-//            System.out.println("Exception in nextToken():" + e.getCause()..getMessage());
-            return null;
-        }
-    }
-
-    public Token peek()
-    {
-        try {
-            String peekLine = (currentLine == null || currentLine.isEmpty() || currentToken == null)
-                    ? "" : currentLine.replaceFirst(Pattern.quote(currentToken.lexeme), "").trim();
-            file.mark(READ_AHEAD_LIMIT);
-
-            // If we already used the last line, get a new one from the file
-            // If the rest of the line is a comment, skip to the next line
-            while(peekLine != null
-                    && (peekLine.trim().isEmpty()
-                    || (peekLine.length() > 1 && peekLine.startsWith("//")))) {
-                peekLine = file.readLine();
-
-                if(peekLine != null) { peekLine = peekLine.trim(); }
-            }
-            file.reset();
-            if(peekLine == null) {
-                return null;
-            }
-
-            // Build the token and remove it from the line
-            String[] split = peekLine.split("[ \t]+");
-            return getRealToken(split[0]);
-        }
-        catch(Exception e) {
-            e.printStackTrace();
-//            System.out.println("Exception in peek():" + e.getMessage());
             return null;
         }
     }
@@ -126,10 +81,10 @@ public class LexicalAnalyzer {
         }
 
         for(int i = 1; i < s.length(); i++){
-//            if((i < s.length() - 3)
-//                    && charEx.matches(s.substring(i, i+3))) {
-//                return buildToken(s.substring(0, i));
-//            }
+            if((i < s.length() - 3)
+                    && charEx.matches(s.substring(i, i+3))) {
+                return buildToken(s.substring(0, i));
+            }
             if((i < s.length() - 1)
                     && isSymbol(s.substring(i, i+1))) {
                 return buildToken(s.substring(0,i));
@@ -195,7 +150,7 @@ public class LexicalAnalyzer {
         return s;
     }
 
-    private boolean isSymbol(char c) {
+    public boolean isSymbol(char c) {
         return (c == '+') || (c == '-') || (c == '*') || (c == '/')
                 || (c == '%') // todo: is this something we need?
                 || (c == '<') || (c == '>')
@@ -221,9 +176,5 @@ public class LexicalAnalyzer {
 
     private boolean isKeyword(String s) {
         return KEYWORDS.contains(s);
-    }
-
-    public int getLineNumber() {
-        return lineNumber;
     }
 }

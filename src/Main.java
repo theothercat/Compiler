@@ -16,11 +16,20 @@ public class Main {
         try {
             BufferedReader file = new BufferedReader(new FileReader(args[0]));
             LexicalAnalyzer la = new LexicalAnalyzer(file);
-            Token t;
-            while((t = la.nextToken()) != null) {
-                System.out.println("Found token \"" + t.lexeme + "\" and classified it as " + t.type.name());
+            Token peek;
+            Token read;
+
+            while(true) {
+                peek = la.peek();
+                read = la.nextToken();
+                if(read == null) { return; }
+
+                System.out.println("Found token \"" + read.lexeme + "\" and classified it as " + read.type.name());
+                System.out.println("Peek matches? " + (peek.lexeme.equals(read.lexeme) && peek.type.equals(read.type)));
             }
         }
-        catch(Exception e) { }
+        catch(Exception e) {
+            System.out.println("Exception in main(): " + e.getMessage());
+        }
     }
 }
