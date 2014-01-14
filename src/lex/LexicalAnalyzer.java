@@ -1,10 +1,8 @@
 package lex;
 
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.RegularExpression;
-import com.sun.xml.internal.ws.util.StringUtils;
 
 import java.io.BufferedReader;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -27,7 +25,6 @@ public class LexicalAnalyzer {
     private static RegularExpression identEx = new RegularExpression("^[_a-zA-Z][_a-zA-Z0-9]*$");
 
     private BufferedReader file;
-    private List<Token> tokens;
     private Token currentToken;
     private String currentLine;
     private int lineNumber;
@@ -49,12 +46,11 @@ public class LexicalAnalyzer {
             // If we already used the last line, get a new one from the file
             // If the rest of the line is a comment, skip to the next line
             while(currentLine != null
-                    && (currentLine.trim().isEmpty()
+                    && (currentLine.isEmpty()
                     || (currentLine.length() > 1 && currentLine.startsWith("//")))) {
-                currentLine = file.readLine();
-
-                if(currentLine != null) { currentLine = currentLine.trim(); }
                 ++lineNumber;
+                currentLine = file.readLine();
+                if(currentLine != null) { currentLine = currentLine.trim(); }
             }
             if(currentLine == null) {
                 currentToken = null;
@@ -68,29 +64,39 @@ public class LexicalAnalyzer {
             return currentToken;
         }
         catch(Exception e) {
+            System.out.println("Exception in nextToken(): line " + lineNumber);
+            if(currentToken != null) {
+                System.out.println("Current token: type = " + currentToken.type + ", lexeme = " + currentToken.lexeme);
+            }
             e.printStackTrace();
-//            System.out.println("Exception in nextToken():" + e.getCause()..getMessage());
             return null;
         }
     }
 
+    // Peeks ahead. If more data needs to be taken from the file,
+    // the file will be marked and will be reset when the peek ends.
     public Token peek()
     {
+        int thisLineNumber = lineNumber;
         try {
-            String peekLine = (currentLine == null || currentLine.isEmpty() || currentToken == null)
-                    ? "" : currentLine.replaceFirst(Pattern.quote(currentToken.lexeme), "").trim();
-            file.mark(READ_AHEAD_LIMIT);
+            String peekLine = (currentLine == null || currentLine.trim().isEmpty() || currentToken == null)
+                    ? "" : currentLine;
 
             // If we already used the last line, get a new one from the file
             // If the rest of the line is a comment, skip to the next line
-            while(peekLine != null
-                    && (peekLine.trim().isEmpty()
-                    || (peekLine.length() > 1 && peekLine.startsWith("//")))) {
-                peekLine = file.readLine();
+            file.mark(READ_AHEAD_LIMIT);
+            if(peekLine.isEmpty()
+                    || (peekLine.length() > 1 && peekLine.startsWith("//"))) {
+                while(peekLine != null && (peekLine.isEmpty()
+                                || (peekLine.length() > 1 && peekLine.startsWith("//")))) {
+                    ++thisLineNumber;
+                    peekLine = file.readLine();
 
-                if(peekLine != null) { peekLine = peekLine.trim(); }
+                    if(peekLine != null) { peekLine = peekLine.trim(); }
+                }
             }
             file.reset();
+
             if(peekLine == null) {
                 return null;
             }
@@ -100,8 +106,11 @@ public class LexicalAnalyzer {
             return getRealToken(split[0]);
         }
         catch(Exception e) {
+            System.out.println("Exception in peek(): line " + thisLineNumber);
+            if(currentToken != null) {
+                System.out.println("Current token (before the token we are trying to get): type = " + currentToken.type + ", lexeme = " + currentToken.lexeme);
+            }
             e.printStackTrace();
-//            System.out.println("Exception in peek():" + e.getMessage());
             return null;
         }
     }

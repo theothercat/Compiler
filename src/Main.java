@@ -25,7 +25,12 @@ public class Main {
                 if(read == null) { return; }
 
                 System.out.println("Found token \"" + read.lexeme + "\" and classified it as " + read.type.name());
-                System.out.println("Peek matches? " + (peek.lexeme.equals(read.lexeme) && peek.type.equals(read.type)));
+                if(peek.lexeme.equals(read.lexeme) && peek.type.equals(read.type)) {
+//                    System.out.println("Peek matches.");
+                }
+                else {
+                    System.out.println("Peek found token \"" + peek.lexeme + "\" and classified it as " + peek.type.name());
+                }
             }
         }
         catch(Exception e) {
