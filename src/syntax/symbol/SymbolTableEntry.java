@@ -11,10 +11,10 @@ public class SymbolTableEntry {
     public String scope;
     public String symid;
     public String value;
-    public String kind;
+    public SymbolTableEntryType kind;
     public String data;
 
-    public SymbolTableEntry(String scope, String symid, String value, String kind, String data) {
+    public SymbolTableEntry(String scope, String symid, String value, SymbolTableEntryType kind, String data) {
         this.scope = scope;
         this.symid = symid;
         this.value = value;

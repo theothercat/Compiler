@@ -3,11 +3,12 @@ package syntax;
 import lex.LexicalAnalyzer;
 import lex.Token;
 import lex.TokenType;
+import syntax.symbol.SymbolTable;
+import syntax.symbol.SymbolTableEntry;
+import syntax.symbol.SymbolTableEntryType;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,34 +18,52 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class SyntaxAnalyzer {
-    private static final List<String> TYPES = Arrays.asList("int", "char", "bool", "void"/*, "class_name"*/);
+    private static final List<String> TYPES = Arrays.asList("int", "char", "bool", "void", "class"/*, "class_name"*/);
+    private static final String CLASS_STR = "class";
 
     private SymbolTable symbolTable;
     private LexicalAnalyzer lex;
     private Token currentToken;
-    private int lineNumber;
     private int symbolTableValue = 0;
+    private String scope;
+    private boolean passFailed = false;
 
     public SyntaxAnalyzer(LexicalAnalyzer lex) {
         this.lex = lex;
-        this.lineNumber = 0;
+        this.scope = "g.";
         this.symbolTable = new SymbolTable();
     }
 
     public void createSymbolTable() throws Exception {
-        while(true) {
-            ++lineNumber;
+        while(!passFailed) {
             currentToken = lex.nextToken();
-            if(isType(currentToken.lexeme)) {
-                Token nextToken = lex.nextToken();
-                if(TokenType.IDENTIFIER.equals(currentToken.type)) {
-                    symbolTable.put(currentToken.lexeme, symbolTableValue++);
-                }
-                else {
-                    throw new Exception("Bad declaration on line " + lineNumber + ": type '" + currentToken.lexeme + "' not followed by identifier"); // todo: fix this?
-                }
+            if(currentToken == null) {
+                return;
             }
+            type();
         }
+    }
+
+    public void type() {
+        Token typeToken = lex.getToken();
+        if(isType(typeToken.lexeme)) {
+            Token expectedIdentifier = lex.peek();
+            if(!TokenType.IDENTIFIER.equals(expectedIdentifier.type)) {
+                System.out.println("Bad declaration on line " + lex.getLineNumber() + ": type '" + currentToken.lexeme + "' not followed by identifier"); // todo: fix this?
+                passFailed = true;
+                return;
+            }
+            symbolTable.put(expectedIdentifier.lexeme, new SymbolTableEntry(scope, "symid", expectedIdentifier.lexeme, getSymbolTableEntryType(typeToken.lexeme), "data"));
+        }
+    }
+
+    public SymbolTableEntryType getSymbolTableEntryType(String typeTokenLexeme) {
+        if(CLASS_STR.equals(typeTokenLexeme)) {
+            scope += lex.peek().lexeme;
+            return SymbolTableEntryType.CLASS;
+        }
+
+        return null;
     }
 
 //    public boolean isDeclaration() {

@@ -7,5 +7,10 @@ package syntax.symbol;
  * Time: 8:10 AM
  * To change this template use File | Settings | File Templates.
  */
-public class SymbolTableEntryType {
+public enum SymbolTableEntryType {
+    CLASS,
+    INSTANCE_VAR,
+    LOCAL_VAR,
+    METHOD,
+    PARAM
 }
