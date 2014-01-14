@@ -1,4 +1,4 @@
-package syntax;
+package syntax.symbol;
 
 import java.util.Collection;
 import java.util.HashMap;

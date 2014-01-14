@@ -1,4 +1,4 @@
-package syntax;
+package syntax.symbol;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,4 +13,12 @@ public class SymbolTableEntry {
     public String value;
     public String kind;
     public String data;
+
+    public SymbolTableEntry(String scope, String symid, String value, String kind, String data) {
+        this.scope = scope;
+        this.symid = symid;
+        this.value = value;
+        this.kind = kind;
+        this.data = data;
+    }
 }
