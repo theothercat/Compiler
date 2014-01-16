@@ -1,5 +1,8 @@
+import global.ProgramConstants;
 import lex.LexicalAnalyzer;
 import lex.Token;
+import log.Log;
+import log.LogLevel;
 import syntax.SyntaxAnalyzer;
 
 import java.io.BufferedReader;
@@ -20,21 +23,24 @@ public class Main {
             Token peek;
             Token read;
 
-            new SyntaxAnalyzer(la).createSymbolTable();
+            if(args.length > 1) {
+                ProgramConstants.logLevel = LogLevel.DEBUG;
+            }
 
-//            while(true) {
-//                peek = la.peek();
-//                read = la.nextToken();
-//                if(read == null) { return; }
-//
-//                System.out.println("Found token \"" + read.lexeme + "\" and classified it as " + read.type.name());
-//                if(peek.lexeme.equals(read.lexeme) && peek.type.equals(read.type)) {
-////                    System.out.println("Peek matches.");
-//                }
-//                else {
-//                    System.out.println("Peek found token \"" + peek.lexeme + "\" and classified it as " + peek.type.name());
-//                }
-//            }
+            new SyntaxAnalyzer(la).pass();
+
+            Log tokenLog = new Log("token_test.log");
+
+            while(true) {
+                peek = la.peek();
+                read = la.nextToken();
+                if(read == null) { return; }
+
+                tokenLog.debug("Found token \"" + read.lexeme + "\" and classified it as " + read.type.name());
+                if(!(peek.lexeme.equals(read.lexeme) && peek.type.equals(read.type))) {
+                    System.out.println("Peek found token \"" + peek.lexeme + "\" and classified it as " + peek.type.name());
+                }
+            }
         }
         catch(Exception e) {
             System.out.println("Exception in main(): " + e.getMessage());
