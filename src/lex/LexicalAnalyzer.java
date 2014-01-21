@@ -15,9 +15,22 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class LexicalAnalyzer {
-    private static final List<String> KEYWORDS = Arrays.asList("if", "while", "true", "false", "return",
-            // todo: these are all unconfirmed
-            "int", "char", "boolean");
+    private static final List<String> KEYWORDS = Arrays.asList(
+            "atoi",
+            "bool",
+            "class", "char", "cin", "cout",
+            "else",
+            "false",
+            "if", "int", "itoa",
+            "main",
+            "new", "null",
+            "object",
+            "public", "private",
+            "return",
+            "string",
+            "this", "true",
+            "void",
+            "while");
     private static final int READ_AHEAD_LIMIT = 100000;
 
     private static RegularExpression numEx = new RegularExpression("^\\d+$");
