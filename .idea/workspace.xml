@@ -2,32 +2,31 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" name="Default" comment="workspace.xml - not sure what this is for, but committing it for safety">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/AnalyzerConstants.java" afterPath="$PROJECT_DIR$/src/syntax/AnalyzerConstants.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Main.java" afterPath="$PROJECT_DIR$/src/Main.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/lex/LexicalAnalyzer.java" afterPath="$PROJECT_DIR$/src/lex/LexicalAnalyzer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/log/Log.java" afterPath="$PROJECT_DIR$/src/log/Log.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" afterPath="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntry.java" afterPath="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntry.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" afterPath="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" />
     </list>
     <ignored path="Compiler.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/LexicalConstants.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389053185706" ignored="false" />
     <file path="/Token.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389628138340" ignored="false" />
-    <file path="/LexicalAnalyzer.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389662258658" ignored="false" />
+    <file path="/LexicalAnalyzer.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390334772116" ignored="false" />
     <file path="$PROJECT_DIR$/../../Threading/src/Main.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389057341723" ignored="false" />
     <file path="/Main.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390332806655" ignored="false" />
     <file path="$PROJECT_DIR$/../../TinkerProj/src/Main.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389139112990" ignored="false" />
     <file path="/fragment.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390332868517" ignored="false" />
     <file path="/Dummy.txt" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390317140213" ignored="false" />
-    <file path="/SyntaxAnalyzer.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390329968120" ignored="false" />
+    <file path="/SyntaxAnalyzer.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390337787317" ignored="false" />
     <file path="/SymbolTableEntry.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390329550758" ignored="false" />
-    <file path="/SymbolTable.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390333784831" ignored="false" />
+    <file path="/SymbolTable.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390336961148" ignored="false" />
     <file path="/SymbolTableEntryType.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389712426972" ignored="false" />
     <file path="/AnalyzerConstants.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390324222454" ignored="false" />
     <file path="/Lexical.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389831236639" ignored="false" />
     <file path="/Logger.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389836452537" ignored="false" />
     <file path="/LogLevel.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389836323090" ignored="false" />
     <file path="/ProgramConstants.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389885647315" ignored="false" />
-    <file path="/Log.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389885935560" ignored="false" />
+    <file path="/Log.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390334686601" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +78,7 @@
       </breakpoint>
     </breakpoint_any>
     <line_breakpoints default_suspend_policy="SuspendAll" default_condition_enabled="true">
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="450" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="476" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -94,7 +93,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="508" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="534" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -109,7 +108,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="709" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="735" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -124,7 +123,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="730" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="756" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -159,15 +158,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ProgramConstants.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/global/ProgramConstants.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="SymbolTableEntry.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntry.java">
           <provider selected="true" editor-type-id="text-editor">
@@ -179,25 +169,36 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SymbolTable.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="SymbolTable.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="56" column="8" selection-start="1600" selection-end="1600" vertical-scroll-proportion="0.8756856">
+            <state line="85" column="0" selection-start="2600" selection-end="2600" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SyntaxAnalyzer.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="SyntaxAnalyzer.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="130" column="19" selection-start="4010" selection-end="4010" vertical-scroll-proportion="-7.64">
+            <state line="723" column="45" selection-start="24868" selection-end="24868" vertical-scroll-proportion="0.9348659">
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#4756#4772#0" expanded="true" />
-                <element signature="e#12040#12048#0" expanded="true" />
-                <element signature="e#12885#12901#0" expanded="true" />
+                <element signature="e#4731#4747#0" expanded="true" />
+                <element signature="e#8699#8715#0" expanded="true" />
+                <element signature="e#11302#11318#0" expanded="true" />
+                <element signature="e#13200#13208#0" expanded="true" />
+                <element signature="e#14148#14164#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="HashMap.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/src.zip!/java/util/HashMap.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="467" column="13" selection-start="17224" selection-end="17224" vertical-scroll-proportion="-6.28">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -223,7 +224,7 @@
       <file leaf-file-name="LexicalAnalyzer.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/lex/LexicalAnalyzer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="35" column="37" selection-start="920" selection-end="920" vertical-scroll-proportion="0.0">
+            <state line="31" column="0" selection-start="772" selection-end="772" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -232,7 +233,7 @@
       <file leaf-file-name="Log.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/log/Log.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="20" column="10" selection-start="407" selection-end="407" vertical-scroll-proportion="0.0">
+            <state line="46" column="14" selection-start="1119" selection-end="1119" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -273,14 +274,14 @@
         <option value="$PROJECT_DIR$/src/ProgramConstants.java" />
         <option value="$PROJECT_DIR$/src/log/LogLevel.java" />
         <option value="$PROJECT_DIR$/src/global/ProgramConstants.java" />
-        <option value="$PROJECT_DIR$/src/log/Log.java" />
-        <option value="$PROJECT_DIR$/src/lex/LexicalAnalyzer.java" />
         <option value="$PROJECT_DIR$/src/syntax/AnalyzerConstants.java" />
         <option value="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntryType.java" />
         <option value="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntry.java" />
-        <option value="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" />
         <option value="$PROJECT_DIR$/src/Main.java" />
+        <option value="$PROJECT_DIR$/src/log/Log.java" />
+        <option value="$PROJECT_DIR$/src/lex/LexicalAnalyzer.java" />
         <option value="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" />
+        <option value="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" />
       </list>
     </option>
   </component>
@@ -621,12 +622,12 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-9" y="-9" width="1938" height="1050" extended-state="0" />
-    <editor active="false" />
+    <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3280543" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3295711" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3295711" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.39932126" sideWeight="0.82604057" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3295711" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -727,11 +728,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/src.zip!/java/util/HashMap.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="123" column="25" selection-start="5267" selection-end="5272" vertical-scroll-proportion="0.03353057" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/README.md">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0" />
@@ -758,30 +754,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/log/Log.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="20" column="10" selection-start="407" selection-end="407" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/lex/TokenType.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="19" column="0" selection-start="306" selection-end="306" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lex/LexicalAnalyzer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="35" column="37" selection-start="920" selection-end="920" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntryType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="0" selection-start="212" selection-end="212" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -809,22 +784,52 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java">
+    <entry file="file://$PROJECT_DIR$/src/log/Log.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="130" column="19" selection-start="4010" selection-end="4010" vertical-scroll-proportion="-7.64">
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#4756#4772#0" expanded="true" />
-            <element signature="e#12040#12048#0" expanded="true" />
-            <element signature="e#12885#12901#0" expanded="true" />
-          </folding>
+        <state line="46" column="14" selection-start="1119" selection-end="1119" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lex/LexicalAnalyzer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="31" column="0" selection-start="772" selection-end="772" vertical-scroll-proportion="0.0">
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="56" column="8" selection-start="1600" selection-end="1600" vertical-scroll-proportion="0.8756856">
+        <state line="85" column="0" selection-start="2600" selection-end="2600" vertical-scroll-proportion="0.0">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/src.zip!/java/util/HashMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="467" column="13" selection-start="17224" selection-end="17224" vertical-scroll-proportion="-6.28">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntryType.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="10" column="0" selection-start="212" selection-end="212" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="723" column="45" selection-start="24868" selection-end="24868" vertical-scroll-proportion="0.9348659">
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#4731#4747#0" expanded="true" />
+            <element signature="e#8699#8715#0" expanded="true" />
+            <element signature="e#11302#11318#0" expanded="true" />
+            <element signature="e#13200#13208#0" expanded="true" />
+            <element signature="e#14148#14164#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

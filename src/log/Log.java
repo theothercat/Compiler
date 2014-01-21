@@ -39,6 +39,7 @@ public class Log {
         try {
             if(writer != null && LogLevel.DEBUG.equals(ProgramConstants.logLevel)) {
                 writer.write(s);
+                writer.newLine();
                 writer.flush();
             }
         }
@@ -55,6 +56,7 @@ public class Log {
         try {
             if(writer != null && !LogLevel.NONE.equals(ProgramConstants.logLevel)) {
                 writer.write(s);
+                writer.newLine();
                 writer.flush();
             }
         }

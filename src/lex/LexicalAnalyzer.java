@@ -1,6 +1,7 @@
 package lex;
 
 import com.sun.org.apache.xerces.internal.impl.xpath.regex.RegularExpression;
+import log.Log;
 
 import java.io.BufferedReader;
 import java.util.Arrays;
@@ -37,6 +38,8 @@ public class LexicalAnalyzer {
     private static RegularExpression charEx = new RegularExpression("^'.'$");
     private static RegularExpression identEx = new RegularExpression("^[_a-zA-Z][_a-zA-Z0-9]*$");
 
+    private static Log lexLog = null;
+
     private BufferedReader file;
     private Token currentToken;
     private String currentLine;
@@ -47,6 +50,10 @@ public class LexicalAnalyzer {
         this.file = file;
         this.currentLine = "";
         this.lineNumber = 0;
+
+        if(lexLog == null) {
+            lexLog = new Log("lex.log");
+        }
     }
 
     public Token getToken() {
@@ -67,6 +74,7 @@ public class LexicalAnalyzer {
             }
             if(currentLine == null) {
                 currentToken = null;
+                lexLog.debug("nextToken() reached end of file and returned null");
                 return null;
             }
 
@@ -74,6 +82,7 @@ public class LexicalAnalyzer {
             String[] split = currentLine.split("[ \t]+");
             currentToken = getRealToken(split[0]);
             currentLine = currentLine.replaceFirst(Pattern.quote(currentToken.lexeme), "").trim();
+            lexLog.debug("nextToken() got new token '" + currentToken.lexeme + "' of type " + currentToken.type.name());
             return currentToken;
         }
         catch(Exception e) {
@@ -111,12 +120,15 @@ public class LexicalAnalyzer {
             file.reset();
 
             if(peekLine == null) {
+                lexLog.debug("peek() reached end of file and returned null");
                 return null;
             }
 
             // Build the token and remove it from the line
             String[] split = peekLine.split("[ \t]+");
-            return getRealToken(split[0]);
+            Token returnToken = getRealToken(split[0]);
+            lexLog.debug("nextToken() got new token '" + returnToken.lexeme + "' of type " + returnToken.type.name());
+            return returnToken;
         }
         catch(Exception e) {
             System.out.println("Exception in peek(): line " + thisLineNumber);
@@ -148,10 +160,6 @@ public class LexicalAnalyzer {
         }
 
         for(int i = 1; i < s.length(); i++){
-//            if((i < s.length() - 3)
-//                    && charEx.matches(s.substring(i, i+3))) {
-//                return buildToken(s.substring(0, i));
-//            }
             if((i < s.length() - 1)
                     && isSymbol(s.substring(i, i+1))) {
                 return buildToken(s.substring(0,i));

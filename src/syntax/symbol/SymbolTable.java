@@ -1,5 +1,7 @@
 package syntax.symbol;
 
+import log.Log;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,9 +15,16 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class SymbolTable implements Map<String, SymbolTableEntry> {
-    private Map<String, SymbolTableEntry> innerTable = new HashMap<String, SymbolTableEntry>();
+    private static Log symLog = null;
 
-    public SymbolTable() { }
+    private Map<String, SymbolTableEntry> innerTable = new HashMap<String, SymbolTableEntry>();
+    private String scope = "g";
+
+    public SymbolTable() {
+        if(symLog == null) {
+            symLog = new Log("symbol_table.log");
+        }
+    }
 
     @Override
     public int size() { return innerTable.size(); }
@@ -53,7 +62,25 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
     @Override
     public Set<Entry<String, SymbolTableEntry>> entrySet() { return innerTable.entrySet(); }
 
-    public SymbolTableEntry search(String lexeme) {
-
+    public SymbolTableEntry add(String lexeme, SymbolTableEntryType type, Map<String, String> data) {
+        SymbolTableEntry newEntry = new SymbolTableEntry(scope, type.name().substring(0, 1), lexeme, type, data);
+        innerTable.put(newEntry.symid, newEntry);
+        symLog.log("Added new entry to symbol table: " + newEntry.symid);
+        symLog.log("\t" + "scope = " + newEntry.scope);
+        symLog.log("\t" + "type = " + newEntry.kind.name());
+        if(newEntry.data == null) {
+            symLog.log("\t" + "data = none;");
+        }
+        else {
+            symLog.log("\t" + "data =");
+            for(String s : data.keySet()) {
+                symLog.log(s + " : " + data.get(s));
+            }
+        }
+        return newEntry;
     }
+
+    public String getScope() { return scope; }
+
+    public void setScope(String newScope) { scope = newScope; }
 }

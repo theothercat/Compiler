@@ -8,10 +8,7 @@ import syntax.symbol.SymbolTable;
 import syntax.symbol.SymbolTableEntry;
 import syntax.symbol.SymbolTableEntryType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static syntax.AnalyzerConstants.*;
 import static syntax.AnalyzerConstants.CLOSING_BRACKET;
@@ -36,7 +33,6 @@ public class SyntaxAnalyzer {
 
     public SyntaxAnalyzer(LexicalAnalyzer lex) {
         this.lex = lex;
-        this.scope = "g";
         this.symbolTable = new SymbolTable();
 
         if(syntaxLog == null) {
@@ -104,7 +100,7 @@ public class SyntaxAnalyzer {
         if(TokenType.IDENTIFIER.equals(lex.nextToken().type)) // todo: this should be class_name
         {
             syntaxLog.debug("Found identifier for class declaration, adding class '" + lex.getToken().lexeme + "' to symbol table");
-            symbolTable.put(lex.getToken().lexeme, new SymbolTableEntry(scope, "C", lex.getToken().lexeme, SymbolTableEntryType.CLASS, ""));
+            addToSymbolTable(lex.getToken().lexeme, SymbolTableEntryType.CLASS, null); // todo: empty hashmap?
         }
         else {
             failGrammar("class_declaration", "expected class_name, found " + lex.getToken().lexeme);
@@ -128,15 +124,15 @@ public class SyntaxAnalyzer {
     }
 
     private void trimScope() {
-        String newScope = scope.substring(0, scope.lastIndexOf("."));
-        syntaxLog.debug("Adjusting scope from " + scope + " to " + newScope);
-        scope = newScope;
+        String newScope = symbolTable.getScope().substring(0, symbolTable.getScope().lastIndexOf("."));
+        syntaxLog.debug("Adjusting scope from " + symbolTable.getScope() + " to " + newScope);
+        symbolTable.setScope(newScope);
     }
 
     private void concatScope(String identifier) {
-        String newScope = scope + "." + identifier;
-        syntaxLog.debug("Adjusting scope from " + scope + " to " + newScope);
-        scope = newScope;
+        String newScope = symbolTable.getScope() + "." + identifier;
+        syntaxLog.debug("Adjusting scope from " + symbolTable.getScope() + " to " + newScope);
+        symbolTable.setScope(newScope);
     }
 
     /**
@@ -165,12 +161,11 @@ public class SyntaxAnalyzer {
 
             String identifier = lex.getToken().lexeme;
             lex.nextToken(); // Advance token - field_declaration() calls getToken()
-            field_declaration(identifier, data);
+            field_declaration(identifier, data); // Actual class member will be declared in here.
         }
         else {
             syntaxLog.debug("Did not find a modifier, assuming constructor declaration.");
-            lex.nextToken(); // Advance token - constructor_declaration() calls getToken()
-            constructor_declaration();
+            constructor_declaration(); // Do not advance token - current token was not modifier, so it should be identifier.
         }
     }
 
@@ -190,11 +185,14 @@ public class SyntaxAnalyzer {
             concatScope(identifier);
 
             if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+                // We have some params.
+
                 parameter_list(data); // Do not advance token - closing parenthesis check does advancement
                 if(CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
                     failGrammar("field_declaration", "expected closing bracket, found " + lex.getToken().lexeme);
                     return;
                 }
+                addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data);
             }
             lex.nextToken(); // Advance token - method_body() calls getToken()
             method_body();
@@ -205,8 +203,12 @@ public class SyntaxAnalyzer {
                     failGrammar("field_declaration", "expected closing bracket, found " + lex.getToken().lexeme);
                     return;
                 }
+                data.put("type", "@:" + data.get("type"));
                 lex.nextToken(); // Advance token for getToken() here
             }
+
+            // Seems like a good time to add to symbol table.
+            addToSymbolTable(identifier, SymbolTableEntryType.INSTANCE_VAR, data);
 
             if(ASSIGNMENT_OPERATOR.equals(lex.getToken().lexeme)) {
                 lex.nextToken(); // Advance token - assignment_expression() uses getToken()
@@ -225,31 +227,38 @@ public class SyntaxAnalyzer {
          *
          * Optional? Not once it's been called.
          *
+         * Declares a constructor.
+         *
          * Complete? Probably.
          */
     private void constructor_declaration() {
         if(passFailed) { return; }
 
-        if(!TokenType.IDENTIFIER.equals(lex.getToken().type)) // todo: this is supposed to be class_name
+        if(!TokenType.IDENTIFIER.equals(lex.getToken().type))
         {
-            failGrammar("class_member_declaration (constructor_declaration)", "expected class_member_declaration (modifier or constructor_declaration), found " + lex.getToken().lexeme);
+            failGrammar("constructor_declaration", "expected class_member_declaration (modifier or constructor_declaration), found " + lex.getToken().lexeme);
             return;
         }
+        concatScope(lex.getToken().lexeme); // We are now in the constructor's scope.
 
         if(!OPENING_PARENTHESIS.equals(lex.nextToken().lexeme))
         {
-            failGrammar("class_member_declaration (constructor_declaration)", "expected class_member_declaration (modifier or constructor_declaration), found " + lex.getToken().lexeme);
+            failGrammar("constructor_declaration", "expected class_member_declaration (modifier or constructor_declaration), found " + lex.getToken().lexeme);
             return;
         }
 
+        HashMap<String, String> data = new HashMap<String, String>(); // Data map to add params to.
         if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
-            parameter_list(); // Do not advance token - closing parenthesis check does advancement
+
+            parameter_list(data); // Do not advance token - closing parenthesis check does advancement
 
             if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
                 failGrammar("constructor_declaration", "expected closing parenthesis, found " + lex.getToken().lexeme);
                 return;
             }
         }
+        addToSymbolTable(lex.getToken().lexeme, SymbolTableEntryType.METHOD, data);
+        // todo: add logging
         lex.nextToken(); // Advance token - method_body() calls getToken()
         method_body();
     }
@@ -287,7 +296,7 @@ public class SyntaxAnalyzer {
 
     /**
      * Helper method to determine whether we are dealing with a variable_declaration or a statement.
-     * @return
+     * @return whether or not this is a variable_declaration
      */
     private boolean isVariableDeclaration() {
         return TYPES.contains(lex.getToken().lexeme) // statements can't begin with primitive types; only variable_declarations can.
@@ -306,9 +315,15 @@ public class SyntaxAnalyzer {
     private void variable_declaration() {
         if(passFailed) { return; }
 
+        HashMap<String, String> data = new HashMap<String, String>();
         type(); // Don't advance - type() uses getToken() and this should be at the correct position for that.
+        if(passFailed) { return; }
+        data.put("type", lex.getToken().lexeme);
+
         lex.nextToken(); // Advance token - identifier() uses getToken()
         identifier();
+        if(passFailed) { return; }
+        String identifier = lex.getToken().lexeme; // Save the identifier.
 
         Token thisToken = lex.nextToken(); // Advance token
         if(OPENING_BRACKET.equals(thisToken.lexeme)) {
@@ -316,8 +331,12 @@ public class SyntaxAnalyzer {
                 failGrammar("variable_declaration", "expected closing bracket, found " + lex.getToken().lexeme);
                 return;
             }
+            data.put("type", "@:" + data.get("type")); // Update type to reflect that this is an array.
             thisToken = lex.nextToken(); // Advance token for next check.
         }
+
+        // Seems like a good time to add this to the symbol table.
+        addToSymbolTable(identifier, SymbolTableEntryType.LOCAL_VAR, data);
 
         if(ASSIGNMENT_OPERATOR.equals(thisToken.lexeme)) {
             lex.nextToken(); // Advance token - assignment_expression() uses getToken()
@@ -330,6 +349,8 @@ public class SyntaxAnalyzer {
             failGrammar("variable_declaration", "expected semicolon, found " + lex.getToken().lexeme);
             return;
         }
+
+
     }
 
     /**
@@ -355,10 +376,11 @@ public class SyntaxAnalyzer {
 
         String paramList = "[";
         for(int i = 0; i < paramIds.size(); i++) {
-            paramList += paramIds.get(i);
-            if(paramIds.size() == i - 1)
+            paramList += (paramIds.get(i) + ", ");
         }
-        paramList = paramList.substring()
+        paramList = paramList.substring(0, paramList.length() - 1) + "]";
+        syntaxLog.debug("Adding params to data: " + paramList);
+        data.put("params", paramList);
     }
 
     /**
@@ -385,7 +407,6 @@ public class SyntaxAnalyzer {
         if(passFailed) { return ""; }
 
         String paramId = lex.getToken().lexeme;
-        symbolTable.put(paramId, new SymbolTableEntry(scope, "P", paramId, SymbolTableEntryType.PARAM, paramData));
 
         Token thisToken = lex.peek();
         if(OPENING_BRACKET.equals(thisToken.lexeme)) {
@@ -393,8 +414,13 @@ public class SyntaxAnalyzer {
             if(!CLOSING_BRACKET.equals(lex.nextToken().lexeme)) {
                 failGrammar("parameter", "expected closing bracket, found " + lex.getToken().lexeme);
             }
+            paramData.put("type", "@:" + paramData.get("type")); // Update type to reflect that this is an array
         }
-        return symbolTable.get(paramId).symid;
+        return addToSymbolTable(paramId, SymbolTableEntryType.PARAM, paramData);
+    }
+
+    private String addToSymbolTable(String symbolLexeme, SymbolTableEntryType type, Map<String, String> data) {
+        return symbolTable.add(symbolLexeme, type, data).symid;
     }
 
     /**
@@ -825,15 +851,6 @@ public class SyntaxAnalyzer {
             failGrammar("identifier", "expected (type or) identifier, found " + lex.getToken().lexeme); // todo: this comes from multiple places. fix it to work for all?
             return;
         }
-    }
-
-    public SymbolTableEntryType getSymbolTableEntryType(String typeTokenLexeme) {
-        if(CLASS_STR.equals(typeTokenLexeme)) {
-            scope += lex.peek().lexeme;
-            return SymbolTableEntryType.CLASS;
-        }
-
-        return null;
     }
 
     public boolean isType(String s) {
