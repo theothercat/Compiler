@@ -43,7 +43,7 @@ public class SyntaxAnalyzer {
     public void pass() throws Exception {
         if(passFailed) { return; }
 
-        lex.nextToken();
+//        lex.nextToken();
         compilation_unit();
     }
 
@@ -92,7 +92,7 @@ public class SyntaxAnalyzer {
     private void class_declaration() {
         if(passFailed) { return; }
 
-        if(!KW_CLASS.equals(lex.getToken())) {
+        if(!KW_CLASS.equals(lex.getToken().lexeme)) {
             failGrammar("class_declaration", "expected 'class' keyword, found " + lex.getToken().lexeme);
             return;
         }
@@ -380,7 +380,7 @@ public class SyntaxAnalyzer {
         }
         paramList = paramList.substring(0, paramList.length() - 1) + "]";
         syntaxLog.debug("Adding params to data: " + paramList);
-        data.put("params", paramList);
+        data.put("Param", paramList);
     }
 
     /**
