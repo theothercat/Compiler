@@ -44,6 +44,7 @@ public class Main {
         }
         catch(Exception e) {
             System.out.println("Exception in main(): " + e.getMessage());
+            // todo: File closing!
         }
     }
 }

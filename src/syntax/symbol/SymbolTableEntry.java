@@ -1,5 +1,9 @@
 package syntax.symbol;
 
+import lex.Token;
+
+import java.util.Map;
+
 /**
  * Created with IntelliJ IDEA.
  * User: Owner
@@ -8,15 +12,17 @@ package syntax.symbol;
  * To change this template use File | Settings | File Templates.
  */
 public class SymbolTableEntry {
+    private static int id = 1;
+
     public String scope;
     public String symid;
     public String value;
     public SymbolTableEntryType kind;
-    public String data;
+    public Map<String, String> data;
 
-    public SymbolTableEntry(String scope, String symid, String value, SymbolTableEntryType kind, String data) {
+    public SymbolTableEntry(String scope, String symid, String value, SymbolTableEntryType kind, Map<String, String> data) {
         this.scope = scope;
-        this.symid = symid;
+        this.symid = symid + (id++);
         this.value = value;
         this.kind = kind;
         this.data = data;

@@ -52,4 +52,8 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
 
     @Override
     public Set<Entry<String, SymbolTableEntry>> entrySet() { return innerTable.entrySet(); }
+
+    public SymbolTableEntry search(String lexeme) {
+
+    }
 }

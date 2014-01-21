@@ -8,7 +8,9 @@ import syntax.symbol.SymbolTable;
 import syntax.symbol.SymbolTableEntry;
 import syntax.symbol.SymbolTableEntryType;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static syntax.AnalyzerConstants.*;
@@ -22,7 +24,7 @@ import static syntax.AnalyzerConstants.CLOSING_BRACKET;
  * To change this template use File | Settings | File Templates.
  */
 public class SyntaxAnalyzer {
-    private static final List<String> TYPES = Arrays.asList("int", "char", "bool", "void"/*, "class_name"*/);
+    private static final List<String> TYPES = Arrays.asList("int", "char", "bool", "void");
     private static final String CLASS_STR = "class";
 
     private static Log syntaxLog = null;
@@ -34,7 +36,7 @@ public class SyntaxAnalyzer {
 
     public SyntaxAnalyzer(LexicalAnalyzer lex) {
         this.lex = lex;
-        this.scope = "g.";
+        this.scope = "g";
         this.symbolTable = new SymbolTable();
 
         if(syntaxLog == null) {
@@ -45,85 +47,388 @@ public class SyntaxAnalyzer {
     public void pass() throws Exception {
         if(passFailed) { return; }
 
-
+        lex.nextToken();
         compilation_unit();
     }
 
     /**
      * Grabs the first token and starts the entire pass.
+     *
+     * Uses: getToken()
+     *
+     * Optional? Doesn't matter.
+     *
+     * Complete? Round 2.
      */
     private void compilation_unit() {
         if(passFailed) { return; }
 
         while(!KW_VOID.equals(lex.nextToken().lexeme)) {
-            class_declaration();
+            syntaxLog.debug("Assuming class declaration");
+            class_declaration(); // Don't advance token
         }
+
+        if(!KW_MAIN.equals(lex.nextToken().lexeme)) {
+            failGrammar("compilation_unit", "expected 'main' keyword, found " + lex.getToken().lexeme);
+            return;
+        }
+        if(!OPENING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+            failGrammar("compilation_unit", "expected opening parenthesis, found " + lex.getToken().lexeme);
+            return;
+        }
+        if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+            failGrammar("compilation_unit", "expected closing parenthesis, found " + lex.getToken().lexeme);
+            return;
+        }
+        lex.nextToken(); // Advance token - method_body() calls getToken()
+        method_body();
     }
 
     /**
      * Class keyword should be current token.
      *
-     * Optional? No?
+     * Uses getToken()
      *
-     * Complete? Probably.
+     * Optional? No.
+     *
+     * Complete? Round 2.5.
      */
     private void class_declaration() {
         if(passFailed) { return; }
 
         if(!KW_CLASS.equals(lex.getToken())) {
             failGrammar("class_declaration", "expected 'class' keyword, found " + lex.getToken().lexeme);
-            passFailed = true;
             return;
         }
-        if(!TokenType.IDENTIFIER.equals(lex.nextToken().type)) // todo: this should be class_name
+
+        if(TokenType.IDENTIFIER.equals(lex.nextToken().type)) // todo: this should be class_name
         {
+            syntaxLog.debug("Found identifier for class declaration, adding class '" + lex.getToken().lexeme + "' to symbol table");
+            symbolTable.put(lex.getToken().lexeme, new SymbolTableEntry(scope, "C", lex.getToken().lexeme, SymbolTableEntryType.CLASS, ""));
+        }
+        else {
             failGrammar("class_declaration", "expected class_name, found " + lex.getToken().lexeme);
-            passFailed = true;
             return;
         }
-        if(!OPENING_BRACE.equals(lex.nextToken())) {
+
+        if(OPENING_BRACE.equals(lex.peek())) {
+            concatScope(lex.getToken().lexeme);
+            lex.nextToken(); // Advance the token now that we've adjusted the scope
+        }
+        else {
             failGrammar("class_declaration", "expected opening brace, found " + lex.getToken().lexeme);
-            passFailed = true;
             return;
         }
-        while(!OPENING_BRACE.equals(lex.nextToken())) {
-            class_member_declaration();
+
+        while(!CLOSING_BRACE.equals(lex.nextToken())) {
+            syntaxLog.debug("Expecting class member declaration");
+            class_member_declaration(); // Don't advance token
         }
+        trimScope();
+    }
+
+    private void trimScope() {
+        String newScope = scope.substring(0, scope.lastIndexOf("."));
+        syntaxLog.debug("Adjusting scope from " + scope + " to " + newScope);
+        scope = newScope;
+    }
+
+    private void concatScope(String identifier) {
+        String newScope = scope + "." + identifier;
+        syntaxLog.debug("Adjusting scope from " + scope + " to " + newScope);
+        scope = newScope;
     }
 
     /**
-     * Current token should be part of class_member_declaration;
-     * use getToken() rather than nextToken().
+     * Current token should be part of class_member_declaration.
+     *
+     * Uses: getToken()
      *
      * Optional? No?
      *
-     * Complete? No!
+     * Complete? Round 2.
      */
     private void class_member_declaration() {
         if(passFailed) { return; }
 
+        if(MODIFIER_TOKENS.contains(lex.getToken().lexeme)) {
+            HashMap<String, String> data = new HashMap<String, String>(2);
+            data.put("accessMod", lex.getToken().lexeme);
 
+            lex.nextToken(); // Advance token - type() calls getToken()
+            type();
+            data.put("type", lex.getToken().lexeme);
+
+            lex.nextToken(); // Advance token - identifier() calls getToken()
+            identifier();
+            if(passFailed) { return; }
+
+            String identifier = lex.getToken().lexeme;
+            lex.nextToken(); // Advance token - field_declaration() calls getToken()
+            field_declaration(identifier, data);
+        }
+        else {
+            syntaxLog.debug("Did not find a modifier, assuming constructor declaration.");
+            lex.nextToken(); // Advance token - constructor_declaration() calls getToken()
+            constructor_declaration();
+        }
     }
 
-    // todo: this might be wrong?
+    /**
+     * Uses getToken()
+     * Ends with: current token is semicolon (or fail)
+     *
+     * Optional? No.
+     *
+     * Complete? Probably.
+     */
+    private void field_declaration(String identifier, HashMap<String, String> data) {
+        if(passFailed) { return; }
+
+        if(OPENING_PARENTHESIS.equals(lex.getToken().lexeme)) {
+            // This is a method declaration.
+            concatScope(identifier);
+
+            if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+                parameter_list(data); // Do not advance token - closing parenthesis check does advancement
+                if(CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+                    failGrammar("field_declaration", "expected closing bracket, found " + lex.getToken().lexeme);
+                    return;
+                }
+            }
+            lex.nextToken(); // Advance token - method_body() calls getToken()
+            method_body();
+        }
+        else {
+            if(OPENING_BRACKET.equals(lex.getToken().lexeme)) {
+                if(!CLOSING_BRACKET.equals(lex.nextToken().lexeme)) {
+                    failGrammar("field_declaration", "expected closing bracket, found " + lex.getToken().lexeme);
+                    return;
+                }
+                lex.nextToken(); // Advance token for getToken() here
+            }
+
+            if(ASSIGNMENT_OPERATOR.equals(lex.getToken().lexeme)) {
+                lex.nextToken(); // Advance token - assignment_expression() uses getToken()
+                assignment_expression();
+                lex.nextToken(); // Advance token for getToken()
+            }
+
+            if(!SEMICOLON.equals(lex.getToken().lexeme)) {
+                failGrammar("field_declaration", "expected semicolon, found " + lex.getToken().lexeme);
+            }
+        }
+    }
+
+        /**
+         * Uses getToken()
+         *
+         * Optional? Not once it's been called.
+         *
+         * Complete? Probably.
+         */
+    private void constructor_declaration() {
+        if(passFailed) { return; }
+
+        if(!TokenType.IDENTIFIER.equals(lex.getToken().type)) // todo: this is supposed to be class_name
+        {
+            failGrammar("class_member_declaration (constructor_declaration)", "expected class_member_declaration (modifier or constructor_declaration), found " + lex.getToken().lexeme);
+            return;
+        }
+
+        if(!OPENING_PARENTHESIS.equals(lex.nextToken().lexeme))
+        {
+            failGrammar("class_member_declaration (constructor_declaration)", "expected class_member_declaration (modifier or constructor_declaration), found " + lex.getToken().lexeme);
+            return;
+        }
+
+        if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+            parameter_list(); // Do not advance token - closing parenthesis check does advancement
+
+            if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+                failGrammar("constructor_declaration", "expected closing parenthesis, found " + lex.getToken().lexeme);
+                return;
+            }
+        }
+        lex.nextToken(); // Advance token - method_body() calls getToken()
+        method_body();
+    }
+
+    /**
+     * Uses getToken()
+     * Ends with: current token is closing brace
+     *
+     * Optional? No.
+     *
+     * Complete? Probably.
+     */
+    private void method_body() {
+        if(passFailed) { return; }
+
+        if(!OPENING_BRACE.equals(lex.getToken().lexeme)) {
+            failGrammar("method_body", "expected opening brace, found " + lex.getToken().lexeme);
+            return;
+        }
+
+        if(!CLOSING_BRACE.equals(lex.nextToken().lexeme)) {
+            while(isVariableDeclaration())
+            {
+                variable_declaration(); // Don't advance token - we are at the first type/identifier of the variable_declaration()
+                // Do not post-advance token; while-loop requires advancement via nextToken() since statement() won't post-advance
+            }
+
+            while(!CLOSING_BRACE.equals(lex.nextToken().lexeme))
+            {
+                statement(); // Don't advance token - closing brace check does advancement
+            }
+            trimScope();
+        }
+    }
+
+    /**
+     * Helper method to determine whether we are dealing with a variable_declaration or a statement.
+     * @return
+     */
+    private boolean isVariableDeclaration() {
+        return TYPES.contains(lex.getToken().lexeme) // statements can't begin with primitive types; only variable_declarations can.
+                || (TokenType.IDENTIFIER.equals(lex.getToken().type) // An identifier can be a type, but it's only a variable_declaration if it's followed by another identifier.
+                && TokenType.IDENTIFIER.equals(lex.peek().type));
+    }
+
+    /**
+     * Uses getToken()
+     * Use of peek means that this will expect a nextToken()
+     *
+     * Optional? Yes.
+     *
+     * Complete? Probably.
+     */
+    private void variable_declaration() {
+        if(passFailed) { return; }
+
+        type(); // Don't advance - type() uses getToken() and this should be at the correct position for that.
+        lex.nextToken(); // Advance token - identifier() uses getToken()
+        identifier();
+
+        Token thisToken = lex.nextToken(); // Advance token
+        if(OPENING_BRACKET.equals(thisToken.lexeme)) {
+            if(!CLOSING_BRACKET.equals(lex.nextToken().lexeme)) {
+                failGrammar("variable_declaration", "expected closing bracket, found " + lex.getToken().lexeme);
+                return;
+            }
+            thisToken = lex.nextToken(); // Advance token for next check.
+        }
+
+        if(ASSIGNMENT_OPERATOR.equals(thisToken.lexeme)) {
+            lex.nextToken(); // Advance token - assignment_expression() uses getToken()
+            assignment_expression();
+            thisToken = lex.nextToken(); // Advance token for next check.
+        }
+
+        if(!SEMICOLON.equals(thisToken.lexeme)) // MUST use getToken() in case the previous token checks failed
+        {
+            failGrammar("variable_declaration", "expected semicolon, found " + lex.getToken().lexeme);
+            return;
+        }
+    }
+
+    /**
+     * Expects token to be where needed in parameter()
+     *
+     * Optional? No.
+     *
+     * Complete? Probably.
+     */
+    private void parameter_list(HashMap<String, String> data) {
+        if(passFailed) { return; }
+
+        List<String> paramIds = new ArrayList<String>();
+
+        paramIds.add(parameter());
+
+
+        while(!LIST_TOKEN.equals(lex.peek().lexeme)) {
+            lex.nextToken(); // Advance to comma
+            lex.nextToken(); // Advance token - parameter() uses getToken()
+            paramIds.add(parameter());
+        }
+
+        String paramList = "[";
+        for(int i = 0; i < paramIds.size(); i++) {
+            paramList += paramIds.get(i);
+            if(paramIds.size() == i - 1)
+        }
+        paramList = paramList.substring()
+    }
+
+    /**
+     * Expects the token to be in the position required for type()
+     *
+     * Optional? No.
+     *
+     * Complete? Probably.
+     *
+     * @return The symid of the parameter that was declared.
+     */
+    private String parameter() {
+        if(passFailed) { return ""; }
+
+        HashMap<String, String> paramData = new HashMap<String, String>();
+        type();
+        if(passFailed) { return ""; }
+
+        paramData.put("type", lex.getToken().lexeme);
+        paramData.put("accessMod", "private");
+
+        lex.nextToken(); // Advance token - identifier() uses getToken()
+        identifier();
+        if(passFailed) { return ""; }
+
+        String paramId = lex.getToken().lexeme;
+        symbolTable.put(paramId, new SymbolTableEntry(scope, "P", paramId, SymbolTableEntryType.PARAM, paramData));
+
+        Token thisToken = lex.peek();
+        if(OPENING_BRACKET.equals(thisToken.lexeme)) {
+            lex.nextToken(); // Advance token to opening bracket
+            if(!CLOSING_BRACKET.equals(lex.nextToken().lexeme)) {
+                failGrammar("parameter", "expected closing bracket, found " + lex.getToken().lexeme);
+            }
+        }
+        return symbolTable.get(paramId).symid;
+    }
+
+    /**
+     * Used for if and while;
+     * Uses getToken()
+     *
+     * Shorthand for 'if' and 'while' cases to get:
+     * Opening parenthesis
+     * Expression
+     * Closing parenthesis
+     * Statement
+     */
     private void if_while() {
         if(passFailed) { return; }
 
-        if(!OPENING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+        if(!OPENING_PARENTHESIS.equals(lex.getToken().lexeme)) {
             failGrammar("statement, if/while", "expected opening parenthesis, found " + lex.getToken().lexeme);
-            passFailed = true;
             return;
         }
-        expression();
+        expression(); // Use nextToken() after this
         if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
             failGrammar("statement, if/while", "expected opening parenthesis, found " + lex.getToken().lexeme);
-            passFailed = true;
             return;
         }
+        lex.nextToken(); // Advance token - statement() uses getToken()
         statement();
     }
 
-    // todo: this might be wrong?
+    /**
+     * Shorthand for an expression with a semicolon check.
+     * Used in several places within statement()
+     *
+     * Uses getToken()
+     */
     private void expression_with_semicolon() {
         if(passFailed) { return; }
 
@@ -131,66 +436,67 @@ public class SyntaxAnalyzer {
 
         if(!SEMICOLON.equals(lex.nextToken().lexeme)) {
             failGrammar("statement, cin/cout", "expected semicolon, found " + lex.getToken().lexeme);
-            passFailed = true;
             return;
         }
     }
 
     /**
+     * Uses getToken()
+     *
+     * Optional? No.
+     *
      * Complete? Hopefully.
      */
     public void statement() {
         if(passFailed) { return; }
 
         Token thisToken = lex.getToken();
-
         if(KW_WHILE.equals(thisToken.lexeme)) {
-            if_while(); // todo: should this be if_while?
+            lex.nextToken(); // Advance token - if_while() uses getToken()
+            if_while();
         }
         else if(KW_IF.equals(thisToken.lexeme)) {
-            if_while(); // todo: should this be if_while?
+            lex.nextToken(); // Advance token - if_while() uses getToken()
+            if_while();
 
             thisToken = lex.peek();
             if(KW_ELSE.equals(thisToken.lexeme)) {
-                lex.nextToken(); // current token is peek
-                lex.nextToken();
+                lex.nextToken(); // Advance token to the else token
+                lex.nextToken(); // Advance token - statement() uses getToken()
                 statement();
             }
         }
         else if(KW_RETURN.equals(thisToken.lexeme)) {
-            thisToken = lex.nextToken();
-
-            if(!SEMICOLON.equals(thisToken.lexeme)) {
-                expression_with_semicolon();
+            if(!SEMICOLON.equals(lex.nextToken().lexeme)) {
+                expression_with_semicolon(); // Don't advance token - semicolon check did advancement already.
             }
-            return;
         }
         else if(KW_CIN.equals(thisToken.lexeme))
         {
             if(!CIN_TOKEN.equals(lex.nextToken().lexeme)) {
                 failGrammar("statement, cin", "expected '>>', found " + lex.getToken().lexeme);
-                passFailed = true;
                 return;
             }
+            lex.nextToken(); // Advance token - expression_with_semicolon() uses getToken()
             expression_with_semicolon();
         }
         else if(KW_COUT.equals(thisToken.lexeme))
         {
             if(!COUT_TOKEN.equals(lex.nextToken().lexeme)) {
                 failGrammar("statement, cout", "expected '<<', found " + lex.getToken().lexeme);
-                passFailed = true;
                 return;
             }
+            lex.nextToken(); // Advance token - expression_with_semicolon() uses getToken()
             expression_with_semicolon();
         }
-        else if(OPENING_BRACE.equals(lex.nextToken().lexeme)) {
-            while(!CLOSING_BRACE.equals(lex.getToken().lexeme)) {
-                statement();
-                lex.nextToken(); // todo: is this necessary?
+        else if(OPENING_BRACE.equals(thisToken.lexeme)) {
+            while(!CLOSING_BRACE.equals(lex.nextToken().lexeme)) {
+                statement(); // Don't advance token - closing brace check did advancement already
             }
         }
         else {
-            expression_with_semicolon();
+            syntaxLog.debug("Assuming statement is expression_with_semicolon.");
+            expression_with_semicolon(); // Don't advance token - checking of all other possible statements ensures this is the right token.
         }
     }
 
@@ -207,7 +513,6 @@ public class SyntaxAnalyzer {
             expression();
             if(!CLOSING_PARENTHESIS.equals(lex.nextToken())) {
                 failGrammar("expression", "expected closing parenthesis, found " + lex.getToken());
-                passFailed = true;
                 return;
             }
             expressionz();
@@ -229,7 +534,6 @@ public class SyntaxAnalyzer {
             character_literal();
             if(!SINGLE_QUOTE.equals(thisToken.lexeme)) {
                 failGrammar("expression", "expected single quote, found " + thisToken.lexeme);
-                passFailed = true;
                 return;
             }
             expressionz();
@@ -269,7 +573,6 @@ public class SyntaxAnalyzer {
 
         if(!NUMBER_TOKENS.contains(lex.getToken().lexeme)) {
             failGrammar("number", "expected number, found " + lex.getToken().lexeme);
-            passFailed = true;
             return;
         }
 
@@ -295,7 +598,6 @@ public class SyntaxAnalyzer {
             if(c < 32
                     || c > 126) {
                 failGrammar("character", "expected printable ascii character, found " + lex.getToken().lexeme);
-                passFailed = true;
                 return;
             }
 
@@ -305,7 +607,6 @@ public class SyntaxAnalyzer {
             if(!BACKSLASH.equals(lex.getToken().lexeme.charAt(1)))
             {
                 failGrammar("character", "expected backslash (or only one character within apostrophes), found " + lex.getToken().lexeme);
-                passFailed = true;
                 return;
             }
             else {
@@ -313,7 +614,6 @@ public class SyntaxAnalyzer {
                 if(c >= 32
                         && c <= 126) {
                     failGrammar("character", "expected nonprintable ascii character, found " + lex.getToken().lexeme);
-                    passFailed = true;
                     return;
                 }
             }
@@ -344,7 +644,6 @@ public class SyntaxAnalyzer {
             expression();
             if(!CLOSING_PARENTHESIS.equals(lex.nextToken())) {
                 failGrammar("fn_arr_member", "expected closing parenthesis, found " + lex.getToken().lexeme);
-                passFailed = true;
                 return;
             }
         }
@@ -391,7 +690,6 @@ public class SyntaxAnalyzer {
 
             if(!TokenType.IDENTIFIER.equals(lex.nextToken().type)) {
                 failGrammar("member_refz", "expected identifier, found " + lex.getToken().lexeme);
-                passFailed = true;
                 return;
             }
             fn_arr_member();
@@ -413,7 +711,7 @@ public class SyntaxAnalyzer {
 
         Token thisToken = lex.peek(); // todo: check
         if(ASSIGNMENT_OPERATOR.equals(thisToken.lexeme)) {
-            lex.nextToken();
+            lex.nextToken(); // Advance token - assignment_expression() uses getToken()
             assignment_expression();
         }
         else if(EXPRESSIONZ_TOKENS.contains(thisToken.lexeme)) {
@@ -423,8 +721,7 @@ public class SyntaxAnalyzer {
     }
 
     /**
-     * Current token is "="
-     * Immediately skip to next token.
+     * Uses getToken()
      *
      * Requires something after the equal sign.
      *
@@ -433,7 +730,7 @@ public class SyntaxAnalyzer {
     public void assignment_expression() {
         if(passFailed) { return; }
 
-        Token thisToken = lex.nextToken();
+        Token thisToken = lex.getToken();
         if(KW_THIS.equals(thisToken.lexeme)) {
             return;
         }
@@ -445,13 +742,11 @@ public class SyntaxAnalyzer {
                 || KW_ITOA.equals(thisToken.lexeme)) {
             if(!OPENING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
                 failGrammar("assignment_expression",  thisToken.lexeme + "' not followed by opening parenthesis");
-                passFailed = true;
                 return;
             }
             expression();
             if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
                 failGrammar("assignment_expression",  thisToken.lexeme + "' not followed by closing parenthesis");
-                passFailed = true;
                 return;
             }
         }
@@ -480,7 +775,6 @@ public class SyntaxAnalyzer {
                 argument_list();
                 if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
                     failGrammar("new_declaration", "expected closing parenthesis, found " + lex.getToken().lexeme);
-                    passFailed = true;
                     return;
                 }
             }
@@ -489,18 +783,19 @@ public class SyntaxAnalyzer {
             expression();
             if(!CLOSING_BRACKET.equals(lex.nextToken().lexeme)) {
                 failGrammar("new_declaration", "expected closing bracket, found " + lex.getToken().lexeme);
-                passFailed = true;
                 return;
             }
         }
 
         failGrammar("new_declaration", "new_declaration expected opening parenthesis or opening bracket, found " + lex.getToken().lexeme);
-        passFailed = true;
         return;
     }
 
     /**
-     * This is required, but failures happen in identifier() rather than here
+     * This is required, but failures happen in inner identifier() rather than here
+     *
+     * Uses getToken()
+     * Ends with: currentToken.type is identifier
      *
      * Complete? Discuss with professor
      *
@@ -527,8 +822,7 @@ public class SyntaxAnalyzer {
         if(passFailed) { return; }
 
         if(!TokenType.IDENTIFIER.equals(lex.getToken().type)) {
-            failGrammar("type", "expected type or identifier, found " + lex.getToken().lexeme);
-            passFailed = true;
+            failGrammar("identifier", "expected (type or) identifier, found " + lex.getToken().lexeme); // todo: this comes from multiple places. fix it to work for all?
             return;
         }
     }
@@ -542,26 +836,7 @@ public class SyntaxAnalyzer {
         return null;
     }
 
-//    public boolean isDeclaration() {
-//        return TokenType.IDENTIFIER.equals(currentToken.type)
-//                && isType(lex.peek().lexeme);
-//    }
-
     public boolean isType(String s) {
         return TYPES.contains(s);
     }
-
-    public boolean isTerminal(Token t) {
-        return t.lexeme.equals("{"); // todo: add in the rest
-    }
-
-    /**
-     * Terminals are:
-     * {
-     * }
-     * ;
-     * (
-     * )     *
-     */
-
 }
