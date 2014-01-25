@@ -4,6 +4,7 @@ import com.sun.org.apache.xerces.internal.impl.xpath.regex.RegularExpression;
 import log.Log;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -32,10 +33,12 @@ public class LexicalAnalyzer {
             "this", "true",
             "void",
             "while");
+//    private static final List<String> ESCAPE_CHARACTERS = Arrays.asList("0", "a", "b", "f", "n", "r", "t", "v", "\"", "&", "'", "\\");
     private static final int READ_AHEAD_LIMIT = 100000;
+    private static final Token EMPTY_TOKEN = new Token();
 
-    private static RegularExpression numEx = new RegularExpression("^\\d+$");
-    private static RegularExpression charEx = new RegularExpression("^'.'$");
+    private static RegularExpression numEx = new RegularExpression("^-?\\d+$");
+    private static RegularExpression charEx = new RegularExpression("^'\\\\[0abfnrtv&'\"\\\\]'|^'[^'\\\\]'");
     private static RegularExpression identEx = new RegularExpression("^[_a-zA-Z][_a-zA-Z0-9]*$");
 
     private static Log lexLog = null;
@@ -73,16 +76,16 @@ public class LexicalAnalyzer {
                 if(currentLine != null) { currentLine = currentLine.trim(); }
             }
             if(currentLine == null) {
-                currentToken = null;
-                lexLog.debug("nextToken() reached end of file and returned null");
-                return null;
+                currentToken = EMPTY_TOKEN;
+                lexLog.log("nextToken() reached end of file");
+                return currentToken;
             }
 
             // Build the token and remove it from the line
             String[] split = currentLine.split("[ \t]+");
             currentToken = getRealToken(split[0]);
             currentLine = currentLine.replaceFirst(Pattern.quote(currentToken.lexeme), "").trim();
-            lexLog.debug("nextToken() got new token '" + currentToken.lexeme + "' of type " + currentToken.type.name());
+            lexLog.log("nextToken() got new token '" + currentToken.lexeme + "' of type " + currentToken.type.name());
             return currentToken;
         }
         catch(Exception e) {
@@ -121,13 +124,13 @@ public class LexicalAnalyzer {
 
             if(peekLine == null) {
                 lexLog.debug("peek() reached end of file and returned null");
-                return null;
+                return EMPTY_TOKEN;
             }
 
             // Build the token and remove it from the line
             String[] split = peekLine.split("[ \t]+");
             Token returnToken = getRealToken(split[0]);
-            lexLog.debug("nextToken() got new token '" + returnToken.lexeme + "' of type " + returnToken.type.name());
+            lexLog.debug("peek() got new token '" + returnToken.lexeme + "' of type " + returnToken.type.name());
             return returnToken;
         }
         catch(Exception e) {
@@ -145,15 +148,14 @@ public class LexicalAnalyzer {
             return null; //todo: throw exception?
         }
 
-        if((s.length() > 2)
-                && charEx.matches(s.substring(0, 3))) {
-            return new Token(s.substring(0, 3), TokenType.CHARACTER);
-        }
-        if(isSymbol(s.charAt(0))) {
-            return new Token(s.substring(0,1), TokenType.SYMBOL);
+        if(isCharacter(s)) {
+            return new Token(getCharacter(s), TokenType.CHARACTER);
         }
         if(s.length() > 1 && isSymbol(s.substring(0,2))) {
             return new Token(s.substring(0,2), TokenType.SYMBOL);
+        }
+        if(isSymbol(s.charAt(0))) {
+            return new Token(s.substring(0,1), TokenType.SYMBOL);
         }
         if(isPunctuation(s.charAt(0))) {
             return new Token(s.substring(0, 1), TokenType.PUNCTUATION);
@@ -199,31 +201,31 @@ public class LexicalAnalyzer {
         return new Token(s, TokenType.UNKNOWN);
     }
 
-    public String checkOperands(String s) {
-        if(s == null || s.isEmpty()) {
-            return s; //todo: throw exception?
-        }
-
-
-
-        if(isSymbol(s.charAt(0))) {
-            return s.substring(0,1);
-        }
-        if(s.length() > 1 && isSymbol(s.substring(0,2))) {
-            return s.substring(0,2);
-        }
-
-        for(int i = 1; i < s.length(); i++){
-            if((i < s.length() - 1)
-                    && isSymbol(s.substring(i, i+1))) {
-                return s.substring(0, i);
-            }
-            if(isSymbol(s.charAt(i))) {
-                return s.substring(0, i-1);
-            }
-        }
-        return s;
-    }
+//    public String checkOperands(String s) {
+//        if(s == null || s.isEmpty()) {
+//            return s; //todo: throw exception?
+//        }
+//
+//
+//
+//        if(isSymbol(s.charAt(0))) {
+//            return s.substring(0,1);
+//        }
+//        if(s.length() > 1 && isSymbol(s.substring(0,2))) {
+//            return s.substring(0,2);
+//        }
+//
+//        for(int i = 1; i < s.length(); i++){
+//            if((i < s.length() - 1)
+//                    && isSymbol(s.substring(i, i+1))) {
+//                return s.substring(0, i);
+//            }
+//            if(isSymbol(s.charAt(i))) {
+//                return s.substring(0, i-1);
+//            }
+//        }
+//        return s;
+//    }
 
     private boolean isSymbol(char c) {
         return (c == '+') || (c == '-') || (c == '*') || (c == '/')
@@ -239,7 +241,14 @@ public class LexicalAnalyzer {
     }
 
     private boolean isSymbol(String s) {
-        return "&&".equals(s) || "||".equals(s);
+        return "&&".equals(s)
+                || "||".equals(s)
+                || "==".equals(s)
+                || "!=".equals(s)
+                || "<=".equals(s)
+                || ">=".equals(s)
+                || "<<".equals(s)
+                || ">>".equals(s);
     }
 
     private boolean isPunctuation(char c) {
@@ -255,5 +264,42 @@ public class LexicalAnalyzer {
 
     public int getLineNumber() {
         return lineNumber;
+    }
+    public void closeLogs() {
+        lexLog.close();
+    }
+
+    public void closeFile() {
+        try {
+            file.close();
+        }
+        catch (IOException e) { }
+    }
+
+    private boolean isCharacter(String s) {
+        if(s.length() < 3) { return false; }
+
+        if(s.length() == 3
+                || s.length() == 4)
+        {
+            return charEx.matches(s);
+        }
+        else {
+            if(!s.startsWith("'")) { return false; }
+
+            String withoutFirstApostrophe = s.substring(1, s.length());
+            int indexOfApostrophe = withoutFirstApostrophe.indexOf("'");
+
+            if(indexOfApostrophe == -1) { return false; }
+
+            String actualCharacterString = s.substring(0, indexOfApostrophe + 2);
+
+            return charEx.matches(actualCharacterString);
+
+//            return false;
+        }
+    }
+    private String getCharacter(String s) {
+        return s.substring(0, s.substring(1, s.length()).indexOf("'") + 2); // 1 for the fact that the substring's first character is the full string's second character, and 1 for the fact that it's exclusive
     }
 }

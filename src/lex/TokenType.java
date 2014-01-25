@@ -15,6 +15,5 @@ public enum TokenType {
     KEYWORD,
     SYMBOL,
     UNKNOWN,
-    EOF,
-    EOT;
+    EMPTY
 }

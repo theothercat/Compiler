@@ -64,4 +64,15 @@ public class Log {
 
         }
     }
+
+    public void close() {
+        if(writer != null) {
+            try {
+                writer.close();
+            }
+            catch(Exception e) {
+
+            }
+        }
+    }
 }

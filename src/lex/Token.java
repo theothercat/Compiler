@@ -11,6 +11,11 @@ public class Token {
     public String lexeme;
     public TokenType type;
 
+    public Token() {
+        lexeme = "";
+        type = TokenType.EMPTY;
+    }
+
     public Token(String lex, TokenType t) {
         lexeme = lex;
         type = t;

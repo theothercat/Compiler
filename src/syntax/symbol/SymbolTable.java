@@ -82,5 +82,11 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
 
     public String getScope() { return scope; }
 
-    public void setScope(String newScope) { scope = newScope; }
+    public void setScope(String newScope) {
+        scope = newScope;
+    }
+
+    public void closeLogs() {
+        symLog.close();
+    }
 }
