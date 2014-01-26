@@ -455,7 +455,7 @@ public class SyntaxAnalyzer {
         for(int i = 0; i < paramIds.size(); i++) {
             paramList += (paramIds.get(i) + ", ");
         }
-        paramList = paramList.substring(0, paramList.length() - 1) + "]";
+        paramList = paramList.substring(0, paramList.length() - 2) + "]";
         syntaxLog.debug("Adding params to data: " + paramList);
         data.put("Param", paramList);
     }

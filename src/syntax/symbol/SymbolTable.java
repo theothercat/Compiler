@@ -66,6 +66,7 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         SymbolTableEntry newEntry = new SymbolTableEntry(scope, type.name().substring(0, 1), lexeme, type, data);
         innerTable.put(newEntry.symid, newEntry);
         symLog.log("Added new entry to symbol table: " + newEntry.symid);
+        symLog.log("\t" + "identifier = " + newEntry.value);
         symLog.log("\t" + "scope = " + newEntry.scope);
         symLog.log("\t" + "type = " + newEntry.kind.name());
         if(newEntry.data == null) {
