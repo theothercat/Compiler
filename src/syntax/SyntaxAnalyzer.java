@@ -28,12 +28,12 @@ public class SyntaxAnalyzer {
 
     private SymbolTable symbolTable;
     private LexicalAnalyzer lex;
-    private String scope;
+    private boolean passTwo = false;
     private boolean passFailed = false;
 
     public SyntaxAnalyzer(LexicalAnalyzer lex) {
         this.lex = lex;
-        this.symbolTable = new SymbolTable();
+        this.symbolTable = SymbolTable.get();
 
         if(syntaxLog == null) {
             syntaxLog = new Log("syntax.log");
@@ -52,6 +52,7 @@ public class SyntaxAnalyzer {
 
 //        lex.nextToken();
             compilation_unit();
+            passTwo = true;
         }
         catch (NullPointerException e) {
 //            syntaxLog.log("Error: unexpected end of file on line " + lex.getLineNumber());
@@ -746,6 +747,10 @@ public class SyntaxAnalyzer {
         if(passFailed) { return; }
 
         if(DOT_TOKEN.equals(lex.peek().lexeme)) {
+            if(passTwo) {
+                String className = lex.getToken().lexeme; // todo: do something with this
+            }
+
             lex.nextToken(); // Current token is now "."
 
             if(!TokenType.IDENTIFIER.equals(lex.nextToken().type)) {
@@ -808,6 +813,7 @@ public class SyntaxAnalyzer {
                 failGrammar("assignment_expression",  "opening parenthesis");
                 return;
             }
+            lex.nextToken(); // Advance token - expression() calls getToken()
             expression();
             if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
                 failGrammar("assignment_expression", "closing parenthesis");
@@ -815,7 +821,7 @@ public class SyntaxAnalyzer {
             }
         }
         else {
-            expression();
+            expression(); // Don't advance token - the token we checked wasn't used yet.
         }
     }
 

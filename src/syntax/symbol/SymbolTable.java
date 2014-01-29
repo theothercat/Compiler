@@ -15,16 +15,83 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class SymbolTable implements Map<String, SymbolTableEntry> {
-    private static Log symLog = null;
+    private static Log symLog = new Log("symbol_table.log");
+    private static SymbolTable theInstance = new SymbolTable();
 
-    private Map<String, SymbolTableEntry> innerTable = new HashMap<String, SymbolTableEntry>();
-    private String scope = "g";
+    private static Map<String, SymbolTableEntry> innerTable = new HashMap<String, SymbolTableEntry>();
+    private static String scope = "g";
 
-    public SymbolTable() {
-        if(symLog == null) {
-            symLog = new Log("symbol_table.log");
-        }
+    private SymbolTable() { }
+
+    public static SymbolTable get() {
+        return theInstance;
     }
+
+    public static boolean identifierExists(String identifier) {
+        return iExists(identifier, scope);
+    }
+
+    public static boolean identifierExists(String identifier, String className) {
+        return iExists(identifier, ("g." + className));
+    }
+
+    /**
+     * Helper function, checks in nested scopes
+     * @param identifier
+     * @param scope
+     * @return true or false
+     */
+    private static boolean iExists(String identifier, String scope) {
+        for(SymbolTableEntry entry : innerTable.values()) {
+            if(entry.scope.equals(scope)
+                    && entry.value.equals(identifier)) {
+                return true;
+            }
+        }
+        if(!"g".equals(scope)) {
+            return iExists(identifier, scope.substring(0, scope.lastIndexOf(".")));
+        }
+        return false;
+    }
+
+    /**
+     * Looks up an identifier in the symbol table and returns its SymId
+     * @param identifier
+     * @return symid of the identifier
+     */
+    public static String find(String identifier) {
+        return iFinder(identifier, scope);
+    }
+
+//    /**
+//     * Find within a class?
+//     * @param identifier
+//     * @param className
+//     * @return
+//     */
+//    public static boolean find(String identifier, String className) {
+//        return iExists(identifier, ("g." + className));
+//    }
+
+    /**
+     * Helper function, checks in nested scopes
+     * @param identifier
+     * @param scope
+     * @return symid, null if not found
+     */
+    private static String iFinder(String identifier, String scope) {
+        for(SymbolTableEntry entry : innerTable.values()) {
+            if(entry.scope.equals(scope)
+                    && entry.value.equals(identifier)) {
+                return entry.symid;
+            }
+        }
+        if(!"g".equals(scope)) {
+            return iFinder(identifier, scope.substring(0, scope.lastIndexOf(".")));
+        }
+        return null;
+    }
+
 
     @Override
     public int size() { return innerTable.size(); }
