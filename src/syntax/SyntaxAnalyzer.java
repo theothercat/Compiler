@@ -501,6 +501,9 @@ public class SyntaxAnalyzer {
     private String addToSymbolTable(String symbolLexeme, SymbolTableEntryType type, Map<String, String> data) {
         return symbolTable.add(symbolLexeme, type, data).symid;
     }
+    private void addLiteralToSymbolTable(String symbolLexeme, Map<String, String> data) {
+        symbolTable.addLiteral(symbolLexeme, data);
+    }
 
     /**
      * Used for if and while;
@@ -644,11 +647,34 @@ public class SyntaxAnalyzer {
         }
         else if(EXPRESSION_TOKENS.contains(thisToken.lexeme)) // true, false, and null
         {
+            if(!passTwo) {
+                HashMap<String, String> data = new HashMap<String, String>(1);
+                if(KW_NULL.equals(thisToken.lexeme)) {
+                    data.put("type", "void");
+                }
+                else {
+                    data.put("type", "bool");
+                }
+                addLiteralToSymbolTable(thisToken.lexeme, data);
+            }
+
             expressionz();
         }
         else if(TokenType.CHARACTER.equals(thisToken.type)
                 || TokenType.NUMBER.equals(thisToken.type)) // Character literals and numbers are a single token, so the token type can just be checked
         {
+            if(!passTwo) {
+                HashMap<String, String> data = new HashMap<String, String>(1);
+                if(TokenType.CHARACTER.equals(thisToken.type)) {
+                    data.put("type", "char");
+                }
+                else // TokenType.NUMBER.equals(thisToken.type)
+                {
+                    data.put("type", "int");
+                }
+                addLiteralToSymbolTable(thisToken.lexeme, data);
+            }
+
             expressionz();
         }
         else // It wasn't any kind of expression!

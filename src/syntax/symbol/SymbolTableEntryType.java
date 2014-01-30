@@ -12,5 +12,6 @@ public enum SymbolTableEntryType {
     INSTANCE_VAR,
     LOCAL_VAR,
     METHOD,
-    PARAM
+    PARAM,
+    GLOBAL_LITERAL
 }

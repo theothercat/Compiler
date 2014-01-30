@@ -45,6 +45,8 @@ public class AnalyzerConstants {
     public static final String KW_CIN = "cin";
     public static final String KW_COUT = "cout";
 
+    public static final String KW_NULL = "null";
+
     public static final String KW_VOID = "void";
     public static final String KW_MAIN = "main";
     public static final String KW_CLASS = "class";

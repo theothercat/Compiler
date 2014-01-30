@@ -13,6 +13,9 @@ class a {
         else {
             return x + e[2 + abc(a, c, e)];
         }
+        if(x != null) {
+            return;
+        }
 //        do_something(x x + 123 + '\r' / (x && 54) - vv() * p[2]); // Note: this line is broken!
     }
 }

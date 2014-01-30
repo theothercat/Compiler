@@ -148,6 +148,32 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return newEntry;
     }
 
+    public void addLiteral(String lexeme, Map<String, String> data) {
+        if(!iExists(lexeme, "g")) // Look for literal in global scope
+        {
+            SymbolTableEntry newEntry = new SymbolTableEntry("g", "G", lexeme, SymbolTableEntryType.GLOBAL_LITERAL, data);
+
+            innerTable.put(newEntry.symid, newEntry);
+            symLog.log("Added new literal to symbol table: " + newEntry.symid);
+            symLog.log("\t" + "identifier = " + newEntry.value);
+            symLog.log("\t" + "scope = " + newEntry.scope);
+            symLog.log("\t" + "type = " + newEntry.kind.name());
+            if(newEntry.data == null) {
+                symLog.log("\t" + "data = none;");
+            }
+            else {
+                symLog.log("\t" + "data =");
+                for(String s : data.keySet()) {
+                    symLog.log(s + " : " + data.get(s));
+                }
+            }
+        }
+        else {
+//            symLog.debug("Literal already exists in symbol table and was not added.");
+            symLog.log("Literal already exists in symbol table and was not added.");
+        }
+    }
+
     public String getScope() { return scope; }
 
     public void setScope(String newScope) {
