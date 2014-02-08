@@ -4,6 +4,7 @@ import com.sun.org.apache.xerces.internal.impl.xpath.regex.RegularExpression;
 import log.Log;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -44,15 +45,28 @@ public class LexicalAnalyzer {
     private static Log lexLog = null;
 
     private BufferedReader file;
+    private String filename;
     private Token currentToken;
     private String currentLine;
     private int lineNumber;
 
-    public LexicalAnalyzer(BufferedReader file)
+    public LexicalAnalyzer(String filename)
     {
-        this.file = file;
+        this.filename = filename;
+        try {
+            this.file = new BufferedReader(new FileReader(filename));
+        }
+        catch (IOException e) {
+            System.out.println("Could not open file.");
+        }
         this.currentLine = "";
         this.lineNumber = 0;
+//        try {
+//            file.mark(READ_AHEAD_LIMIT);
+//        }
+//        catch (IOException e) {
+//            System.out.println("Could not mark file for pass two.");
+//        }
 
         if(lexLog == null) {
             lexLog = new Log("lex.log");
@@ -274,6 +288,16 @@ public class LexicalAnalyzer {
             file.close();
         }
         catch (IOException e) { }
+    }
+
+    public void resetFile() {
+        try {
+            file = new BufferedReader(new FileReader(filename));
+            lineNumber = 0;
+        }
+        catch(IOException e) {
+            System.out.println("Failed to reset file for pass two.");
+        }
     }
 
     private boolean isCharacter(String s) {

@@ -9,6 +9,10 @@ import syntax.SyntaxAnalyzer;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,20 +22,24 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class Main {
+    private static List<String> VALID_DEBUG_ARGS = Arrays.asList("-d", "d", "-debug", "debug");
+
     public static void main(String[] args) {
         SyntaxAnalyzer sa;
         LexicalAnalyzer la;
 
         if(args.length > 1) {
-            ProgramConstants.logLevel = LogLevel.STANDARD;
+            ProgramConstants.logLevel = isDebugArg(args[1]) ? LogLevel.DEBUG : LogLevel.STANDARD;
         }
 
         try {
-            BufferedReader file = new BufferedReader(new FileReader(args[0]));
-            la = new LexicalAnalyzer(file);
+//            FileReader file = new FileReader(args[0]);
+            la = new LexicalAnalyzer(args[0]); //file);
 
 
             sa = new SyntaxAnalyzer(la);
+            sa.pass();
+
             sa.pass();
             sa.closeLogs();
             la.closeFile();
@@ -51,12 +59,12 @@ public class Main {
         Token read;
         LexicalAnalyzer la;
 
-        try {
-            la = new LexicalAnalyzer(new BufferedReader(new FileReader(filename)));
-        }
-        catch (IOException e) {
-            return;
-        }
+//        try {
+            la = new LexicalAnalyzer(/*new BufferedReader(new FileReader(*/filename);//));
+//        }
+//        catch (IOException e) {
+//            return;
+//        }
 
         Log tokenLog = new Log("token_test.log");
 
@@ -72,5 +80,10 @@ public class Main {
                 System.out.println("Peek found token \"" + peek.lexeme + "\" and classified it as " + peek.type.name());
             }
         }
+    }
+
+    private static boolean isDebugArg(String s) {
+        return s != null
+                && VALID_DEBUG_ARGS.contains(s.toLowerCase());
     }
 }

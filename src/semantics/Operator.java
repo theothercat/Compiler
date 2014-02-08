@@ -15,4 +15,13 @@ public class Operator {
         Symbol = s;
         Precedence = p;
     }
+
+    public Operator(String s) {
+        Symbol = s;
+    }
+
+    @Override
+    public String toString() {
+        return Symbol;
+    }
 }

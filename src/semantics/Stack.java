@@ -21,6 +21,7 @@ public class Stack<T> {
     public Stack(String filename) { stackLog = new Log(filename); }
 
     public void push(T new_top) {
+        stackLog.debug("Pushed new stack object " + new_top.toString());
         stack.add(0, new_top);
     }
 
@@ -40,5 +41,9 @@ public class Stack<T> {
         }
         s.append('\n');
         stackLog.log(s.toString());
+    }
+
+    public void closeLogs() {
+        stackLog.close();
     }
 }

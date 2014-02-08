@@ -8,5 +8,7 @@ package semantics.record;
  * To change this template use File | Settings | File Templates.
  */
 public enum RecordType {
-    IDENTIFIER
+    IDENTIFIER,
+    TYPE,
+    LITERAL
 }
