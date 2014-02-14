@@ -4,6 +4,7 @@ import lex.Token;
 import lex.TokenType;
 import log.Log;
 import log.LogLevel;
+import log.LogManager;
 import syntax.SyntaxAnalyzer;
 
 import java.io.BufferedReader;
@@ -41,7 +42,6 @@ public class Main {
             sa.pass();
 
             sa.pass();
-            sa.closeLogs();
             la.closeFile();
 
         }
@@ -50,8 +50,8 @@ public class Main {
             e.printStackTrace();
             // todo: File closing!
         }
-
 //        tokenTest(args[0]);
+        LogManager.cleanup();
     }
 
     private static void tokenTest(String filename) {
@@ -67,8 +67,6 @@ public class Main {
 //        }
 
         Log tokenLog = new Log("token_test.log");
-
-        la.closeLogs();
 
         while(true) {
             peek = la.peek();

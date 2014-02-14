@@ -10,5 +10,12 @@ package semantics.record;
 public enum RecordType {
     IDENTIFIER,
     TYPE,
-    LITERAL
+    LITERAL,
+    VARIABLE,
+    EXPRESSION,
+    BAL,
+    REFERENCE,
+    ARG_LIST,
+
+    SYMID
 }

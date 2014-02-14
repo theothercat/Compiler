@@ -5,6 +5,8 @@ import lex.Token;
 import lex.TokenType;
 import log.Log;
 import semantics.SemanticActions;
+import semantics.SemanticsException;
+import syntax.symbol.DuplicateSymbolException;
 import syntax.symbol.SymbolTable;
 import syntax.symbol.SymbolTableEntryType;
 
@@ -21,8 +23,6 @@ import static syntax.AnalyzerConstants.CLOSING_BRACKET;
  * To change this template use File | Settings | File Templates.
  */
 public class SyntaxAnalyzer {
-    private static final List<String> TYPES = Arrays.asList("int", "char", "bool", "void");
-
     private static Log syntaxLog = null;
 
     private SymbolTable symbolTable;
@@ -39,26 +39,36 @@ public class SyntaxAnalyzer {
         }
     }
 
-    public void closeLogs() {
-        syntaxLog.close();
-        lex.closeLogs();
-        symbolTable.closeLogs();
-        SemanticActions.closeLogs();
-    }
-
     public void pass() throws Exception {
         try {
             if(passFailed) { return; }
-            if(passTwo) { lex.resetFile(); }
+            if(passTwo) {
+                lex.resetFile();
+                symbolTable.setScope("g");
+//                symbolTable.checkDuplicates();
+            }
 
             compilation_unit();
             if(!passTwo) { passTwo = true; }
         }
         catch (NullPointerException e) {
+            if(passTwo) {
+                e.printStackTrace();
+            }
 //            syntaxLog.log("Error: unexpected end of file on line " + lex.getLineNumber());
 //            System.out.println("Error: unexpected end of file on line " + lex.getLineNumber());
         }
+        catch(DuplicateSymbolException e) {
+            System.out.println(String.format("Line %d: %s", lex.getLineNumber(), e.getMessage()));
+            passFailed = true;
+        }
+        catch(SemanticsException e) {
+            failSemantics(e.getMessage());
+        }
         catch (Exception e) {
+            if(passTwo) {
+                e.printStackTrace();
+            }
             // Easy escape from failed pass.
         }
 
@@ -267,7 +277,7 @@ public class SyntaxAnalyzer {
             }
 
             if(passTwo) {
-                SemanticActions.vPush();
+                SemanticActions.vPush(identifier);
             }
             else {
                 // Seems like a good time to add to symbol table.
@@ -428,7 +438,7 @@ public class SyntaxAnalyzer {
             thisToken = lex.nextToken(); // Advance token for next check.
         }
         if(passTwo) {
-            SemanticActions.vPush();
+            SemanticActions.vPush(identifier);
         }
         else {
             // Seems like a good time to add this to the symbol table.
@@ -539,7 +549,7 @@ public class SyntaxAnalyzer {
         return "";
     }
 
-    private String addToSymbolTable(String symbolLexeme, SymbolTableEntryType type, Map<String, String> data) {
+    private String addToSymbolTable(String symbolLexeme, SymbolTableEntryType type, Map<String, String> data) throws DuplicateSymbolException {
         return symbolTable.add(symbolLexeme, type, data).symid;
     }
     private void addLiteralToSymbolTable(String symbolLexeme, Map<String, String> data) {
@@ -732,13 +742,13 @@ public class SyntaxAnalyzer {
             }
 
             if(passFailed) { return; }
-            if(passTwo) {
-                try { SemanticActions.iExist(); }
-                catch(Exception e) {
-                    failSemantics(e.getMessage());
-                    return;
-                }
-            }
+//            if(passTwo) {
+//                try { SemanticActions.iExist(); }
+//                catch(Exception e) {
+//                    failSemantics(e.getMessage());
+//                    return;
+//                }
+//            }
 
             member_refz();
             if(passFailed) { return; }
@@ -892,10 +902,6 @@ public class SyntaxAnalyzer {
         if(passFailed) { return; }
 
         if(DOT_TOKEN.equals(lex.peek().lexeme)) {
-            if(passTwo) {
-                String className = lex.getToken().lexeme; // todo: do something with this
-            }
-
             lex.nextToken(); // Current token is now "."
 
             if(!TokenType.IDENTIFIER.equals(lex.nextToken().type)) {
@@ -1019,7 +1025,7 @@ public class SyntaxAnalyzer {
                 lex.getLineNumber(),
                 failMessage));
         passFailed = true;
-        throw new Exception();
+//        throw new Exception();
     }
 
     /**

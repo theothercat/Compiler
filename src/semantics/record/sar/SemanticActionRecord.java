@@ -30,6 +30,9 @@ public class SemanticActionRecord {
         if(RecordType.IDENTIFIER.equals(r)) {
             return new IdentifierSAR(d);
         }
-        return null;
+//        if(RecordType.SYMID.equals(r)) {
+            return new SemanticActionRecord(d, r);
+//        }
+//        return null;
     }
 }

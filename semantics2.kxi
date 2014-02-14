@@ -1,0 +1,16 @@
+    class Cat {
+        public int lives;
+
+        Cat() {
+            lives = 0;
+        }
+    }
+    void main() {
+        int x;
+        int y;
+        Cat c; // = new Cat();
+
+        x = 1 + 2 / y - x;
+        x = x + c.lives;
+        x = (1 + 2) * y;
+    }

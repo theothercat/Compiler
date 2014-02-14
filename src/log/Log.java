@@ -25,6 +25,7 @@ public class Log {
 
         try {
             writer = new BufferedWriter(new FileWriter(logFileName));
+            LogManager.registerLog(this);
         }
         catch (IOException e) {
             System.out.println("Could not open a log file.");

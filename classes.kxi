@@ -1,0 +1,42 @@
+class Cat {
+    public int noiseCount;
+
+    public String makeNoise() {
+        noiseCount = 0;
+        meow();
+        noiseCount = noiseCount + 1;
+    }
+
+    public void meow() {
+        cout << 'm';
+        cout << 'e';
+        cout << 'o';
+        cout << 'w';
+        cout << '\n';
+    }
+}
+class Dog {
+    public int b;
+
+    public String makeNoise() {
+        int noiseCount = 0;
+        bark();
+        noiseCount = noiseCount + 1;
+    }
+
+    private void bark() {
+        cout << 'b';
+        cout << 'a';
+        cout << 'r';
+        cout << 'k';
+        cout << '\n';
+    }
+}
+
+    void main() {
+        Cat c = new Cat();
+        Dog d = new Dog();
+
+        c.makeNoise();
+        d.makeNoise();
+    }

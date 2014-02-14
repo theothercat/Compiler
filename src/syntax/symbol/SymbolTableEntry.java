@@ -27,4 +27,12 @@ public class SymbolTableEntry {
         this.kind = kind;
         this.data = data;
     }
+
+    public SymbolTableEntry(String scope, String symid, SymbolTableEntryType kind, Map<String, String> data) {
+        this.scope = scope;
+        this.symid = symid + (id++);
+        this.value = this.symid;
+        this.kind = kind;
+        this.data = data;
+    }
 }

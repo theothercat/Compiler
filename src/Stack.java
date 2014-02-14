@@ -1,5 +1,3 @@
-package semantics;
-
 import log.Log;
 
 import java.util.ArrayList;

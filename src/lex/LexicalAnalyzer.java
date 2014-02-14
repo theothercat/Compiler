@@ -279,9 +279,6 @@ public class LexicalAnalyzer {
     public int getLineNumber() {
         return lineNumber;
     }
-    public void closeLogs() {
-        lexLog.close();
-    }
 
     public void closeFile() {
         try {

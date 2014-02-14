@@ -2,10 +2,7 @@ package syntax.symbol;
 
 import log.Log;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,20 +15,25 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
     private static Log symLog = new Log("symbol_table.log");
     private static SymbolTable theInstance = new SymbolTable();
 
-    private static Map<String, SymbolTableEntry> innerTable = new HashMap<String, SymbolTableEntry>();
+    private static Map<String, SymbolTableEntry> innerTable;
+    private static Map<String, List<String>> scopesToSymIdsMap;
     private static String scope = "g";
 
-    private SymbolTable() { }
+    private SymbolTable() {
+        innerTable = new HashMap<String, SymbolTableEntry>();
+        scopesToSymIdsMap = new HashMap<String, List<String>>();
+        scopesToSymIdsMap.put("g", new ArrayList<String>());
+    }
 
     public static SymbolTable get() {
         return theInstance;
     }
 
-    public static boolean identifierExists(String identifier) {
+    public boolean identifierExists(String identifier) {
         return iExists(identifier, scope);
     }
 
-    public static boolean identifierExists(String identifier, String className) {
+    public boolean identifierExists(String identifier, String className) {
         return iExists(identifier, ("g." + className));
     }
 
@@ -59,8 +61,24 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
      * @param identifier
      * @return symid of the identifier
      */
-    public static String find(String identifier) {
+    public String find(String identifier) {
         return iFinder(identifier, scope);
+    }
+
+    /**
+     * Looks up an identifier in the symbol table and returns its SymId
+     * @param member
+     * @param scope
+     * @return symid of the identifier
+     */
+    public String findInScope(String member, String scope) {
+        for(String sym : scopesToSymIdsMap.get(scope))
+        {
+            if(innerTable.get(sym).value.equals(member)) {
+                return sym;
+            }
+        }
+        return null;
     }
 
 //    /**
@@ -79,7 +97,7 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
      * @param scope
      * @return symid, null if not found
      */
-    private static String iFinder(String identifier, String scope) {
+    private String iFinder(String identifier, String scope) {
         for(SymbolTableEntry entry : innerTable.values()) {
             if(entry.scope.equals(scope)
                     && entry.value.equals(identifier)) {
@@ -129,9 +147,54 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
     @Override
     public Set<Entry<String, SymbolTableEntry>> entrySet() { return innerTable.entrySet(); }
 
-    public SymbolTableEntry add(String lexeme, SymbolTableEntryType type, Map<String, String> data) {
+    private boolean isDuplicateEntry(String lexeme) {
+        List<String> symids = scopesToSymIdsMap.get(scope);
+        for(String s : symids) {
+            if(lexeme.equals(innerTable.get(s).value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public SymbolTableEntry add(String lexeme, SymbolTableEntryType type, Map<String, String> data) throws DuplicateSymbolException {
+        if(this.isDuplicateEntry(lexeme)) {
+            throw new DuplicateSymbolException(lexeme, scope);
+        }
+
         SymbolTableEntry newEntry = new SymbolTableEntry(scope, type.name().substring(0, 1), lexeme, type, data);
         innerTable.put(newEntry.symid, newEntry);
+
+//        if(!SymbolTableEntryType.PARAM.equals(newEntry.kind)) {
+            scopesToSymIdsMap.get(scope).add(newEntry.symid);
+//        }
+
+        // Logging
+        symLog.log("Added new entry to symbol table: " + newEntry.symid);
+        symLog.log("\t" + "identifier = " + newEntry.value);
+        symLog.log("\t" + "scope = " + newEntry.scope);
+        symLog.log("\t" + "type = " + newEntry.kind.name());
+        if(newEntry.data == null) {
+            symLog.log("\t" + "data = none;");
+        }
+        else {
+            symLog.log("\t" + "data =");
+            for(String s : data.keySet()) {
+                symLog.log(s + " : " + data.get(s));
+            }
+        }
+        return newEntry;
+    }
+
+    public SymbolTableEntry add(SymbolTableEntryType type, Map<String, String> data) {
+        SymbolTableEntry newEntry = new SymbolTableEntry(scope, type.name().substring(0, 1), type, data);
+        innerTable.put(newEntry.symid, newEntry);
+
+//        if(!SymbolTableEntryType.PARAM.equals(newEntry.kind)) {
+        scopesToSymIdsMap.get(scope).add(newEntry.symid);
+//        }
+
+        // Logging
         symLog.log("Added new entry to symbol table: " + newEntry.symid);
         symLog.log("\t" + "identifier = " + newEntry.value);
         symLog.log("\t" + "scope = " + newEntry.scope);
@@ -178,9 +241,115 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
 
     public void setScope(String newScope) {
         scope = newScope;
+        if(scopesToSymIdsMap.get(newScope) == null) {
+            scopesToSymIdsMap.put(newScope, new ArrayList<String>());
+        }
     }
 
-    public void closeLogs() {
-        symLog.close();
+//    public void checkDuplicates() throws DuplicateSymbolException {
+//        for(List<String> symids : scopesToSymIdsMap.values()) {
+//            for(String symid : symids) {
+//                SymbolTableEntry s1 = innerTable.get(symid);
+//                for(String symid2 : symids) {
+//                    if(!symid.equals(symid2) // Can't be the same symbol
+//                        && isDuplicate(innerTable.get(symid), innerTable.get(symid2))) {
+//                    }
+//                }
+//            }
+//        }
+//    }
+
+//    public boolean isDuplicate(SymbolTableEntry s1, SymbolTableEntry s2) {
+//        if(s1.value.equals(s2.value)) {
+//            if((SymbolTableEntryType.METHOD.equals(s1.kind)
+//                    || SymbolTableEntryType.METHOD.equals(s2.kind))) // One is a method
+//            {
+//                if(!s1.kind.equals(s2.kind)) // One is a method, and the other is not
+//                {
+//                    return false; // Possible to have a method and a variable that share a name.
+//                }
+//                else {
+//                    return isMethodMatch(s1.data, s2.data); // Both are methods, so find out if they are the same.
+//                }
+//            }
+//            else {
+//                return true; // If they aren't methods, they can't share a name.
+//            }
+//        }
+//        return false; // If the names aren't the same, they aren't a duplicate!
+//    }
+
+    /**
+     * Based on my testing in Java, these things are irrelevant here:
+     * -accessMod
+     * -returnType
+     *
+     * We only care about Param (order, arity, and type)
+     *
+     * @param funcIdentifier the identifier for the function
+     * @param paramList the symids of args when the function is called
+     * @return whether or not a matching function is found
+     */
+    public boolean functionExists(String funcIdentifier, String paramList)
+    {
+        return functionExists(funcIdentifier, paramList, scope);
+    }
+
+
+    /**
+     * Based on my testing in Java, these things are irrelevant here:
+     * -accessMod
+     * -returnType
+     *
+     * We only care about Param (order, arity, and type)
+     *
+     * @param funcIdentifier the identifier for the function
+     * @param paramList the symids of args when the function is called
+     * @return whether or not a matching function is found
+     */
+    public boolean functionExists(String funcIdentifier, String paramList, String scope)
+    {
+        SymbolTableEntry entry;
+        List<String> paramIdsPassed = parseParamIds(paramList);
+        List<String> paramIdsSymbolTable;
+        for(String symid : scopesToSymIdsMap.get(scope))
+        {
+            entry = innerTable.get(symid);
+            if(!SymbolTableEntryType.METHOD.equals(entry.kind)) { continue; }
+
+            paramIdsSymbolTable = parseParamIds(entry.data.get("Param"));
+
+            // Arity?
+            if(paramIdsPassed.size() != paramIdsSymbolTable.size()) {
+                return false; // Can't match if there are a different number of params
+            }
+
+            // Order and type are checked together
+            for(int i = 0; i < paramIdsPassed.size(); i++) {
+                SymbolTableEntryType paramType1 = innerTable.get(paramIdsPassed.get(i)).kind;
+                SymbolTableEntryType paramType2 = innerTable.get(paramIdsSymbolTable.get(i)).kind;
+
+                if(!paramType1.equals(paramType2)) {
+                    return false; // Can't match if the param types are different
+                }
+            }
+            return true; // Nothing different about the params
+        }
+        return false; // No scope adjustment?
+    }
+
+    // Gets symids of all params from the string list
+    private List<String> parseParamIds(String paramList) {
+        List<String> paramIds = new ArrayList<String>();
+        if("[]".equals(paramList)) {
+            return paramIds;
+        }
+
+        String plist = paramList.substring(1, paramList.length() - 1); // Chop off array brackets.
+        String[] params = plist.split(", ");
+        for(int i = 0; i < params.length; i++) {
+            paramIds.add(params[i]);
+        }
+        return paramIds;
     }
 }

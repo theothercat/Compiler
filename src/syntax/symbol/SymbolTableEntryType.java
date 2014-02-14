@@ -13,5 +13,6 @@ public enum SymbolTableEntryType {
     LOCAL_VAR,
     METHOD,
     PARAM,
-    GLOBAL_LITERAL
+    GLOBAL_LITERAL,
+    REFERENCE
 }

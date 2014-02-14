@@ -1,8 +1,12 @@
-class a {
+class Cat {
     public int b = 23;
     private int x = 2;
-    private ZZZ abcd(Q qwerty, char c){
+    public char abcd = '3';
+//    private char abcd;
+    public int j = j;
+    private ZZZ abcd(Q qwerty, char j){
         p arr[] = new arr[23];
+//        int j;
         d g = new d();
         do_something(x + 123 + '\r' / (x && 54) - vv() * p[2]);
         g.yz = 'd' - '6' / '$';
@@ -18,6 +22,20 @@ class a {
             return;
         }
 //        do_something(x x + 123 + '\r' / (x && 54) - vv() * p[2]); // Note: this line is broken!
+    }
+    public String makeNoise() {
+        int noiseCount = 0;
+        meow();
+        noiseCount = noiseCount + 1;
+    }
+}
+class Dog {
+    public int b;
+
+    public String makeNoise() {
+        int noiseCount = 0;
+        bark();
+        noiseCount = noiseCount + 1;
     }
 }
 
