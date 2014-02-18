@@ -11,9 +11,9 @@ import syntax.symbol.SymbolTableEntryType;
  * To change this template use File | Settings | File Templates.
  */
 public class ComparisonOperator extends Operator {
-    public ComparisonOperator() {
+    public ComparisonOperator(String operator) {
 //        super(getPrecedence("*"));
-        super("*");
+        super(operator);
     }
 
     @Override
@@ -26,9 +26,10 @@ public class ComparisonOperator extends Operator {
             return null;
         }
 
-        if("int".equals(s1.data.get("type"))
-                && "int".equals(s2.data.get("type")))
-            return "int";
+        if(("int".equals(s1.data.get("type")) && "int".equals(s2.data.get("type")))
+                || ("char".equals(s1.data.get("type")) && "char".equals(s2.data.get("type")))) {
+            return "bool";
+        }
         return null;
     }
 }

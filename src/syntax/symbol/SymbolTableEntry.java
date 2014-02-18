@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public class SymbolTableEntry {
     private static int id = 1;
+    public static SymbolTableEntry THIS_PLACEHOLDER = new SymbolTableEntry("", "THIS", "this", SymbolTableEntryType.GLOBAL_LITERAL, null);
 
     public String scope;
     public String symid;

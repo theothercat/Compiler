@@ -11,13 +11,16 @@ public enum RecordType {
     IDENTIFIER,
     TYPE,
     LITERAL,
-    VARIABLE,
-    EXPRESSION,
+//    VARIABLE,
+//    EXPRESSION,
     BAL,
     REFERENCE,
     VOID_RETURN,
     ARG_LIST,
     FUNC,
+    NEW_ARR,
+    ARR_INDEX,
+    THIS_PLACEHOLDER,
 
     SYMID
 }

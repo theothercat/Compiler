@@ -5,7 +5,7 @@ import lex.Token;
 import lex.TokenType;
 import log.Log;
 import semantics.SemanticActions;
-import semantics.SemanticsException;
+import semantics.err.SemanticsException;
 import syntax.symbol.DuplicateSymbolException;
 import syntax.symbol.SymbolTable;
 import syntax.symbol.SymbolTableEntryType;
@@ -106,7 +106,7 @@ public class SyntaxAnalyzer {
             data.put("Param", "[]");
             data.put("accessMod", "public");
             if(!passTwo) {
-                addToSymbolTable("main", SymbolTableEntryType.METHOD, data);
+                addToSymbolTable("main", SymbolTableEntryType.METHOD, data, true); // Extra param to trim the method off the scope.
             }
         }
         else {
@@ -251,16 +251,24 @@ public class SyntaxAnalyzer {
             data.remove("type");
             concatScope(identifier);
 
-            if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+            if(CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+                // No params.
+                if(!passTwo) {
+                    data.put("Param", "[]");
+                    addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data, true); // Added param to notify this is a method.
+                }
+            }
+            else {
                 // We have some params.
-
                 parameter_list(data); // Do not advance token - closing parenthesis check does advancement
-                if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+                if(CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+                    if(!passTwo) {
+                        addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data, true); // Added param to notify this is a method.
+                    }
+                }
+                else {
                     failGrammar("field_declaration", "closing parenthesis");
                     return;
-                }
-                if(!passTwo) {
-                    addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data);
                 }
             }
             lex.nextToken(); // Advance token - method_body() calls getToken()
@@ -300,7 +308,6 @@ public class SyntaxAnalyzer {
             else if(passTwo) {
                 SemanticActions.EOE();
             }
-
         }
     }
 
@@ -316,16 +323,20 @@ public class SyntaxAnalyzer {
     private void constructor_declaration() throws Exception {
         if(passFailed) { return; }
 
-        if(!TokenType.IDENTIFIER.equals(lex.getToken().type))
+        String identifier;
+        if(TokenType.IDENTIFIER.equals(lex.getToken().type))
         {
+            identifier = lex.getToken().lexeme;
+            if(passTwo) {
+                SemanticActions.CD(identifier);
+            }
+        }
+        else {
             failGrammar("constructor_declaration", "class_member_declaration (modifier or constructor_declaration)");
             return;
         }
-        else if(passTwo) {
-            SemanticActions.CD();
-        }
 
-        concatScope(lex.getToken().lexeme); // We are now in the constructor's scope.
+        concatScope(identifier); // We are now in the constructor's scope.
 
         if(!OPENING_PARENTHESIS.equals(lex.nextToken().lexeme))
         {
@@ -334,17 +345,26 @@ public class SyntaxAnalyzer {
         }
 
         HashMap<String, String> data = new HashMap<String, String>(); // Data map to add params to.
-        if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
-
+        if(CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
+            // No params.
+            if(!passTwo) {
+                data.put("Param", "[]");
+                data.put("returnType", identifier); // Returns the type of the class that's being built, which is the method name.
+                addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data, true); // Added param to notify this is a method.
+            }
+        }
+        else {
             parameter_list(data); // Do not advance token - closing parenthesis check does advancement
 
             if(!CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
                 failGrammar("constructor_declaration", "closing parenthesis");
                 return;
             }
-        }
-        if(!passTwo) {
-            addToSymbolTable(lex.getToken().lexeme, SymbolTableEntryType.METHOD, data);
+
+            if(!passTwo) {
+                data.put("returnType", identifier); // Returns the type of the class that's being built, which is the method name.
+                addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data, true); // Added param to notify this is a method.
+            }
         }
 
         // todo: add logging
@@ -550,7 +570,10 @@ public class SyntaxAnalyzer {
     }
 
     private String addToSymbolTable(String symbolLexeme, SymbolTableEntryType type, Map<String, String> data) throws DuplicateSymbolException {
-        return symbolTable.add(symbolLexeme, type, data).symid;
+        return symbolTable.add(symbolLexeme, type, data, false).symid;
+    }
+    private String addToSymbolTable(String symbolLexeme, SymbolTableEntryType type, Map<String, String> data, boolean isMethod) throws DuplicateSymbolException {
+        return symbolTable.add(symbolLexeme, type, data, isMethod).symid;
     }
     private void addLiteralToSymbolTable(String symbolLexeme, Map<String, String> data) {
         symbolTable.addLiteral(symbolLexeme, data);
@@ -624,15 +647,18 @@ public class SyntaxAnalyzer {
         if(KW_WHILE.equals(thisToken.lexeme)) {
             lex.nextToken(); // Advance token - if_while() uses getToken()
             if_while();
-            lex.nextToken(); // Advance token - statement() uses getToken()
-            statement();
             if(passTwo) {
                 SemanticActions.doWhile();
             }
+            lex.nextToken(); // Advance token - statement() uses getToken()
+            statement();
         }
         else if(KW_IF.equals(thisToken.lexeme)) {
             lex.nextToken(); // Advance token - if_while() uses getToken()
             if_while();
+            if(passTwo) {
+                SemanticActions.doIf();
+            }
             lex.nextToken(); // Advance token - statement() uses getToken()
             statement();
 
@@ -642,15 +668,15 @@ public class SyntaxAnalyzer {
                 lex.nextToken(); // Advance token - statement() uses getToken()
                 statement();
             }
-            if(passTwo) {
-                SemanticActions.doIf();
-            }
         }
         else if(KW_RETURN.equals(thisToken.lexeme)) {
             if(!SEMICOLON.equals(lex.nextToken().lexeme)) {
                 expression_with_semicolon(); // Don't advance token - semicolon check did advancement already.
+                if(passFailed) { return; }
             }
-            if(passFailed) { return; }
+            else if(passTwo) {
+                SemanticActions.voidPush();
+            }
 
             if(passTwo) {
                 SemanticActions.doReturn();
@@ -762,7 +788,7 @@ public class SyntaxAnalyzer {
             else {
                 HashMap<String, String> data = new HashMap<String, String>(1);
                 if(KW_NULL.equals(thisToken.lexeme)) {
-                    data.put("type", "void");
+                    data.put("type", "null");
                 }
                 else {
                     data.put("type", "bool");
@@ -964,6 +990,9 @@ public class SyntaxAnalyzer {
 
         Token thisToken = lex.getToken();
         if(KW_THIS.equals(thisToken.lexeme)) {
+            if(passTwo) {
+                SemanticActions.thisPush();
+            }
             return;
         }
         else if(KW_NEW.equals(thisToken.lexeme)) {
@@ -981,7 +1010,7 @@ public class SyntaxAnalyzer {
                 return;
             }
             else if(passTwo) {
-                SemanticActions.oPush(thisToken.lexeme);
+                SemanticActions.oPush(lex.getToken().lexeme);
             }
 
             lex.nextToken(); // Advance token - expression() calls getToken()
@@ -1049,11 +1078,19 @@ public class SyntaxAnalyzer {
                     failGrammar("new_declaration", "closing parenthesis");
                     return;
                 }
+                else if(passTwo) {
+                    SemanticActions.closeParen();
+                    SemanticActions.EAL();
+                    SemanticActions.newObj();
+                }
+
             }
-            else if(passTwo) {
-                SemanticActions.closeParen();
-                SemanticActions.EAL();
-                SemanticActions.newObj();
+            else {
+                if(passTwo) {
+                    SemanticActions.closeParen();
+                    SemanticActions.EAL();
+                    SemanticActions.newObj();
+                }
             }
 
         }

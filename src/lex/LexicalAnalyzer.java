@@ -34,11 +34,12 @@ public class LexicalAnalyzer {
             "this", "true",
             "void",
             "while");
+    private static final List<Character> NUM_TOKENS = Arrays.asList('-', '+');
 //    private static final List<String> ESCAPE_CHARACTERS = Arrays.asList("0", "a", "b", "f", "n", "r", "t", "v", "\"", "&", "'", "\\");
     private static final int READ_AHEAD_LIMIT = 100000;
     private static final Token EMPTY_TOKEN = new Token();
 
-    private static RegularExpression numEx = new RegularExpression("^-?\\d+$");
+    private static RegularExpression numEx = new RegularExpression("^[-+]?\\d+$");
     private static RegularExpression charEx = new RegularExpression("^'\\\\[0abfnrtv&'\"\\\\]'|^'[^'\\\\]'");
     private static RegularExpression identEx = new RegularExpression("^[_a-zA-Z][_a-zA-Z0-9]*$");
 
@@ -99,6 +100,9 @@ public class LexicalAnalyzer {
             String[] split = currentLine.split("[ \t]+");
             currentToken = getRealToken(split[0]);
             currentLine = currentLine.replaceFirst(Pattern.quote(currentToken.lexeme), "").trim();
+            if(TokenType.NUMBER.equals(currentToken.type) && currentToken.lexeme.startsWith("+")) {
+                currentToken.lexeme = currentToken.lexeme.substring(1, currentToken.lexeme.length());
+            }
             lexLog.log("nextToken() got new token '" + currentToken.lexeme + "' of type " + currentToken.type.name());
             return currentToken;
         }
@@ -144,6 +148,9 @@ public class LexicalAnalyzer {
             // Build the token and remove it from the line
             String[] split = peekLine.split("[ \t]+");
             Token returnToken = getRealToken(split[0]);
+            if(TokenType.NUMBER.equals(returnToken.type) && returnToken.lexeme.startsWith("+")) {
+                returnToken.lexeme = returnToken.lexeme.substring(1, returnToken.lexeme.length());
+            }
             lexLog.debug("peek() got new token '" + returnToken.lexeme + "' of type " + returnToken.type.name());
             return returnToken;
         }
@@ -165,17 +172,31 @@ public class LexicalAnalyzer {
         if(isCharacter(s)) {
             return new Token(getCharacter(s), TokenType.CHARACTER);
         }
-        if(s.length() > 1 && isSymbol(s.substring(0,2))) {
-            return new Token(s.substring(0,2), TokenType.SYMBOL);
-        }
-        if(isSymbol(s.charAt(0))) {
-            return new Token(s.substring(0,1), TokenType.SYMBOL);
+        if("'".equals(s)) {
+            if(currentLine.startsWith("' '")) // It's the literal for a space.
+            {
+                return new Token("' '", TokenType.CHARACTER);
+            }
         }
         if(isPunctuation(s.charAt(0))) {
             return new Token(s.substring(0, 1), TokenType.PUNCTUATION);
         }
-
+        if(s.length() > 1 && isSymbol(s.substring(0,2))) {
+            return new Token(s.substring(0,2), TokenType.SYMBOL);
+        }
+        boolean isNumPossible = false;
+        if(isSymbol(s.charAt(0))) {
+            if(!NUM_TOKENS.contains(s.charAt(0))) {
+                return new Token(s.substring(0,1), TokenType.SYMBOL);
+            }
+            isNumPossible = true;
+        }
         for(int i = 1; i < s.length(); i++){
+            if(isNumPossible && i > 1) {
+                if(!numEx.matches(s.substring(0,i))) {
+                    return new Token(s.substring(0,1), TokenType.SYMBOL); // If it can't be a number, it must be a minus or plus sign.
+                }
+            }
             if((i < s.length() - 1)
                     && isSymbol(s.substring(i, i+1))) {
                 return buildToken(s.substring(0,i));
@@ -187,6 +208,9 @@ public class LexicalAnalyzer {
                 return buildToken(s.substring(0, i));
             }
         }
+//        if(isNumPossible && s.startsWith("+")) {
+//            return buildToken(s.substring(1, s.length()));
+//        }
         return buildToken(s);
     }
 
@@ -266,10 +290,10 @@ public class LexicalAnalyzer {
     }
 
     private boolean isPunctuation(char c) {
-        return (c == ',') || (c == ';') || (c == '.')
+        return (c == ',') || (c == ';') || (c == '.');
                 // todo: verify these
-                || (c == '!') || (c == '?') //|| (c == '\"')
-                || (c == ':');
+//                || (c == '!') || (c == '?') //|| (c == '\"')
+//                || (c == ':');
     }
 
     private boolean isKeyword(String s) {

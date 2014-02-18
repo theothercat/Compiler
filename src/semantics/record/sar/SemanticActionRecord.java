@@ -1,6 +1,6 @@
 package semantics.record.sar;
 
-import semantics.record.RecordType;
+import java.util.HashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,24 +12,41 @@ import semantics.record.RecordType;
 public class SemanticActionRecord {
     public String data;
     public RecordType type;
+    public HashMap<String, String> subRecords;
 
     public SemanticActionRecord(String d, RecordType r) {
         data = d;
         type = r;
     }
 
+    public SemanticActionRecord(String d, RecordType r, HashMap<String, String> sub) {
+        data = d;
+        type = r;
+        subRecords = sub;
+    }
+
     @Override
     public String toString() {
-        return new StringBuilder(type.name())
-                .append(" ")
-                .append(data)
+        return new StringBuilder(
+                type.name())
+                .append(subRecords == null ? (" " + data + " ") : "")
+                .append(
+                        subRecords == null ? "" : " " + subRecords.get("id")
+                )
+                .append(
+                        subRecords == null ? "" : " " + subRecords.get("args")
+                )
                 .toString();
     }
 
+    public static SemanticActionRecord getRecord(SemanticActionRecord identifier, SemanticActionRecord argList) {
+        HashMap<String, String> sub = new HashMap<String, String>(2);
+        sub.put("id", identifier.data);
+        sub.put("args", argList.data);
+        return new SemanticActionRecord(identifier.data, RecordType.FUNC, sub);
+    }
+
     public static SemanticActionRecord getRecord(String d, RecordType r) {
-        if(RecordType.IDENTIFIER.equals(r)) {
-            return new IdentifierSAR(d);
-        }
 //        if(RecordType.SYMID.equals(r)) {
             return new SemanticActionRecord(d, r);
 //        }

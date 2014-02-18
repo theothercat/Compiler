@@ -1,16 +1,301 @@
+    class Dog {
+        private int feet;
+        private bool isDogMute;
+
+        Dog(bool isDogCrippled, bool canDogBark) {
+            int numberOfFeetADogHas = 4;
+            if(isDogCrippled) {
+                feet = numberOfFeetADogHas - 1; // Assume 3
+            }
+            else {
+                feet = numberOfFeetADogHas;
+            }
+            isDogMute = canDogBark;
+        }
+
+        private void bark() {
+            if(isDogMute) {
+                return;
+            }
+
+            cout << 'b';
+            cout << 'a';
+            cout << 'r';
+            cout << 'k';
+            cout << '\n';
+        }
+
+        public void dogsBehavingBadly(bool dogSeesMailman) {
+            int totalTimesBarked = 0;
+            int baseNumberOfBarks = 100;
+            int loopIndex = 0;
+            char message[] = new char[8];
+            message[0] = 'B';
+            message[1] = 'a';
+            message[2] = 'd';
+            message[3] = ' ';
+            message[4] = 'd';
+            message[5] = 'o';
+            message[6] = 'g';
+            message[7] = '!';
+
+            if(dogSeesMailman) {
+                baseNumberOfBarks = 400;
+            }
+            while(dogSeesMailman && totalTimesBarked < baseNumberOfBarks + (feet * 150)) {
+                bark();
+                totalTimesBarked = totalTimesBarked + 1;
+            }
+            while(dogSeesMailman != true || baseNumberOfBarks > 100) {
+                bark();
+                baseNumberOfBarks = baseNumberOfBarks - 1;
+                if(baseNumberOfBarks == 0) {
+                    dogSeesMailman = false;
+                }
+            }
+            while(loopIndex < 8) {
+                cout << message[loopIndex];
+                loopIndex = loopIndex + 1;
+            }
+        }
+    }
+
     class Cat {
         public int lives;
 
         Cat() {
             lives = 0;
         }
+
+        public void meow() {
+            cout << 'm';
+            cout << 'e';
+            cout << 'o';
+            cout << 'w';
+            cout << '\n';
+        }
+
+        public void eat() {
+            char c;
+            int i;
+            cin >> c;
+            cin >> i;
+//            cin >> 'c';
+        }
+
+        public Cat getSelf(int j) {
+            Cat self = this;
+//            self = new Cat();
+            if(j < 0) {
+                return null;
+            }
+            return self;
+        }
+//        public void lives() {
+//            return;
+//        }
     }
+
+    class Calculator {
+        public int timesCalled;
+
+        public bool tryNestedIfs() {
+            int retVal;
+            int x;
+            int y;
+            int z;
+
+            x = 1;
+            y = 2;
+            z = 3;
+            if(x == y) {
+                return false; // Should have been false.
+            }
+            else {
+                if(x == 2) {
+                    return false; // Should have been false.
+                }
+                else {
+                    if(x != 2) {
+                        x = 2; // Now x and y are both 2
+                    }
+                }
+                if(x + 1 == z && z - 1 == y) {
+                    // Should be true.
+                    x = 0;
+                    y = 50;
+                    z = 100;
+                }
+                while(z - x > 0) {
+                    if(y <= 50 || y > 50) {
+                        // Should always happen.
+                        x = x + 1;
+                        z = z - 1;
+                    }
+                    else {
+                        cout << '!';
+                        return false; // Did not finish the loop; something went terribly wrong.
+                    }
+                }
+            }
+            return true; // Finished the loop.
+        }
+        public bool isInAlphabeticalOrder(char a, char b) {
+//            char a; // Should break.
+            return a < b;
+        }
+
+        public bool doBadStuff() {
+            int a;
+            bool b;
+            char c;
+            Dog d;
+            int iArr[];
+            bool bArr[];
+            char cArr[];
+            Dog dArr[];
+
+//            a = true;
+//            a = 'c';
+//            a = true != false;
+//            a = null;
+//            a = b;
+//            a = c;
+//            a = d;
+
+//            b = 1 + 2;
+//            b = null;
+//            b = 'c';
+//            b = d;
+
+//            c = 'b' > 'a';
+//            c = false;
+//            c = null;
+//            c = 5 <= 30;
+//            c = 5;
+//            c = d;
+//            c = a;
+//            c = b;
+
+//            d = 12;
+//            d = a;
+//            d = b;
+//            d = c;
+//            d = false == true;
+//            d = '\n';
+
+//            if(d) { }
+//            if(a) { }
+//            if(c) { }
+//            if(1 + 2) { }
+//            if(null) { }
+
+//            while(d) { }
+//            while(a, b) { }
+//            while(a) { }
+//            while(c) { }
+//            while(1 + 2) { }
+//            while(null) { }
+
+//            cout << null;
+//            cout << d;
+//            cout << b;
+//            cout << 'a' != 'b';
+
+//            cout << isInAlphabeticalOrder('x', 'z');
+
+//            cin >> a + a;
+//            cin >> 'x';
+//            cin >> 3;
+//            cin >> d;
+//            cin >> null;
+//            cin >> x;
+
+//            isInAlphabeticalOrder('x', 'y', 'z');
+
+//            b = isInAlphabeticalOrder;
+//            return null;
+
+//              iArr = bArr;
+//              iArr = cArr;
+//              iArr = dArr;
+//              iArr = 1;
+//              iArr = 'c';
+//              iArr = null;
+
+//              bArr = cArr;
+
+//            1 = a;
+//            1 = 2;
+
+//            null = dArr[1];
+//            dArr[1] = dArr;
+//            dArr['c'] = null;
+//              dArr[0] = iArr[1];
+        }
+
+        public int returnNull() {
+            dontCallThis();
+//            return null;
+//            return;
+        }
+
+        private char dontCallThis() {
+//            return 12;
+        }
+
+        public int pow(int base, int exponent) {
+            int total;
+            int exponentCopy;
+            total = 1;
+            exponentCopy = exponent;
+            while(exponentCopy > 0) {
+                total = total * base;
+            }
+            return total;
+        }
+    }
+
     void main() {
         int x;
-        int y;
-        Cat c; // = new Cat();
+        int y = x; //+qwerty;
+        char theChar;
+        Dog d = new Dog(false, true);
+        Calculator math;
+        Cat c;
+        int arr[];
+        Cat oArr[] = new Cat[4];
+
+        c = new Cat();
+        x = 5;
+        math.pow(1 + (+100 / 50), (x - 2 + 14 / 2) / 2);
+
 
         x = 1 + 2 / y - x;
         x = x + c.lives;
         x = (1 + 2) * y;
+        c.meow();
+        c = c.getSelf(-1).getSelf(12);
+
+        if(math.tryNestedIfs() != math.tryNestedIfs()) {
+            cout << 'F';
+            return;
+        }
+
+        if((math.tryNestedIfs() == math.tryNestedIfs() == true)
+                && (-2000 <= -1000)
+                && ('m' >= 'n')) {
+            return;
+        }
+
+        x = atoi('c');
+        theChar = itoa(x * 10 + c.lives);
+//        math.dontCallThis(); // Private method should not be callable.
+         arr = new int[5];
+         arr[0] = 1;
+         oArr[3] = null;
+         oArr[1] = c;
+         x = arr[1];
+         arr[arr[2]] = 3;
+         x = 1 + 2 + arr[3] * 4 / arr[arr[-3 + x /4]] - (arr[3] + arr[c.lives]) * c.getSelf(2).lives;
     }

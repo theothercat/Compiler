@@ -1,6 +1,8 @@
 package syntax.symbol;
 
 import log.Log;
+import semantics.record.sar.RecordType;
+import semantics.record.sar.SemanticActionRecord;
 
 import java.util.*;
 
@@ -23,6 +25,48 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         innerTable = new HashMap<String, SymbolTableEntry>();
         scopesToSymIdsMap = new HashMap<String, List<String>>();
         scopesToSymIdsMap.put("g", new ArrayList<String>());
+
+        // Deal with THIS_PLACEHOLDER
+        SymbolTableEntry.THIS_PLACEHOLDER.data = new HashMap<String, String>(1);
+        SymbolTableEntry.THIS_PLACEHOLDER.data.put("type", "this");
+    }
+
+    /**
+     * Looks up the current scope in the symbol table
+     * @return symbol table entry for the current class or function (hopefully)
+     */
+    public SymbolTableEntry findCurrentScopeEntry() {
+        if("g".equals(scope)) {
+            symLog.log("Tried to find entry for global scope in the symbol table!!!");
+            return null;
+        }
+        String containingScope = scope.substring(0, scope.lastIndexOf("."));
+        String identifier = scope.substring(scope.lastIndexOf(".") + 1, scope.length());
+        for(String symid : scopesToSymIdsMap.get(containingScope)) {
+            SymbolTableEntry entry = innerTable.get(symid);
+
+            if(entry.value.equals(identifier)) {
+                symLog.debug("Successfully found entry for current scope in the symbol table");
+                return entry; // We can't have duplicate names within a scope, and we know it exists, so all we care is the name.
+            }
+        }
+        symLog.log("Failed to find entry for current scope in the symbol table");
+        return null;
+    }
+
+    public String findCurrentClassScope() {
+        if("g".equals(scope)) {
+            symLog.log("Tried to find current class scope but was already in global scope!!!");
+            return null;
+        }
+        String classScope =
+                scope.substring(
+                        scope.indexOf(".") + 1, // This cuts off the "g." part of scope
+                        scope.substring(scope.indexOf(".") + 1, scope.length()) // Gets scope minus the "g." part. If scope is g.Cat.meow, this gets Cat.meow
+                        .indexOf(".") + 2 // The second '.' in overall scope.  If scope is g.Cat.meow, this gets the '.' between Cat and meow.  The + 2 is to account for the "g." that got chopped of before the index was computed.
+                );
+        symLog.debug("Class scope is " + classScope);
+        return classScope;
     }
 
     public static SymbolTable get() {
@@ -31,6 +75,10 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
 
     public boolean identifierExists(String identifier) {
         return iExists(identifier, scope);
+    }
+
+    public boolean classExists(String className) {
+        return iExists(className, "g");
     }
 
     public boolean identifierExists(String identifier, String className) {
@@ -44,7 +92,10 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
      * @return true or false
      */
     private static boolean iExists(String identifier, String scope) {
-        for(SymbolTableEntry entry : innerTable.values()) {
+        SymbolTableEntry entry;
+        for(String symid : scopesToSymIdsMap.get(scope)) {
+            entry = innerTable.get(symid);
+
             if(entry.scope.equals(scope)
                     && entry.value.equals(identifier)) {
                 return true;
@@ -157,7 +208,25 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return false;
     }
 
-    public SymbolTableEntry add(String lexeme, SymbolTableEntryType type, Map<String, String> data) throws DuplicateSymbolException {
+    public SymbolTableEntry add(String lexeme, SymbolTableEntryType type, Map<String, String> data, boolean isMethod) throws DuplicateSymbolException {
+        if(this.isDuplicateEntry(lexeme)) {
+            throw new DuplicateSymbolException(lexeme, scope);
+        }
+
+        if(isMethod) {
+            String oldScope = scope;
+            scope = scope.substring(0, scope.lastIndexOf("."));
+
+            SymbolTableEntry returnVal = add(lexeme, type, data);
+            scope = oldScope;
+            return returnVal;
+        }
+        else {
+            return add(lexeme, type, data);
+        }
+    }
+
+    private SymbolTableEntry add(String lexeme, SymbolTableEntryType type, Map<String, String> data) throws DuplicateSymbolException {
         if(this.isDuplicateEntry(lexeme)) {
             throw new DuplicateSymbolException(lexeme, scope);
         }
@@ -286,56 +355,140 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
      *
      * We only care about Param (order, arity, and type)
      *
-     * @param funcIdentifier the identifier for the function
-     * @param paramList the symids of args when the function is called
+     * @param container the container of the function
+     * @param member the record containing function info
      * @return whether or not a matching function is found
      */
-    public boolean functionExists(String funcIdentifier, String paramList)
-    {
-        return functionExists(funcIdentifier, paramList, scope);
+    public SymbolTableEntry findFunction(SemanticActionRecord container, SemanticActionRecord member) {
+
+        if(!RecordType.FUNC.equals(member.type)) {
+            return null; // Must have a func_sar for this to work.
+        }
+
+        SymbolTableEntry theObj;
+        if(RecordType.IDENTIFIER.equals(container.type)) {
+            theObj = innerTable.get(iFinder(container.data, scope));
+        }
+        else if(RecordType.REFERENCE.equals(container.type)
+                || RecordType.SYMID.equals(container.type)) // Can't be a literal because those are only primitives.
+        {
+            theObj = innerTable.get(container.data);
+        }
+        else {
+            return null; // Not a type of SAR we can use to look up what we need?
+        }
+
+        // Look up the class the object is made of.
+        if(theObj.data == null)
+        {
+            return null; // Doesn't have data.
+        }
+        String className = theObj.data.get("type");
+        return fFinder(
+                member,
+                "g." + className);
+    }
+
+    public SymbolTableEntry findFunctionInClass(SemanticActionRecord func) {
+        if(!RecordType.FUNC.equals(func.type)) {
+            return null; // Must have a func_sar for this to work.
+        }
+
+        return fFinder(
+                func,
+                "g." + findCurrentClassScope()
+        );
+    }
+
+    public SymbolTableEntry findConstructor(String identifier, String argList) {
+        SymbolTableEntry entry;
+        List<String> paramIdsPassed = parseParamIds(argList);
+        List<String> paramIdsSymbolTable;
+        boolean allParamsMatch;
+        for(String symid : scopesToSymIdsMap.get("g." + identifier)) {
+            entry = innerTable.get(symid);
+
+            if(!entry.value.equals(identifier)) {
+                continue; // Identifiers don't match; try a different method.
+            }
+            else if(!SymbolTableEntryType.METHOD.equals(entry.kind)) {
+                continue; // This isn't a method, try something else.
+            }
+
+            paramIdsSymbolTable = parseParamIds(entry.data.get("Param"));
+            if(paramIdsPassed.size() != paramIdsSymbolTable.size()) {
+                continue; // Arity - can't match if there are a different number of params
+            }
+
+            // Order and type are checked together
+            allParamsMatch = true;
+            for(int i = 0; i < paramIdsPassed.size(); i++) {
+                String paramType1 = innerTable.get(paramIdsPassed.get(i)).data.get("type");
+                String paramType2 = innerTable.get(paramIdsSymbolTable.get(i)).data.get("type");
+
+                if(!paramType1.equals(paramType2)) {
+                    allParamsMatch = false; // Can't match if the param types are different
+                    break; // No point checking if other params match
+                }
+            }
+            if(allParamsMatch)
+            {
+                return entry; // Nothing different about the params, so it's the same method.
+            }
+        }
+        return null;
     }
 
 
     /**
-     * Based on my testing in Java, these things are irrelevant here:
-     * -accessMod
-     * -returnType
+//     * Based on my testing in Java, these things are irrelevant here:
+//     * -accessMod
+//     * -returnType
      *
-     * We only care about Param (order, arity, and type)
+//     * We only care about Param (order, arity, and type)
      *
-     * @param funcIdentifier the identifier for the function
-     * @param paramList the symids of args when the function is called
+     * @param function the sar containing function identifier and params info
+     * @param containerScope the scope in which to search for the member
      * @return whether or not a matching function is found
      */
-    public boolean functionExists(String funcIdentifier, String paramList, String scope)
+    public SymbolTableEntry fFinder(SemanticActionRecord function, String containerScope)
     {
         SymbolTableEntry entry;
-        List<String> paramIdsPassed = parseParamIds(paramList);
+        List<String> paramIdsPassed = parseParamIds(function.subRecords.get("args"));
         List<String> paramIdsSymbolTable;
-        for(String symid : scopesToSymIdsMap.get(scope))
+        boolean allParamsMatch;
+        for(String symid : scopesToSymIdsMap.get(containerScope))
         {
             entry = innerTable.get(symid);
-            if(!SymbolTableEntryType.METHOD.equals(entry.kind)) { continue; }
+            if(!entry.value.equals(function.subRecords.get("id"))) {
+                continue; // Identifiers don't match; try a different method.
+            }
+            else if(!SymbolTableEntryType.METHOD.equals(entry.kind)) {
+                continue; // This isn't a method, try something else.
+            }
 
             paramIdsSymbolTable = parseParamIds(entry.data.get("Param"));
-
-            // Arity?
             if(paramIdsPassed.size() != paramIdsSymbolTable.size()) {
-                return false; // Can't match if there are a different number of params
+                continue; // Arity - can't match if there are a different number of params
             }
 
             // Order and type are checked together
+            allParamsMatch = true;
             for(int i = 0; i < paramIdsPassed.size(); i++) {
-                SymbolTableEntryType paramType1 = innerTable.get(paramIdsPassed.get(i)).kind;
-                SymbolTableEntryType paramType2 = innerTable.get(paramIdsSymbolTable.get(i)).kind;
+                String paramType1 = innerTable.get(paramIdsPassed.get(i)).data.get("type");
+                String paramType2 = innerTable.get(paramIdsSymbolTable.get(i)).data.get("type");
 
                 if(!paramType1.equals(paramType2)) {
-                    return false; // Can't match if the param types are different
+                    allParamsMatch = false; // Can't match if the param types are different
+                    break; // No point checking if other params match
                 }
             }
-            return true; // Nothing different about the params
+            if(allParamsMatch)
+            {
+                return entry; // Nothing different about the params, so it's the same method.
+            }
         }
-        return false; // No scope adjustment?
+        return null; // No scope adjustment?
     }
 
     // Gets symids of all params from the string list

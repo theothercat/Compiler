@@ -2,9 +2,7 @@ package semantics.op;
 
 import log.Log;
 import semantics.SemanticActions;
-import semantics.SemanticsException;
-import semantics.record.sar.SemanticActionRecord;
-import syntax.symbol.SymbolTableEntry;
+import semantics.err.SemanticsException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +24,14 @@ public class OperatorStack {
     public void push(String new_top) throws SemanticsException {
         Operator op = Operator.get(new_top);
         Operator top = peek();
-        if(top != null && top.Precedence >= op.Precedence) {
+        if(top != null
+                && !"(".equals(new_top) // Don't mess with anything if there is an open paren.
+                && !"[".equals(new_top) // Don't mess with anything if there is an open bracket.
+                && top.Precedence >= op.Precedence) {
             opstackLog.debug("Must pop higher precedence operator.");
             SemanticActions.doExpression();
         }
-        opstackLog.debug("Pushed new stack object " + new_top.toString());
+        opstackLog.debug("Pushed new stack object " + op.toString());
         stack.add(0, op);
     }
 

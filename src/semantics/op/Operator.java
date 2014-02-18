@@ -1,5 +1,6 @@
 package semantics.op;
 
+import semantics.err.SemanticsException;
 import semantics.record.sar.SemanticActionRecord;
 import syntax.symbol.SymbolTableEntry;
 
@@ -25,7 +26,7 @@ public abstract class Operator {
 
     @Override
     public String toString() {
-        return Symbol;
+        return Symbol + " (" + Precedence + ")";
     }
 
     /**
@@ -34,7 +35,7 @@ public abstract class Operator {
      * @param s2
      * @return type (null if not valid)
      */
-    public abstract String opResult(SymbolTableEntry s1, SymbolTableEntry s2);
+    public abstract String opResult(SymbolTableEntry s1, SymbolTableEntry s2) throws SemanticsException;
 
     protected static int getPrecedence(String operator) {
         if("*".equals(operator)
@@ -86,6 +87,26 @@ public abstract class Operator {
         }
         else if("(".equals(opSymbol)) {
             return new OpenParenthesis();
+        }
+        else if("[".equals(opSymbol)) {
+            return new OpenBracket();
+        }
+        else if("<".equals(opSymbol)
+                || ">".equals(opSymbol)
+                || "<=".equals(opSymbol)
+                || ">=".equals(opSymbol)) {
+            return new ComparisonOperator(opSymbol);
+        }
+        else if("&&".equals(opSymbol)) {
+            return new AndOperator();
+        }
+        else if("||".equals(opSymbol)) {
+            return new OrOperator();
+        }
+        else if("==".equals(opSymbol)
+                || "!=".equals(opSymbol))
+        {
+            return new EqualityOperator(opSymbol);
         }
         return null;
     }

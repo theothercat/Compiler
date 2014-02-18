@@ -1,5 +1,7 @@
 package semantics.op;
 
+import semantics.err.SemanticsException;
+import syntax.AnalyzerConstants;
 import syntax.symbol.SymbolTableEntry;
 import syntax.symbol.SymbolTableEntryType;
 
@@ -16,7 +18,7 @@ public class AssignmentOperator extends Operator {
     }
 
     @Override
-    public String opResult(SymbolTableEntry s1, SymbolTableEntry s2) {
+    public String opResult(SymbolTableEntry s1, SymbolTableEntry s2) throws SemanticsException {
         if(SymbolTableEntryType.METHOD.equals(s1.kind)
                 || SymbolTableEntryType.METHOD.equals(s2.kind)) {
             return null;
@@ -24,17 +26,32 @@ public class AssignmentOperator extends Operator {
         else if(s1.data == null || s2.data == null) {
             return null; // Shouldn't happen?
         }
+        else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(s2.kind)) {
+            throw new SemanticsException("Expression LHS cannot be type literal!");
+        }
 
         String t1 = s1.data.get("type");
-        String t2 = s1.data.get("type");
+        String t2 = s2.data.get("type");
 
         if(t1 == null || t2 == null) {
             return null; // Shouldn't happen?
         }
-
-        if(t1.equals(t2)) {
+        if("this".equals(t1)) {
+            return t2; // If RHS is 'this', return type is LHS
+        }
+        else if("void".equals(t1) || "void".equals(t2)) {
+            return null;
+        }
+        else if(t1.equals(t2)) {
             return t1;
         }
+        else if("null".equals(t1) && !AnalyzerConstants.TYPES.contains(t2)) {
+            return t2; // todo: should I be returning type t2, or null?
+        }
+        else if("null".equals(t2) && !AnalyzerConstants.TYPES.contains(t1)) {
+            return t1;
+        }
+
         return null;
     }
 }

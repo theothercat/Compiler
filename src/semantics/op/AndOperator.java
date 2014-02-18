@@ -11,9 +11,9 @@ import syntax.symbol.SymbolTableEntryType;
  * To change this template use File | Settings | File Templates.
  */
 public class AndOperator extends Operator {
-    public AndOperator(String operator) {
+    public AndOperator() {
 //        super(getPrecedence("*"));
-        super(operator);
+        super("&&");
     }
 
     @Override
@@ -26,13 +26,9 @@ public class AndOperator extends Operator {
             return null;
         }
 
-        if("int".equals(s1.data.get("type"))
-                && "int".equals(s2.data.get("type"))) {
-            return "int";
-        }
-        else if("char".equals(s1.data.get("type"))
-                && "char".equals(s2.data.get("type"))) {
-            return "char";
+        if("bool".equals(s1.data.get("type"))
+                && "bool".equals(s2.data.get("type"))) {
+            return "bool";
         }
         return null;
     }

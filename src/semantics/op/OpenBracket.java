@@ -11,7 +11,7 @@ import syntax.symbol.SymbolTableEntry;
  */
 public class OpenBracket extends Operator {
     public OpenBracket() {
-        super("(");
+        super("[");
     }
 
     @Override
