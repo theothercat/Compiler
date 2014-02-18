@@ -1,4 +1,4 @@
-package semantics.record;
+package semantics.record.sar;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +15,9 @@ public enum RecordType {
     EXPRESSION,
     BAL,
     REFERENCE,
+    VOID_RETURN,
     ARG_LIST,
+    FUNC,
 
     SYMID
 }

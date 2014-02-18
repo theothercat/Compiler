@@ -1,4 +1,4 @@
-package semantics;
+package semantics.err;
 
 /**
  * Created with IntelliJ IDEA.
