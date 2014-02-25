@@ -1,5 +1,7 @@
 package semantics;
 
+import icode.Generator;
+import icode.quad.Quad;
 import log.Log;
 import semantics.err.SemanticsException;
 import semantics.op.Operator;
@@ -11,7 +13,9 @@ import syntax.symbol.SymbolTable;
 import syntax.symbol.SymbolTableEntry;
 import syntax.symbol.SymbolTableEntryType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -23,9 +27,14 @@ import java.util.HashMap;
 public final class SemanticActions {
     public static SemanticRecordStack semanticRecordStack = new SemanticRecordStack("sar_stack.log");
     public static OperatorStack operatorStack = new OperatorStack("op_stack.log");
+    public static List<String> labelStack = new ArrayList<String>();
+    public static int labelGen = 1;
+//    public static
+
 
     private static SymbolTable symbolTable = SymbolTable.get(); // A reference to the symbol table singleton.
     private static Log semanticLog = new Log("semantic_actions.log");
+    private static Log iLog = new Log("actions_icode.log");
 
     /**
      * Semantic routines follow below.
@@ -111,25 +120,33 @@ public final class SemanticActions {
 
             String refType = foundFunction.data.get("returnType");
             if(refType == null) {
-                throw new SemanticsException ("No return type for " + foundFunction.value);
-            }
-            else if("void".equals(refType)) {
-                voidPush();
+                throw new SemanticsException("No return type for " + foundFunction.value);
             }
             else {
-                HashMap<String, String> data = new HashMap<String, String>(1);
-                data.put("type", refType);
+                generateFuncQuads(null, foundFunction, top_sar.subRecords.get("args"));
 
-                semanticRecordStack.push(SemanticActionRecord.getRecord(
-                        symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                        RecordType.REFERENCE
-                ));
+                if("void".equals(refType)) {
+                    voidPush();
+                }
+                else {
+                    HashMap<String, String> data = new HashMap<String, String>(1);
+                    data.put("type", refType);
+
+                    SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+                    semanticRecordStack.push(SemanticActionRecord.getRecord(
+                            newEntry.symid,
+                            RecordType.TEMP_VAR
+                    ));
+                    Generator.addQuad("PEEK", newEntry, (String)null, null);
+                }
             }
         }
         else if(RecordType.ARR_INDEX.equals(top_sar.type)) {
             semanticLog.debug("Checking for " + top_sar.toString());
 
-            SymbolTableEntry array = symbolTable.get(top_sar.data);
+            // We already did some checking back in arr() so this *should* exist.
+            SymbolTableEntry array = symbolTable.get(top_sar.data); // Get the array itself
+            SymbolTableEntry index = symbolTable.get(top_sar.subRecords.get("index")); // Get the index of the array
 
             if(array == null) {
                 throw new SemanticsException(top_sar.toString() + " does not exist");
@@ -148,10 +165,12 @@ public final class SemanticActions {
             HashMap<String, String> data = new HashMap<String, String>(1);
             data.put("type", itemType);
 
+            SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.ARR_ITEM, data); // todo: get the right SymbolTableEntryType ?
             semanticRecordStack.push(SemanticActionRecord.getRecord(
-                    symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                    RecordType.REFERENCE
+                    newEntry.symid,
+                    RecordType.TEMP_VAR
             ));
+            Generator.addQuad("AEF", array, index, newEntry); // newEntry should have baseAddress + size(1 or 4) * offset
         }
         else {
             throw new SemanticsException(top_sar.type + " not handled by iExist");
@@ -198,24 +217,40 @@ public final class SemanticActions {
             }
             semanticLog.debug("Function found.");
 
+
             String refType = foundFunction.data.get("returnType");
             if(refType == null) {
                 throw new SemanticsException ("No return type for " + foundFunction.value);
             }
-            else if("void".equals(refType)) {
-                semanticRecordStack.push(SemanticActionRecord.getRecord(
-                        "voidReturnPlaceholderSAR",
-                        RecordType.VOID_RETURN
-                ));
-            }
             else {
-                HashMap<String, String> data = new HashMap<String, String>(1);
-                data.put("type", refType);
+                SymbolTableEntry container = symbolTable.get(
+                        RecordType.IDENTIFIER.equals(object.type)
+                                ? symbolTable.find(object.data)
+                                : object.data);
+                generateFuncQuads(container, foundFunction, member.subRecords.get("args"));
 
-                semanticRecordStack.push(SemanticActionRecord.getRecord(
-                        symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                        RecordType.REFERENCE
-                ));
+                if("void".equals(refType)) {
+                    semanticRecordStack.push(SemanticActionRecord.getRecord(
+                            "voidReturnPlaceholderSAR",
+                            RecordType.VOID_RETURN
+                    ));
+//                    Generator.addQuad("CALL", foundFunction, (String)null, null);
+                }
+                else {
+//                Generator.addQuad("CALL", foundFunction, (String)null, null);
+
+
+                    HashMap<String, String> data = new HashMap<String, String>(1);
+                    data.put("type", refType);
+
+                    SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+                    Generator.addQuad("PEEK", newEntry, (String)null, null);
+
+                    semanticRecordStack.push(SemanticActionRecord.getRecord(
+                            newEntry.symid,
+                            RecordType.TEMP_VAR
+                    ));
+                }
             }
         }
         else // Assumes object.data contains a symid.
@@ -228,7 +263,7 @@ public final class SemanticActions {
             }
             String accessMod = symbolTable.get(symid).data.get("accessMod");
             if(!"public".equals(accessMod)) {
-                throw new SemanticsException("Function " + member.subRecords.get("id") + " with params " + member.subRecords.get("args") + " is not public");
+                throw new SemanticsException("Member " + member.data + " is not public");
             }
             semanticLog.debug("Reference found.");
 
@@ -239,10 +274,11 @@ public final class SemanticActions {
             HashMap<String, String> data = new HashMap<String, String>(1);
             data.put("type", refType);
 
-            ;
+            SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.MEMBER_REF, data);
+            doQuads("REF", obj, symbolTable.get(symid), newEntry);
             semanticRecordStack.push(SemanticActionRecord.getRecord(
-                    symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                    RecordType.REFERENCE));
+                    newEntry.symid,
+                    RecordType.TEMP_VAR));
         }
 
         semanticLog.debug("Reference exists.");
@@ -295,17 +331,52 @@ public final class SemanticActions {
 
     public static void doIf() throws SemanticsException {
         semanticLog.debug("if, checking if arg is type bool");
-        checkType("bool");
+        SymbolTableEntry boolParam = checkType("bool");
         semanticLog.debug("if, bool check passed");
+        String label = "SKIPIF" + labelGen++;
+        Generator.addQuad(new Quad("BF", boolParam, label, null));
+        labelStack.add(0, label);
+    }
+
+    public static void endIf() throws SemanticsException {
+        Generator.addQuad(labelStack.remove(0));
+    }
+
+    public static void endElse() throws SemanticsException {
+        Generator.addQuad(labelStack.remove(0));
+    }
+
+    public static void beginElse() throws SemanticsException {
+        String label = "SKIPELSE" + labelGen++;
+        Generator.addQuad(new Quad("JMP", label, null, (String)null));
+        Generator.addQuad(labelStack.remove(0));
+        labelStack.add(0, label);
     }
 
     public static void doWhile() throws SemanticsException {
         semanticLog.debug("while, checking if arg is type bool");
-        checkType("bool");
+//        Generator.addQuad(labelStack.remove(0));
+        SymbolTableEntry boolParam = checkType("bool");
         semanticLog.debug("while, bool check passed");
+        String label = "ENDWHILE" + labelGen++;
+        Generator.addQuad("BF", boolParam, label, null);
+        labelStack.add(0, label);
     }
 
-    private static void checkType(String type) throws SemanticsException {
+    public static void beginWhile() {
+        String label = "BEGIN" + labelGen++;
+        labelStack.add(0, label);
+        Generator.addQuad(label);
+    }
+
+    public static void endWhile() {
+        String endLabel = labelStack.remove(0);
+        String beginLabel = labelStack.remove(0);
+        Generator.addQuad(new Quad("JMP", beginLabel, null, (String)null));
+        Generator.addQuad(endLabel);
+    }
+
+    private static SymbolTableEntry checkType(String type) throws SemanticsException {
         SemanticActionRecord arg = semanticRecordStack.pop();
         if(arg == null) {
             throw new SemanticsException("Not enough args for if/while");
@@ -331,6 +402,7 @@ public final class SemanticActions {
         if(!type.equals(entry.data.get("type"))) {
             throw  new SemanticsException("checkType() expected argument of type " + type + ", got " + entry.data.get("type"));
         }
+        return entry;
     }
 
     public static void doReturn() throws SemanticsException {
@@ -362,6 +434,7 @@ public final class SemanticActions {
             }
             else {
                 semanticLog.debug("void return value is valid for function " + currentScope.scope + "." + currentScope.value);
+                Generator.addQuad("RTN", null, null, (String)null);
                 return;
             }
         }
@@ -384,6 +457,7 @@ public final class SemanticActions {
             }
         }
         semanticLog.debug("Return value is valid for function " + currentScope.scope + "." + currentScope.value);
+        Generator.addQuad("RTN",returnValue, (SymbolTableEntry)null, null);
     }
 
     public static void cin() throws SemanticsException {
@@ -405,7 +479,7 @@ public final class SemanticActions {
         data.put("type", "int");
         semanticRecordStack.push(SemanticActionRecord.getRecord(
                 symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                RecordType.REFERENCE
+                RecordType.TEMP_VAR
         ));
     }
 
@@ -418,7 +492,7 @@ public final class SemanticActions {
         data.put("type", "char");
         semanticRecordStack.push(SemanticActionRecord.getRecord(
                 symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                RecordType.REFERENCE
+                RecordType.TEMP_VAR
         ));
     }
 
@@ -432,15 +506,24 @@ public final class SemanticActions {
         semanticLog.debug("End argument list");
         SemanticActionRecord sar;
         String paramList = "[";
-        boolean trim = false;
+//        boolean trim = false;
+        List<String> params = new ArrayList<String>();
         while(!RecordType.BAL.equals(
                 (sar = semanticRecordStack.pop()).type))
         {
-            trim = true;
-            paramList += sar.data + ", ";
+            params.add(0, sar.data); // Get the params in the correct order.
         }
 
-        paramList = paramList.substring(0, trim ? (paramList.length() - 2) : 1) + "]";
+        if(params.size() < 1) {
+            paramList = "[]";
+        }
+        else {
+            for(String s : params) {
+                paramList += s + ", ";
+            }
+            paramList = paramList.substring(0, paramList.length() - 2) + "]";
+        }
+
         semanticRecordStack.push(
                 new SemanticActionRecord(
                         paramList,
@@ -483,7 +566,7 @@ public final class SemanticActions {
     public static void arr() throws SemanticsException {
         SemanticActionRecord expression = semanticRecordStack.peek();
         semanticLog.debug("arr(), checking if expression is type int");
-        checkType("int");
+        SymbolTableEntry index = checkType("int");
         semanticLog.debug("arr(), int check passed");
 
         SemanticActionRecord identifier = semanticRecordStack.pop();
@@ -510,11 +593,12 @@ public final class SemanticActions {
         HashMap<String, String> data = new HashMap<String, String>(1);
 //        String typeData = arrType.substring(2, arrType.length()); // It's an element of the array, now.
         data.put("type", arrType);
-        data.put("index", expression.data);
 
+//        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
-                symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                RecordType.ARR_INDEX
+                symid,
+                RecordType.ARR_INDEX,
+                index.symid
         ));
     }
 
@@ -533,25 +617,28 @@ public final class SemanticActions {
         if(foundFunction == null) {
             throw new SemanticsException("Constructor " + identifier.data + " with params " + argList.data + " does not exist");
         }
-//        String accessMod = foundFunction.data.get("accessMod");
-//        if(!"public".equals(accessMod)) {
-//            throw new SemanticsException("Constructor " + identifier.data + " with params " + argList.data + " is not public");
-//        }
         semanticLog.debug("Constructor found.");
 
         HashMap<String, String> data = new HashMap<String, String>(1);
         data.put("type", identifier.data);
 
+        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+
+        int classSize = symbolTable.sizeOf(identifier.data);
+        Generator.addQuad("NEWI", String.valueOf(classSize), (String)null, newEntry);
+        generateFuncQuads(newEntry, foundFunction, argList.data);
+
+        SymbolTableEntry newEntry2 = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
-                symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                RecordType.REFERENCE
+                newEntry2.symid,
+                RecordType.TEMP_VAR
         ));
+        Generator.addQuad("PEEK", (String)null, (String)null, newEntry2);
     }
 
     public static void new_arrBrackets() throws SemanticsException {
-        SemanticActionRecord expression = semanticRecordStack.peek();
         semanticLog.debug("new[], checking if arg is type int");
-        checkType("int");
+        SymbolTableEntry arrSize = checkType("int");
         semanticLog.debug("new[], int check passed");
 
         SemanticActionRecord arrType = semanticRecordStack.peek();
@@ -568,12 +655,29 @@ public final class SemanticActions {
         HashMap<String, String> data = new HashMap<String, String>(1);
         String typeData = "@:" + arrType.data;
         data.put("type", typeData);
-        data.put("length", expression.data);
+//        data.put("length", expression.data);
 
+        SymbolTableEntry arraySizeVar = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
-                symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
+                newEntry.symid,
                 RecordType.NEW_ARR
         ));
+        int arrItemSize;
+        if("char".equals(arrType.data) || "bool".equals(arrType.data)) {
+            arrItemSize = 1;
+        }
+        else { arrItemSize = 4; }
+
+        Generator.addQuad(
+                "MUL",
+                String.valueOf(arrItemSize),
+                arrSize,
+                arraySizeVar
+        );
+
+        Generator.addQuad("NEW", arraySizeVar, (String)null, newEntry);
+
     }
 
     public static void EOE() throws SemanticsException {
@@ -604,7 +708,7 @@ public final class SemanticActions {
             // todo: do I need type checks?
             if(RecordType.SYMID.equals(exp_sar.type)
                     || (SemanticCheck.COUT.equals(checkType)
-                    && (RecordType.REFERENCE.equals(exp_sar.type) || RecordType.LITERAL.equals(exp_sar.type)))) // Can only use a literal with cout.
+                    && (RecordType.TEMP_VAR.equals(exp_sar.type) || RecordType.LITERAL.equals(exp_sar.type)))) // Can only use a literal with cout.
             {
                 SymbolTableEntry entry = symbolTable.get(exp_sar.data);
                 if(entry.data == null) {
@@ -614,12 +718,43 @@ public final class SemanticActions {
                     && !entry.data.get("type").equals("char")) {
                     throw new SemanticsException("cin/cout expected int or char type, got " + entry.data.get("type"));
                 }
+                generateIOQuads(entry, checkType);
             }
             else {
                 throw new SemanticsException("Cannot use SAR of type " + exp_sar.type.name() + " with "+ checkType.name());
             }
         }
         semanticLog.debug(checkType.name() + " validity check passed."); // If it failed there would have been an exception.
+    }
+
+    private static void generateIOQuads(SymbolTableEntry entry, SemanticCheck checkType) {
+        boolean isCin = SemanticCheck.CIN.equals(checkType);
+        String intCharArg = "int".equals(entry.data.get("type")) ? "1" : "2";
+        if(isCin) {
+            Generator.addQuad("READ", (String)null, intCharArg, entry);
+        }
+        else {
+            Generator.addQuad("WRITE", (String)null, intCharArg, entry);
+        }
+    }
+
+    private static void generateFuncQuads(SymbolTableEntry container, SymbolTableEntry member, String paramList) {
+        if(container == null) {
+            Generator.addQuad("FRAME", member, "this", null);
+        }
+        else {
+            Generator.addQuad("FRAME", member, container, null);
+        }
+        if(paramList!= null) {
+            List<String> paramSymIds = symbolTable.parseParamIds(paramList);
+            for(int i = paramSymIds.size() - 1; i >= 0; i--) // Need to add these in reverse order
+//            for(int i = 0; i < paramSymIds.size(); i++)
+            {
+                Generator.addQuad("PUSH", symbolTable.get(paramSymIds.get(i)), (SymbolTableEntry)null, (SymbolTableEntry)null);
+            }
+        }
+
+        Generator.addQuad("CALL", member, (SymbolTableEntry)null, null);
     }
 
     public static void doExpression() throws SemanticsException {
@@ -641,81 +776,116 @@ public final class SemanticActions {
                             + " and symid "
                             + s1.data);
         }
-        SymbolTableEntry e1 = RecordType.THIS_PLACEHOLDER.equals(s1.type)
+        SymbolTableEntry rhs = RecordType.THIS_PLACEHOLDER.equals(s1.type)
                 ? SymbolTableEntry.THIS_PLACEHOLDER
                 : symbolTable.get(s1.data); // Assume is symid by now, else this would fail
-        SymbolTableEntry e2 = RecordType.THIS_PLACEHOLDER.equals(s2.type)
+        SymbolTableEntry lhs = RecordType.THIS_PLACEHOLDER.equals(s2.type)
                 ? SymbolTableEntry.THIS_PLACEHOLDER
                 : symbolTable.get(s2.data);
 
-        if(e1 == null) {
+        if(rhs == null) {
             throw new SemanticsException("Symid " + s1.data + " not found in symbol table");
         }
-        else if(e2 == null) {
+        else if(lhs == null) {
             throw new SemanticsException("Symid " + s2.data + " not found in symbol table");
         }
 
         semanticLog.debug("Evaluating expression: " + s2.toString() + " " + op.Symbol + " " + s1.toString());
 
-        String type = op.opResult(e1, e2);
+        String type = op.opResult(rhs, lhs);
         if(type == null) {
             String typeString = "";
-            if(e1.data != null && e2.data != null) {
-                typeString = ", of types " + e2.data.get("type") + " and " + e1.data.get("type");
+            if(rhs.data != null && lhs.data != null) {
+                typeString = ", of types " + lhs.data.get("type") + " and " + rhs.data.get("type");
             }
 //                String t1 = e1.data.get("type");
             throw new SemanticsException("Can't perform operation " + op.Symbol
-                    + " on operands " + e2.value + " and " + e1.value
+                    + " on operands " + lhs.value + " and " + rhs.value
                     + typeString
-                    + " in scope " + e1.scope
+                    + " in scope " + rhs.scope
             );
         }
         semanticLog.debug("Expression is valid. Creating new reference of type " + type);
         HashMap<String, String> data = new HashMap<String, String>(1);
         data.put("type", type);
 
+
+        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+        doQuads(op.Symbol, lhs, rhs, newEntry);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
-                symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
-                RecordType.REFERENCE
+                newEntry.symid,
+                RecordType.TEMP_VAR
         ));
     }
-//        SymbolTableEntry e1 = symbolTable.get(s1.data); // Assume is symid by now, else this would fail
-//        SymbolTableEntry e2 = symbolTable.get(s2.data);
-//
-//        try {
-//            String type = o.opResult(e1, e2);
-//            if(type == null) {
-//
-//            }
-//            if("+".equals(o.Symbol)) {
-//                if(SymbolTableEntryType.CLASS.equals(e1.kind) || SymbolTableEntryType.CLASS.equals(e2.kind)) {
-//                    throw new Exception("How did a class entry end up on the semantic action stack?");
-//                }
-//                else if(SymbolTableEntryType.METHOD.equals(e1.kind) || SymbolTableEntryType.METHOD.equals(e2.kind)) // One is a method
-//                {
-//                    return false; // Can't add two methods, or method and non-method.
-//                }
-//                else // Neither is a method.
-//                {
-//                    // Both have data.get
-//                    String t1 = e2.data.get("type");
-//                    String t2 = e2.data.get("type");
-//
-//                    if(t1.equals(t2)) {
-//                        return true; // todo: ????
-//                    }
-//                }
-//                return false; // Can't add a method and a non-method.
-//            }
-//        }
-//        catch (NullPointerException e) {
-//            e.printStackTrace();
-//        }
-//    }
+
+    private static void doQuads(String symbol, SymbolTableEntry lhs, SymbolTableEntry rhs, SymbolTableEntry newEntry) {
+        if("=".equals(symbol)) {
+            iLog.debug("Assignment expression, generating icode");
+            Generator.addQuad("MOV", rhs, (SymbolTableEntry)null, lhs);
+        }
+        else if("+".equals(symbol)) {
+            iLog.debug("Add expression, generating icode");
+            if(SymbolTableEntryType.GLOBAL_LITERAL.equals(lhs.kind)) {
+                Generator.addQuad("ADI", rhs, lhs, newEntry); // Addition is commutative, so we can flip the params so the immediate is in slot 2.
+            }
+            else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(rhs.kind)) {
+                Generator.addQuad("ADI", lhs, rhs, newEntry);
+            }
+            else {
+                Generator.addQuad("ADD", lhs, rhs, newEntry);
+            }
+        }
+        else if("-".equals(symbol)) {
+            iLog.debug("Subtract expression, generating icode");
+            Generator.addQuad("SUB", lhs, rhs, newEntry);
+        }
+        else if("*".equals(symbol)) {
+            iLog.debug("Multiply expression, generating icode");
+            Generator.addQuad("MUL", lhs, rhs, newEntry);
+        }
+        else if("/".equals(symbol)) {
+            iLog.debug("Divide expression, generating icode");
+            Generator.addQuad("DIV", lhs, rhs, newEntry);
+        }
+        else if("==".equals(symbol)) {
+            iLog.debug("Equals expression, generating icode");
+            Generator.addQuad("EQ", lhs, rhs, newEntry);
+        }
+        else if("!=".equals(symbol)) {
+            iLog.debug("Does-not-equal expression, generating icode");
+            Generator.addQuad("NE", lhs, rhs, newEntry);
+        }
+        else if("<".equals(symbol)) {
+            iLog.debug("Less-than expression, generating icode");
+            Generator.addQuad("LT", lhs, rhs, newEntry);
+        }
+        else if(">".equals(symbol)) {
+            iLog.debug("Greater-than expression, generating icode");
+            Generator.addQuad("GT", lhs, rhs, newEntry);
+        }
+        else if("<=".equals(symbol)) {
+            iLog.debug("Less-than-or-equals expression, generating icode");
+            Generator.addQuad("LE", lhs, rhs, newEntry);
+        }
+        else if(">=".equals(symbol)) {
+            iLog.debug("Greater-than-or-equals expression, generating icode");
+            Generator.addQuad("GE", lhs, rhs, newEntry);
+        }
+        else if("&&".equals(symbol)) {
+            iLog.debug("And expression, generating icode");
+            Generator.addQuad("AND", lhs, rhs, newEntry);
+        }
+        else if("||".equals(symbol)) {
+            iLog.debug("Equals expression, generating icode");
+            Generator.addQuad("OR", lhs, rhs, newEntry);
+        }
+        else if("REF".equals(symbol)) {
+            Generator.addQuad("REF", lhs, rhs, newEntry);
+        }
+    }
 
     private static enum SemanticCheck {
         COUT,
         CIN,
-        RETURN
     }
 }

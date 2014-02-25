@@ -46,6 +46,12 @@ public class SemanticActionRecord {
         return new SemanticActionRecord(identifier.data, RecordType.FUNC, sub);
     }
 
+    public static SemanticActionRecord getRecord(String d, RecordType r, String indexSymId) {
+        HashMap<String, String> sub = new HashMap<String, String>(1);
+        sub.put("index", indexSymId);
+        return new SemanticActionRecord(d, r, sub);
+    }
+
     public static SemanticActionRecord getRecord(String d, RecordType r) {
 //        if(RecordType.SYMID.equals(r)) {
             return new SemanticActionRecord(d, r);

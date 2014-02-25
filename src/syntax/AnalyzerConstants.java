@@ -51,4 +51,7 @@ public class AnalyzerConstants {
     public static final String KW_VOID = "void";
     public static final String KW_MAIN = "main";
     public static final String KW_CLASS = "class";
+
+
+//    public static final int SIZE_OF_POINTER = 4;
 }

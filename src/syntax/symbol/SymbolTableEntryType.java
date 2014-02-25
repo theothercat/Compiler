@@ -14,5 +14,7 @@ public enum SymbolTableEntryType {
     METHOD,
     PARAM,
     GLOBAL_LITERAL,
-    REFERENCE
+    REFERENCE,
+    ARR_ITEM,
+    MEMBER_REF
 }

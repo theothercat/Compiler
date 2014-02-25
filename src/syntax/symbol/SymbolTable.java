@@ -280,6 +280,31 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return newEntry;
     }
 
+    public SymbolTableEntry addStaticInit() {
+        SymbolTableEntryType type = SymbolTableEntryType.METHOD;
+        HashMap<String, String> data = new HashMap<String, String>();
+        data.put("returnType", "void");
+        SymbolTableEntry newEntry = new SymbolTableEntry(scope, type.name().substring(0, 1), type, data);
+        innerTable.put(newEntry.symid, newEntry);
+//        scopesToSymIdsMap.get(scope).add(newEntry.symid);
+
+        // Logging
+        symLog.log("Added new entry to symbol table: " + newEntry.symid);
+        symLog.log("\t" + "identifier = " + newEntry.value);
+        symLog.log("\t" + "scope = " + newEntry.scope);
+        symLog.log("\t" + "type = " + newEntry.kind.name());
+        if(newEntry.data == null) {
+            symLog.log("\t" + "data = none;");
+        }
+        else {
+            symLog.log("\t" + "data =");
+            for(String s : data.keySet()) {
+                symLog.log(s + " : " + data.get(s));
+            }
+        }
+        return newEntry;
+    }
+
     public void addLiteral(String lexeme, Map<String, String> data) {
         if(!iExists(lexeme, "g")) // Look for literal in global scope
         {
@@ -369,7 +394,7 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         if(RecordType.IDENTIFIER.equals(container.type)) {
             theObj = innerTable.get(iFinder(container.data, scope));
         }
-        else if(RecordType.REFERENCE.equals(container.type)
+        else if(RecordType.TEMP_VAR.equals(container.type)
                 || RecordType.SYMID.equals(container.type)) // Can't be a literal because those are only primitives.
         {
             theObj = innerTable.get(container.data);
@@ -492,7 +517,7 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
     }
 
     // Gets symids of all params from the string list
-    private List<String> parseParamIds(String paramList) {
+    public List<String> parseParamIds(String paramList) {
         List<String> paramIds = new ArrayList<String>();
         if("[]".equals(paramList)) {
             return paramIds;
@@ -504,5 +529,36 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
             paramIds.add(params[i]);
         }
         return paramIds;
+    }
+
+    public int sizeOf(String className) {
+        int size = 0;
+        SymbolTableEntry entry;
+        for(String symid : scopesToSymIdsMap.get("g." + className))
+        {
+            entry = innerTable.get(symid);
+            if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
+                if(entry.data != null && entry.data.get("type") != null) {
+                    if("bool".equals(entry.data.get("type"))
+                            || "char".equals(entry.data.get("type")))
+                    {
+                        size += 1;
+                    }
+                    else {
+                        size += 4;
+                    }
+                }
+            }
+        }
+        return size;
+    }
+
+
+    public Integer sizeOfObj(String objSymId) {
+        SymbolTableEntry s = innerTable.get(objSymId);
+        if(s.data == null || s.data.get("type") == null) {
+            return null;
+        }
+        return sizeOf("g." + innerTable.get(objSymId).data.get("type"));
     }
 }

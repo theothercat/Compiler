@@ -1,0 +1,86 @@
+    class Cat {
+        public Dog dog;
+        public int lives = 9;
+        public char y;
+
+        Cat(int i, char j) {
+            y = j;
+            lives = lives + i;
+        }
+
+        public Dog j(int a, int b) {
+//            return dog;
+            int r;
+//            char c[] = new char[r * f(r, true).lives];
+//            char x;
+//            c[r + 3] = 3;
+//            Cat k = new Cat(7, x);
+//            c[r + 3] = c[r - 5];
+        }
+
+//        public Dog f(int a, bool b) {
+//            return dog;
+//        }
+
+//        public void call() {
+//            int r;
+//            int g;
+//            int k;
+//            f(r * 3, g < k);
+//        }
+    }
+    class Dog {
+        public Cat cat;
+        public int lives;
+
+        public Cat g(bool tf) {
+//            return cat;
+        }
+    }
+    void main() {
+//        int x;
+//        int y;
+        int g;
+        int f;
+        int k;
+//        int r;
+//        Cat c;
+        Cat y; // = new Cat();
+        Cat x; // = new Cat();
+//        Dog d;
+        char r;
+//        x.f(k, g).g(true).y = r;
+
+//        d.cat.lives = c.dog.lives;
+//        x = y * g + f / k ;
+
+//        x = y . f( k , g ) + g * r ;
+
+//        if(x == y) {
+//            if(g - f < k) {
+//                y = 1;
+//            }
+//            else if(y > 12) {
+//                y = -50;
+//            }
+//            else if(y < 0) {
+//                y = 53;
+//            }
+//            else {
+//                x = 10000;
+//            }
+//        }
+//        else {
+//            d = null;
+//        }
+//        x = y;
+
+//        while(x < y) {
+//            x = x + 1;
+//            while(k < f) {
+//                d.lives = 1;
+//            }
+//            y = y - 1;
+//        }
+//        return;
+    }

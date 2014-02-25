@@ -26,8 +26,12 @@ public class AssignmentOperator extends Operator {
         else if(s1.data == null || s2.data == null) {
             return null; // Shouldn't happen?
         }
-        else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(s2.kind)) {
-            throw new SemanticsException("Expression LHS cannot be type literal!");
+        else if(!SymbolTableEntryType.INSTANCE_VAR.equals(s2.kind)
+                && !SymbolTableEntryType.PARAM.equals(s2.kind)
+                && !SymbolTableEntryType.LOCAL_VAR.equals(s2.kind)
+                && !SymbolTableEntryType.ARR_ITEM.equals(s2.kind)
+                && !SymbolTableEntryType.MEMBER_REF.equals(s2.kind)) {
+            throw new SemanticsException("Expression LHS must be a variable! Got " + s2.kind);
         }
 
         String t1 = s1.data.get("type");

@@ -1,4 +1,5 @@
 import global.ProgramConstants;
+import icode.Generator;
 import lex.LexicalAnalyzer;
 import lex.Token;
 import lex.TokenType;
@@ -51,6 +52,7 @@ public class Main {
             // todo: File closing!
         }
 //        tokenTest(args[0]);
+        Generator.dumpQuads();
         LogManager.cleanup();
     }
 

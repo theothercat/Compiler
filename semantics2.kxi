@@ -61,7 +61,7 @@
     }
 
     class Cat {
-        public int lives;
+        public int lives = 9;
 
         Cat() {
             lives = 0;
@@ -227,11 +227,17 @@
 
 //            1 = a;
 //            1 = 2;
+//            iArr[a] + a = 3;
+//            a * 12 = a;
+//            returnNull = 2;
+//            returnNull() = 2;
 
 //            null = dArr[1];
 //            dArr[1] = dArr;
 //            dArr['c'] = null;
 //              dArr[0] = iArr[1];
+
+//            x = 3; // Variable doesn't exist
         }
 
         public int returnNull() {
@@ -298,4 +304,8 @@
          x = arr[1];
          arr[arr[2]] = 3;
          x = 1 + 2 + arr[3] * 4 / arr[arr[-3 + x /4]] - (arr[3] + arr[c.lives]) * c.getSelf(2).lives;
+         x = y;
+         x = x + y;
+         x = y - 1;
+         c.lives = x = c.lives / 15;
     }

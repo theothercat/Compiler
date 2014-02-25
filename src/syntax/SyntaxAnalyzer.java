@@ -1,5 +1,6 @@
 package syntax;
 
+import icode.Generator;
 import lex.LexicalAnalyzer;
 import lex.Token;
 import lex.TokenType;
@@ -66,9 +67,9 @@ public class SyntaxAnalyzer {
             failSemantics(e.getMessage());
         }
         catch (Exception e) {
-            if(passTwo) {
+//            if(passTwo) {
                 e.printStackTrace();
-            }
+//            }
             // Easy escape from failed pass.
         }
 
@@ -158,6 +159,10 @@ public class SyntaxAnalyzer {
         if(OPENING_BRACE.equals(lex.peek().lexeme)) {
             concatScope(lex.getToken().lexeme);
             lex.nextToken(); // Advance the token now that we've adjusted the scope
+
+            if(passTwo) {
+                Generator.prepareStaticInit();
+            }
         }
         else {
             failGrammar("class_declaration", "opening brace");
@@ -173,6 +178,12 @@ public class SyntaxAnalyzer {
             syntaxLog.debug("Assuming class member declaration");
             class_member_declaration(); // Don't advance token
             if(passFailed) { return; }
+        }
+
+        if(passTwo) {
+            Generator.replaceStaticInit();
+
+//            Generator.quads.addAll(Generator.staticInitQuads);
         }
         trimScope();
     }
@@ -206,6 +217,7 @@ public class SyntaxAnalyzer {
      */
     private void class_member_declaration() throws Exception {
         if(passFailed) { return; }
+        // todo: add classStaticInit() to symbol table?
 
         if(MODIFIER_TOKENS.contains(lex.getToken().lexeme)) {
             HashMap<String, String> data = new HashMap<String, String>(2);
@@ -274,8 +286,14 @@ public class SyntaxAnalyzer {
             lex.nextToken(); // Advance token - method_body() calls getToken()
             method_body();
         }
-        else {
+        else // Instance variable.
+        {
+            if(passTwo) {
+                Generator.activateStaticInit();
+            }
+
             if(OPENING_BRACKET.equals(lex.getToken().lexeme)) {
+                // This is an array.
                 if(!CLOSING_BRACKET.equals(lex.nextToken().lexeme)) {
                     failGrammar("field_declaration", "closing bracket");
                     return;
@@ -288,7 +306,6 @@ public class SyntaxAnalyzer {
                 SemanticActions.vPush(identifier);
             }
             else {
-                // Seems like a good time to add to symbol table.
                 addToSymbolTable(identifier, SymbolTableEntryType.INSTANCE_VAR, data);
             }
 
@@ -307,6 +324,7 @@ public class SyntaxAnalyzer {
             }
             else if(passTwo) {
                 SemanticActions.EOE();
+                Generator.deactivateStaticInit();
             }
         }
     }
@@ -369,6 +387,9 @@ public class SyntaxAnalyzer {
 
         // todo: add logging
         lex.nextToken(); // Advance token - method_body() calls getToken()
+        if(passTwo) {
+            Generator.doStaticInitPlaceholder();
+        }
         method_body();
     }
 
@@ -409,6 +430,8 @@ public class SyntaxAnalyzer {
 
                 if(passFailed) { return; }
             }
+            // Got closing brace, generate a return.
+            Generator.addQuad("RTN", null, null, (String)null);
         }
         trimScope();
     }
@@ -646,12 +669,18 @@ public class SyntaxAnalyzer {
         Token thisToken = lex.getToken();
         if(KW_WHILE.equals(thisToken.lexeme)) {
             lex.nextToken(); // Advance token - if_while() uses getToken()
+            if(passTwo) {
+                SemanticActions.beginWhile();
+            }
             if_while();
             if(passTwo) {
                 SemanticActions.doWhile();
             }
             lex.nextToken(); // Advance token - statement() uses getToken()
             statement();
+            if(passTwo) {
+                SemanticActions.endWhile();
+            }
         }
         else if(KW_IF.equals(thisToken.lexeme)) {
             lex.nextToken(); // Advance token - if_while() uses getToken()
@@ -664,9 +693,21 @@ public class SyntaxAnalyzer {
 
             thisToken = lex.peek();
             if(KW_ELSE.equals(thisToken.lexeme)) {
+                if(passTwo) {
+                    SemanticActions.beginElse();
+                }
+
                 lex.nextToken(); // Advance token to the else token
                 lex.nextToken(); // Advance token - statement() uses getToken()
                 statement();
+                if(passTwo) {
+                    SemanticActions.endElse();
+                }
+            }
+            else {
+                if(passTwo) {
+                    SemanticActions.endIf();
+                }
             }
         }
         else if(KW_RETURN.equals(thisToken.lexeme)) {

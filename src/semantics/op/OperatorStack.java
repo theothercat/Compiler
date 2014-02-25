@@ -27,12 +27,21 @@ public class OperatorStack {
         if(top != null
                 && !"(".equals(new_top) // Don't mess with anything if there is an open paren.
                 && !"[".equals(new_top) // Don't mess with anything if there is an open bracket.
-                && top.Precedence >= op.Precedence) {
+                && shouldPopStack(top, op)) {
             opstackLog.debug("Must pop higher precedence operator.");
             SemanticActions.doExpression();
         }
         opstackLog.debug("Pushed new stack object " + op.toString());
         stack.add(0, op);
+    }
+
+    private boolean shouldPopStack(Operator topOp, Operator newOp) {
+        if("=".equals(topOp.Symbol)) {
+            return topOp.Precedence > newOp.Precedence;
+        }
+        else {
+            return topOp.Precedence >= newOp.Precedence;
+        }
     }
 
 //    private void doExpression() throws Exception {
