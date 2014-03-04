@@ -1,0 +1,7 @@
+    void main() {
+        cout << (50 + 567 - 17) / 2 + 21;
+        cout << '!';
+//        int x;
+//        bool y;
+//        int z;
+    }

@@ -74,6 +74,11 @@ public class Generator {
         checkLabelAndAddQuad(q, getActiveQuadsList());
     }
 
+    public static void addQuad(String op, SymbolTableEntry o1, String o2, String o3, String label) {
+        Quad q = new Quad(op, o1, o2, o3, label);
+        checkLabelAndAddQuad(q, getActiveQuadsList());
+    }
+
     public static void addQuad(String label) {
         Quad q = new Quad(label);
         checkLabelAndAddQuad(q, getActiveQuadsList());

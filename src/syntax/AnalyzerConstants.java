@@ -53,5 +53,5 @@ public class AnalyzerConstants {
     public static final String KW_CLASS = "class";
 
 
-//    public static final int SIZE_OF_POINTER = 4;
+    public static final int SIZE_OF_INT = 4;
 }

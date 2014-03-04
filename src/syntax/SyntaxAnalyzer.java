@@ -9,6 +9,7 @@ import semantics.SemanticActions;
 import semantics.err.SemanticsException;
 import syntax.symbol.DuplicateSymbolException;
 import syntax.symbol.SymbolTable;
+import syntax.symbol.SymbolTableEntry;
 import syntax.symbol.SymbolTableEntryType;
 
 import java.util.*;
@@ -30,6 +31,8 @@ public class SyntaxAnalyzer {
     private LexicalAnalyzer lex;
     private boolean passTwo = false;
     private boolean passFailed = false;
+    private int classOffset;
+    private int methodOffset;
 
     public SyntaxAnalyzer(LexicalAnalyzer lex) {
         this.lex = lex;
@@ -50,7 +53,10 @@ public class SyntaxAnalyzer {
             }
 
             compilation_unit();
-            if(!passTwo) { passTwo = true; }
+            if(!passTwo) {
+                passTwo = true;
+                symbolTable.dumpSymbolTable();
+            }
         }
         catch (NullPointerException e) {
             if(passTwo) {
@@ -109,6 +115,10 @@ public class SyntaxAnalyzer {
             if(!passTwo) {
                 addToSymbolTable("main", SymbolTableEntryType.METHOD, data, true); // Extra param to trim the method off the scope.
             }
+            else {//if(passTwo) {
+                String funcSymId = symbolTable.findInScope("main", "g");
+                Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
+            }
         }
         else {
             failGrammar("compilation_unit", "'main' keyword");
@@ -124,6 +134,7 @@ public class SyntaxAnalyzer {
             return;
         }
         lex.nextToken(); // Advance token - method_body() calls getToken()
+        methodOffset = 0;
         method_body();
     }
 
@@ -139,6 +150,8 @@ public class SyntaxAnalyzer {
     private void class_declaration() throws Exception {
         if(passFailed) { return; }
 
+        String classIdentifier;
+
         if(!KW_CLASS.equals(lex.getToken().lexeme)) {
             failGrammar("class_declaration", "'class' keyword");
             return;
@@ -146,9 +159,10 @@ public class SyntaxAnalyzer {
 
         if(TokenType.IDENTIFIER.equals(lex.nextToken().type)) // todo: this should be class_name
         {
+            classIdentifier = lex.getToken().lexeme;
             if(!passTwo) {
-                syntaxLog.debug("Found identifier for class declaration, adding class '" + lex.getToken().lexeme + "' to symbol table");
-                addToSymbolTable(lex.getToken().lexeme, SymbolTableEntryType.CLASS, null); // todo: empty hashmap?
+                syntaxLog.debug("Found identifier for class declaration, adding class '" + classIdentifier + "' to symbol table");
+                addToSymbolTable(classIdentifier, SymbolTableEntryType.CLASS, null); // todo: empty hashmap?
             }
         }
         else {
@@ -163,6 +177,7 @@ public class SyntaxAnalyzer {
             if(passTwo) {
                 Generator.prepareStaticInit();
             }
+            classOffset = 0;
         }
         else {
             failGrammar("class_declaration", "opening brace");
@@ -182,8 +197,10 @@ public class SyntaxAnalyzer {
 
         if(passTwo) {
             Generator.replaceStaticInit();
-
 //            Generator.quads.addAll(Generator.staticInitQuads);
+        }
+        else {
+            symbolTable.doSize(classIdentifier);
         }
         trimScope();
     }
@@ -259,6 +276,8 @@ public class SyntaxAnalyzer {
 
         if(OPENING_PARENTHESIS.equals(lex.getToken().lexeme)) {
             // This is a method declaration.
+            methodOffset = 0;
+
             data.put("returnType", data.get("type"));
             data.remove("type");
             concatScope(identifier);
@@ -276,6 +295,10 @@ public class SyntaxAnalyzer {
                 if(CLOSING_PARENTHESIS.equals(lex.nextToken().lexeme)) {
                     if(!passTwo) {
                         addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data, true); // Added param to notify this is a method.
+                    }
+                    else {
+                        String funcSymId = symbolTable.find(identifier);
+                        Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
                     }
                 }
                 else {
@@ -306,6 +329,8 @@ public class SyntaxAnalyzer {
                 SemanticActions.vPush(identifier);
             }
             else {
+                data.put("offset", String.valueOf(classOffset));
+                classOffset += symbolTable.getSize(data.get("type"));
                 addToSymbolTable(identifier, SymbolTableEntryType.INSTANCE_VAR, data);
             }
 
@@ -355,6 +380,7 @@ public class SyntaxAnalyzer {
         }
 
         concatScope(identifier); // We are now in the constructor's scope.
+        methodOffset = 0;
 
         if(!OPENING_PARENTHESIS.equals(lex.nextToken().lexeme))
         {
@@ -382,6 +408,10 @@ public class SyntaxAnalyzer {
             if(!passTwo) {
                 data.put("returnType", identifier); // Returns the type of the class that's being built, which is the method name.
                 addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data, true); // Added param to notify this is a method.
+            }
+            else {
+                String funcSymId = symbolTable.find(identifier);
+                Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
             }
         }
 
@@ -485,6 +515,8 @@ public class SyntaxAnalyzer {
         }
         else {
             // Seems like a good time to add this to the symbol table.
+            data.put("offset", String.valueOf(methodOffset));
+            methodOffset += 4; // Everything on the stack uses size 4.
             addToSymbolTable(identifier, SymbolTableEntryType.LOCAL_VAR, data);
         }
 
@@ -587,6 +619,8 @@ public class SyntaxAnalyzer {
             paramData.put("type", "@:" + paramData.get("type")); // Update type to reflect that this is an array
         }
         if(!passTwo) {
+            paramData.put("offset", String.valueOf(methodOffset));
+            methodOffset += 4; // Everything on the stack uses size 4.
             return addToSymbolTable(paramId, SymbolTableEntryType.PARAM, paramData);
         }
         return "";

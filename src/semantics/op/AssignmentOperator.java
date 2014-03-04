@@ -30,7 +30,7 @@ public class AssignmentOperator extends Operator {
                 && !SymbolTableEntryType.PARAM.equals(s2.kind)
                 && !SymbolTableEntryType.LOCAL_VAR.equals(s2.kind)
                 && !SymbolTableEntryType.ARR_ITEM.equals(s2.kind)
-                && !SymbolTableEntryType.MEMBER_REF.equals(s2.kind)) {
+                && !SymbolTableEntryType.REF_MEMBER.equals(s2.kind)) {
             throw new SemanticsException("Expression LHS must be a variable! Got " + s2.kind);
         }
 

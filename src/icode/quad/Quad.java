@@ -13,12 +13,13 @@ import syntax.symbol.SymbolTableEntry;
 public class Quad {
     public static Log quadLog = new Log("quad.log");
 
-    public String label;
+    public String label = null;
     public String operator;
     public String operand1; // Source operand 1. In REF, the object will be here.
     public String operand2; // Source operand 2. Operations like MOV will have a null operand here.  For ADI, the immediate value will be here. In REF, the member will be here.
     public String operand3; // This is where the result should be stored.
     public String comment;
+    public boolean tcode = false;
 
     public Quad(String op, String o1, String o2, String o3) {
         operator = op;
@@ -47,12 +48,12 @@ public class Quad {
         operand3 = o3;
         this.label = label;
 
-        quadLog.debug(
-                "Created quad " + operator
-                        + (operand1 == null ? "" : (" " + operand1))
-                        + (operand2 == null ? "" : (" " + operand2))
-                        + (operand3 == null ? "" : (" " + operand3))
-        );
+//        quadLog.debug(
+//                "Created quad " + operator
+//                        + (operand1 == null ? "" : (" " + operand1))
+//                        + (operand2 == null ? "" : (" " + operand2))
+//                        + (operand3 == null ? "" : (" " + operand3))
+//        );
         comment = operator
                 + (operand1 == null ? "" : (" " + operand1))
                 + (operand2 == null ? "" : (" " + operand2))
@@ -61,6 +62,38 @@ public class Quad {
 //        quadFile.log(this.toString());
     }
 
+    public Quad(String op, String o1, String o2, String o3, String label, String comment) {
+        operator = op;
+        operand1 = o1;
+        operand2 = o2;
+        operand3 = o3;
+        this.label = label;
+        this.comment = comment;
+
+        tcode = true; // This is used for tcode quads.
+    }
+
+
+    public Quad(String op, SymbolTableEntry o1, String o2, String o3, String label) {
+        operator = op;
+        operand1 = o1 == null ? null : o1.symid;
+        operand2 = o2;
+        operand3 = o3;
+        this.label = label;
+
+        quadLog.debug(
+                "Created quad " + operator
+                        + (operand1 == null ? "" : (" " + operand1))
+                        + (operand2 == null ? "" : (" " + operand2))
+                        + (operand3 == null ? "" : (" " + operand3))
+        );
+        comment = operator
+                + (o1 == null ? "" : (" " + o1.value))
+                + (o2 == null ? "" : (" " + o2))
+                + (o3 == null ? "" : (" " + o3));
+
+//        quadFile.log(this.toString());
+    }
 
     public Quad(String op, SymbolTableEntry o1, SymbolTableEntry o2, SymbolTableEntry o3) {
         operator = op;
@@ -190,7 +223,7 @@ public class Quad {
 
     @Override
     public String toString() {
-        return (label == null ? "" : label + ": ")
+        return (label == null ? "" : (tcode ? (label + " ") : (label + ": ")))
                 + operator
                 + (operand1 == null ? "" : (" " + operand1))
                 + (operand2 == null ? "" : (" " + operand2))

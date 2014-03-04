@@ -8,13 +8,13 @@ package syntax.symbol;
  * To change this template use File | Settings | File Templates.
  */
 public enum SymbolTableEntryType {
+    ARR_ITEM,
     CLASS,
+    GLOBAL_LITERAL,
     INSTANCE_VAR,
     LOCAL_VAR,
     METHOD,
     PARAM,
-    GLOBAL_LITERAL,
-    REFERENCE,
-    ARR_ITEM,
-    MEMBER_REF
+    REF_MEMBER,
+    TEMP_VAR
 }

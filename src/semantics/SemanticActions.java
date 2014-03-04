@@ -132,7 +132,7 @@ public final class SemanticActions {
                     HashMap<String, String> data = new HashMap<String, String>(1);
                     data.put("type", refType);
 
-                    SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+                    SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
                     semanticRecordStack.push(SemanticActionRecord.getRecord(
                             newEntry.symid,
                             RecordType.TEMP_VAR
@@ -243,7 +243,7 @@ public final class SemanticActions {
                     HashMap<String, String> data = new HashMap<String, String>(1);
                     data.put("type", refType);
 
-                    SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+                    SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
                     Generator.addQuad("PEEK", newEntry, (String)null, null);
 
                     semanticRecordStack.push(SemanticActionRecord.getRecord(
@@ -274,7 +274,7 @@ public final class SemanticActions {
             HashMap<String, String> data = new HashMap<String, String>(1);
             data.put("type", refType);
 
-            SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.MEMBER_REF, data);
+            SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REF_MEMBER, data);
             doQuads("REF", obj, symbolTable.get(symid), newEntry);
             semanticRecordStack.push(SemanticActionRecord.getRecord(
                     newEntry.symid,
@@ -478,7 +478,7 @@ public final class SemanticActions {
         HashMap<String, String> data = new HashMap<String, String>(1);
         data.put("type", "int");
         semanticRecordStack.push(SemanticActionRecord.getRecord(
-                symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
+                symbolTable.add(SymbolTableEntryType.TEMP_VAR, data).symid,
                 RecordType.TEMP_VAR
         ));
     }
@@ -491,7 +491,7 @@ public final class SemanticActions {
         HashMap<String, String> data = new HashMap<String, String>(1);
         data.put("type", "char");
         semanticRecordStack.push(SemanticActionRecord.getRecord(
-                symbolTable.add(SymbolTableEntryType.REFERENCE, data).symid,
+                symbolTable.add(SymbolTableEntryType.TEMP_VAR, data).symid,
                 RecordType.TEMP_VAR
         ));
     }
@@ -622,13 +622,13 @@ public final class SemanticActions {
         HashMap<String, String> data = new HashMap<String, String>(1);
         data.put("type", identifier.data);
 
-        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
 
         int classSize = symbolTable.sizeOf(identifier.data);
         Generator.addQuad("NEWI", String.valueOf(classSize), (String)null, newEntry);
         generateFuncQuads(newEntry, foundFunction, argList.data);
 
-        SymbolTableEntry newEntry2 = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+        SymbolTableEntry newEntry2 = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
                 newEntry2.symid,
                 RecordType.TEMP_VAR
@@ -657,8 +657,8 @@ public final class SemanticActions {
         data.put("type", typeData);
 //        data.put("length", expression.data);
 
-        SymbolTableEntry arraySizeVar = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
-        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+        SymbolTableEntry arraySizeVar = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
+        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
                 newEntry.symid,
                 RecordType.NEW_ARR
@@ -729,12 +729,12 @@ public final class SemanticActions {
 
     private static void generateIOQuads(SymbolTableEntry entry, SemanticCheck checkType) {
         boolean isCin = SemanticCheck.CIN.equals(checkType);
-        String intCharArg = "int".equals(entry.data.get("type")) ? "1" : "2";
+        String intCharArg = "int".equals(entry.data.get("type")) ? "1" : "3";
         if(isCin) {
-            Generator.addQuad("READ", (String)null, intCharArg, entry);
+            Generator.addQuad("READ", intCharArg, (SymbolTableEntry)null, entry);
         }
         else {
-            Generator.addQuad("WRITE", (String)null, intCharArg, entry);
+            Generator.addQuad("WRITE", entry, intCharArg, null);
         }
     }
 
@@ -805,12 +805,12 @@ public final class SemanticActions {
                     + " in scope " + rhs.scope
             );
         }
-        semanticLog.debug("Expression is valid. Creating new reference of type " + type);
+        semanticLog.debug("Expression is valid. Creating new temp variable of type " + type);
         HashMap<String, String> data = new HashMap<String, String>(1);
         data.put("type", type);
 
 
-        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.REFERENCE, data);
+        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
         doQuads(op.Symbol, lhs, rhs, newEntry);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
                 newEntry.symid,
@@ -826,10 +826,10 @@ public final class SemanticActions {
         else if("+".equals(symbol)) {
             iLog.debug("Add expression, generating icode");
             if(SymbolTableEntryType.GLOBAL_LITERAL.equals(lhs.kind)) {
-                Generator.addQuad("ADI", rhs, lhs, newEntry); // Addition is commutative, so we can flip the params so the immediate is in slot 2.
+                Generator.addQuad("ADI", rhs, lhs.value, newEntry); // Addition is commutative, so we can flip the params so the immediate is in slot 2.
             }
             else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(rhs.kind)) {
-                Generator.addQuad("ADI", lhs, rhs, newEntry);
+                Generator.addQuad("ADI", lhs, rhs.value, newEntry);
             }
             else {
                 Generator.addQuad("ADD", lhs, rhs, newEntry);

@@ -66,6 +66,23 @@ public class Log {
         }
     }
 
+    /**
+     * Writes the string, unconditionally
+     * @param s message to write
+     */
+    public void write(String s) {
+        try {
+            if(writer != null) {
+                writer.write(s);
+                writer.newLine();
+                writer.flush();
+            }
+        }
+        catch (IOException e) {
+
+        }
+    }
+
     public void close() {
         if(writer != null) {
             try {

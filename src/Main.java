@@ -7,6 +7,7 @@ import log.Log;
 import log.LogLevel;
 import log.LogManager;
 import syntax.SyntaxAnalyzer;
+import tcode.RegisterManager;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -45,6 +46,7 @@ public class Main {
             sa.pass();
             la.closeFile();
 
+            RegisterManager.produceTargetCode();
         }
         catch(Exception e) {
             System.out.println("Exception in main(): ");
