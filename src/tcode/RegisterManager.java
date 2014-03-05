@@ -309,15 +309,15 @@ public final class RegisterManager {
             frame(q);
         }
         else if("PUSH".equals(q.operator)) {
-            int offset = symbolTable.getOffset(symbolTable.get(q.operand1));
+            loadData(q);
+//            int offset = symbolTable.getOffset(symbolTable.get(q.operand1));
 
             // Can't use loadData since it's the previous frame that has the vars.
-            checkLabelAndAddQuad(new Quad("LDR", "R4", FP, null, null, "Get current frame"));
-            checkLabelAndAddQuad(new Quad("ADI", "R4", "-4", null, null, "PFP"));
-            checkLabelAndAddQuad(new Quad("LDR", "R4", indirect("R4"), null, null, "Get previous frame"));
-
-            checkLabelAndAddQuad(new Quad("ADI", "R4", String.valueOf(offset), null, null, "Get address of var"));
-            checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R4"), null, null, "Load value of var into R1"));
+//            checkLabelAndAddQuad(new Quad("LDR", "R4", FP, null, null, "Get current frame"));
+//            checkLabelAndAddQuad(new Quad("ADI", "R4", "-4", null, null, "PFP"));
+//            checkLabelAndAddQuad(new Quad("LDR", "R4", indirect("R4"), null, null, "Get previous frame"));
+//            checkLabelAndAddQuad(new Quad("ADI", "R4", String.valueOf(offset), null, null, "Get address of var"));
+//            checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R4"), null, null, "Load value of var into R1"));
             checkLabelAndAddQuad(new Quad("STR", "R1", indirect(TOS), null, null, "Put var on top of stack"));
             checkLabelAndAddQuad(new Quad("ADI", TOS, "-4", null, null, "Move TOS"));
         }
@@ -372,7 +372,12 @@ public final class RegisterManager {
 //            loadData(q);
             checkLabelAndAddQuad(new Quad("JMP", q.operand1, null, null, null, q.comment)); // Label for the next thing?
         }
-
+        else if("REF".equals(q.operator)) {
+            loadData(q);
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment)); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad("ADI", "R3", String.valueOf(symbolTable.getOffset(symbolTable.get(q.operand2))), null, null, q.comment)); // Label for the next thing?
+            storeData(q);
+        }
 
 
 //        new Quad(s, s, s, null, label, q.comment);
@@ -391,7 +396,8 @@ public final class RegisterManager {
         boolean skipOperand1 = q.operand1 == null || "READ".equals(q.operator) || "FRAME".equals(q.operator)
                 || "JMP".equals(q.operator);
         boolean skipOperand2 = q.operand2 == null || "WRITE".equals(q.operator) || "ADI".equals(q.operator)
-                || "BF".equals(q.operator) || "BT".equals(q.operator);
+                || "BF".equals(q.operator) || "BT".equals(q.operator)
+                || "REF".equals(q.operator);
 
         SymbolTableEntry entry;
         if(!skipOperand1) {
@@ -441,6 +447,26 @@ public final class RegisterManager {
                     }
 
                     checkLabelAndAddQuad(new Quad(loadOp, "R1", "(R1)", null, null, q.comment + " - Load data (heap)")); // Load actual value into R1
+                }
+                else if(SymbolTableEntryType.REF_MEMBER.equals(entry.kind)) {
+                    // This is a temp var holding an address on the heap.
+                    if("int".equals(datatype)) {
+                        loadOp = "LDR";
+                    }
+                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                        loadOp = "LDB";
+                    }
+                    else {
+                        loadOp = "LDR"; // todo: this will probably change
+                    }
+
+                    // First treat it like a stack variable:
+                    checkLabelAndAddQuad(new Quad("MOV", "R1", null, FP, null, q.comment + " - Load Ref member (stack portion)")); // Put FP in R2
+                    checkLabelAndAddQuad(new Quad("ADI", "R1", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment + " - Load Ref member (stack portion)")); // FP + -offset
+                    checkLabelAndAddQuad(new Quad("LDR", "R1", null, "(R1)", null, q.comment + " - Load Ref member (stack portion)")); // Load the value into R2
+
+                    // Now we have the address on the heap and can load it into the register proper!
+                    checkLabelAndAddQuad(new Quad(loadOp, "R1", indirect("R1"), null, null, q.comment + " - Load data (heap portion)")); // Get the address of the object on the heap
                 }
             }
         }
@@ -494,6 +520,26 @@ public final class RegisterManager {
 
                     checkLabelAndAddQuad(new Quad(loadOp, "R2", "(R2)", null, null, q.comment + " - Load data (heap)")); // Load actual value into R2
                 }
+                else if(SymbolTableEntryType.REF_MEMBER.equals(entry.kind)) {
+                    // This is a temp var holding an address on the heap.
+                    if("int".equals(datatype)) {
+                        loadOp = "LDR";
+                    }
+                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                        loadOp = "LDB";
+                    }
+                    else {
+                        loadOp = "LDR"; // todo: this will probably change
+                    }
+
+                    // First treat it like a stack variable:
+                    checkLabelAndAddQuad(new Quad("MOV", "R2", null, FP, null, q.comment + " - Load Ref member (stack portion)")); // Put FP in R2
+                    checkLabelAndAddQuad(new Quad("ADI", "R2", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment + " - Load Ref member (stack portion)")); // FP + -offset
+                    checkLabelAndAddQuad(new Quad("LDR", "R2", null, "(R2)", null, q.comment + " - Load Ref member (stack portion)")); // Load the value into R2
+
+                    // Now we have the address on the heap and can load it into the register proper!
+                    checkLabelAndAddQuad(new Quad(loadOp, "R2", indirect("R2"), null, null, q.comment + " - Load Ref member (heap portion)")); // Get the address of the object on the heap
+                }
             }
         }
 
@@ -511,6 +557,7 @@ public final class RegisterManager {
      * @param q the quad with instructions
      */
     private static void storeData(Quad q) {
+        String storeOp;
         SymbolTableEntry entry = symbolTable.get(q.operand3);
         if(SymbolTableEntryType.PARAM.equals(entry.kind)
                 || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
@@ -520,14 +567,51 @@ public final class RegisterManager {
             checkLabelAndAddQuad(new Quad("STR", "R3", "(R1)", null, null, q.comment + " - Store data (stack)")); // Store value in R3 to address in R1
         }
         else if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
+            String datatype = entry.data.get("type");
+
+            if("int".equals(datatype)) {
+                storeOp = "STR";
+            }
+            else if("char".equals(datatype) || "bool".equals(datatype)) {
+                storeOp = "STB";
+            }
+            else {
+                storeOp = "STR"; // todo: this will probably change
+            }
+
             checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store data (heap)")); // Put FP in R1
             checkLabelAndAddQuad(new Quad("ADI", "R1", "-8", null, null, q.comment + " - Store data (heap)")); // Get the address of the this*
             checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Store data (heap)")); // Get the address of this object on the heap
 
             getNumberInRegister("R2", symbolTable.getOffset(entry));
             checkLabelAndAddQuad(new Quad("ADD", "R1", "R2", null, null, q.comment + " - Store data (heap)")); // Base heap address in R1 + offset in R2 = address to write to
-            checkLabelAndAddQuad(new Quad("STR", "R3", "(R1)", null, null, q.comment + " - Store data (heap)")); // Store value in R3 to address in R1
+            checkLabelAndAddQuad(new Quad(storeOp, "R3", "(R1)", null, null, q.comment + " - Store data (heap)")); // Store value in R3 to address in R1
         }
+        else if(SymbolTableEntryType.REF_MEMBER.equals(entry.kind)) {
+            checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store data (heap reference on stack)")); // Put FP in R1
+            checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(entry)), null, null, q.comment + " - Store data (heap reference on stack)")); // FP + -offset
+            checkLabelAndAddQuad(new Quad("STR", "R3", "(R1)", null, null, q.comment + " - Store data (heap reference on stack)")); // Store value in R3 to address in R1
+        }
+//            String datatype = entry.data.get("type");
+//
+//            if("int".equals(datatype)) {
+//                storeOp = "STR";
+//            }
+//            else if("char".equals(datatype) || "bool".equals(datatype)) {
+//                storeOp = "STB";
+//            }
+//            else {
+//                storeOp = "STR"; // todo: this will probably change
+//            }
+//
+//            // First treat it like a stack variable:
+//            checkLabelAndAddQuad(new Quad("MOV", "R2", null, FP, null, q.comment + " - Load Ref member (stack portion)")); // Put FP in R2
+//            checkLabelAndAddQuad(new Quad("ADI", "R2", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment + " - Load Ref member (stack portion)")); // FP + -offset
+//            checkLabelAndAddQuad(new Quad("LDR", "R2", null, "(R2)", null, q.comment + " - Load Ref member (stack portion)")); // Load the value into R2
+//
+//            // Now we have the address on the heap and can load it into the register proper!
+//            checkLabelAndAddQuad(new Quad(storeOp, "R2", indirect("R2"), null, null, q.comment + " - Load Ref member (heap portion)")); // Get the address of the object on the heap
+//        }
     }
 
     private static void checkLabelAndAddQuad(Quad q) {

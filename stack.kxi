@@ -1,7 +1,7 @@
     class Cat {
         public int lives;
-        Cat() {
-            lives = 9;
+        Cat(int l, int j, int m) {
+            lives = l;
             cout << '(';
             cout << ')';
         }
@@ -23,11 +23,11 @@
     void main() {
 //        int fiveSixtySeven = 567;
 //        int negativeSeventeen = -17;
-        Cat c = new Cat();
-        c.f();
+        Cat c = new Cat(3, 4, 5);
+//        c.f();
 //        Cat d = new Cat();
 //        c.lives = 9;
-//        cout << c.lives;
+        cout << c.lives;
 
 //        cout << (50 + fiveSixtySeven + negativeSeventeen) / 2 + 21;
 //        cout << '!';
