@@ -1,6 +1,36 @@
+    class Cat {
+        public int lives;
+        Cat() {
+            lives = 9;
+            cout << '(';
+            cout << ')';
+        }
+        public void f() {
+            cout << lives;
+            die();
+            if(lives == 0) {
+                return;
+            }
+            f();
+        }
+
+        public void die() {
+            lives = lives - 1;
+        }
+
+    }
+
     void main() {
-        cout << (50 + 567 - 17) / 2 + 21;
-        cout << '!';
+//        int fiveSixtySeven = 567;
+//        int negativeSeventeen = -17;
+        Cat c = new Cat();
+        c.f();
+//        Cat d = new Cat();
+//        c.lives = 9;
+//        cout << c.lives;
+
+//        cout << (50 + fiveSixtySeven + negativeSeventeen) / 2 + 21;
+//        cout << '!';
 //        int x;
 //        bool y;
 //        int z;

@@ -3,7 +3,6 @@ package tcode;
 import icode.Generator;
 import icode.quad.Quad;
 import log.Log;
-import sun.awt.Symbol;
 import syntax.symbol.SymbolTable;
 import syntax.symbol.SymbolTableEntry;
 import syntax.symbol.SymbolTableEntryType;
@@ -23,6 +22,8 @@ import java.util.Map;
 public final class RegisterManager {
     public static final int VAL_REGISTER_COUNT = 6;
     public static final int OVERALL_REGISTER_COUNT = 11;
+    
+    public static List<Quad> finalQuads = new ArrayList<Quad>();
 
     public static final String TOS = "R6";
     public static final String FP = "R7";
@@ -30,7 +31,13 @@ public final class RegisterManager {
     public static final String SB = "R9";
     public static final String PC = "R10";
 
+    private static int logicLabelCounter = 1;
+
     public static Log targetCodeFile = new Log("tcode.asm");
+
+    private static String getLogicLabel() {
+        return "LL" + logicLabelCounter++;
+    }
 
 //    private static  List<Register> registerDescriptors = initRegisterDescriptors();
     public static final Map<Integer, Register> registers = initRegisterDescriptors();
@@ -69,9 +76,9 @@ public final class RegisterManager {
     }
 
     private static void getNumberInRegister(String register, int number) {
-        targetCodeFile.write(new Quad("SUB", register, register, null, null, "Zero out " + register).toString());
+        checkLabelAndAddQuad(new Quad("SUB", register, register, null, null, "Zero out " + register));
         if(number != 0) {
-            targetCodeFile.write(new Quad("ADI", register, String.valueOf(number), null, null, "Put " + number + " in " + register).toString());
+            checkLabelAndAddQuad(new Quad("ADI", register, String.valueOf(number), null, null, "Put " + number + " in " + register));
         }
     }
 
@@ -79,97 +86,133 @@ public final class RegisterManager {
         return String.format("(%s)", register);
     }
 
-    private static void fakeAMainCall() {
-        targetCodeFile.write(new Quad("MOV", "R1", TOS, null, null, "Copy TOS into R1").toString());
-        targetCodeFile.write(new Quad("ADI", "R1", "-12", null, null, "Space for RTN addr, PFP, and this?").toString());
-        targetCodeFile.write(new Quad("CMP", "R1", SL, null, null, "Compare TOS and SL").toString());
-        targetCodeFile.write(new Quad("BLT", "R1", "OVERFLOW", null, null, "Overflow check").toString());
+//    MOV R5, SP ; Test Overflow
+//    ADI R5, #-20 ; rtn,pfp,this,i,7
+//    CMP R5, SL
+//    BLT R5, OVERFLOW
+//    MOV R3, FP ; Old Frame
+//    MOV FP, SP ; New Frame
+//    ADI SP, #-4 ; PFP
+//    STR R3, (SP) ; Set PFP
+//    ADI SP, #-4
+//    STR R7, (SP) ; Set this on Stack
+//    ADI SP, #-4
 
-        targetCodeFile.write(new Quad("MOV", "R1", FP, null, null, "Save FP in R1, this will be the PFP").toString());
-        targetCodeFile.write(new Quad("MOV", FP, TOS, null, null, "Set FP to Current Activation Record (FP = TOS)").toString());
-        targetCodeFile.write(new Quad("ADI", TOS, "-4", null, null, "Move TOS to where PFP should be stored").toString());
-        targetCodeFile.write(new Quad("STR", "R1", indirect(FP), null, null, "Put PFP on the Activation Record (PFP = FP)").toString());
-        targetCodeFile.write(new Quad("ADI", TOS, "-4", null, null, "Move TOS to this*").toString());
-        // Don't bother putting anything in the this* for main.
-        targetCodeFile.write(new Quad("ADI", TOS, "-4", null, null, "Move TOS to new top").toString());
+    /**
+     *
+     * @param q
+     */
+    private static void frame(Quad q) {
+        int frameSize = -12;
+        if(q != null) {
+            frameSize -= symbolTable.getFuncSize(q.operand1);
+        }
 
-        targetCodeFile.write(new Quad("MOV", "R1", PC, null, null, "PC incremented by 1 instruction").toString());
-        targetCodeFile.write(new Quad("ADI", "R1", "18", null, null, "Compute return address").toString());
-        targetCodeFile.write(new Quad("STR", "R1", indirect(FP), null, null, "Compute return address").toString());
-        targetCodeFile.write(new Quad("JMP", symbolTable.findInScope("main", "g"), null, null, null, "Return from main - quit program").toString());
-        targetCodeFile.write(new Quad("TRP", "0", null, null, null, "Return from main - quit program").toString());
-        targetCodeFile.write("");
+        checkLabelAndAddQuad(new Quad("MOV", "R1", TOS, null, null, "Copy TOS into R1"));
+        checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(frameSize), null, null, "Space for RTN addr, PFP, this, and locals?"));
+        checkLabelAndAddQuad(new Quad("CMP", "R1", SL, null, null, "Compare TOS and SL"));
+        checkLabelAndAddQuad(new Quad("BLT", "R1", "OVERFLOW", null, null, "Overflow check"));
+
+        checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, "Save FP in R1, this will be the PFP"));
+        checkLabelAndAddQuad(new Quad("MOV", FP, TOS, null, null, "Set FP to Current Activation Record (FP = TOS)"));
+        checkLabelAndAddQuad(new Quad("ADI", TOS, "-4", null, null, "Move TOS to where PFP should be stored"));
+        checkLabelAndAddQuad(new Quad("STR", "R1", indirect(TOS), null, null, "Put PFP on the Activation Record (PFP = FP)"));
+        checkLabelAndAddQuad(new Quad("ADI", TOS, "-4", null, null, "Move TOS to this*"));
+
+        // Set the this*
+        if(q == null) {
+            // Set the this* for main
+            checkLabelAndAddQuad(new Quad("LDA", "R5", "FREE", null, null, "Where is the FREE label?")); // This tells you where the next free space is.
+            checkLabelAndAddQuad(new Quad("ADI", "R5", "4", null, null, "Increment by size of int to get where the actual free space is"));
+            checkLabelAndAddQuad(new Quad("STR", "R5", "FREE", null, null, "Put the actual address of the FREE space at FREE"));
+            checkLabelAndAddQuad(new Quad("STR", "R5", indirect(TOS), null, null, "Store the this* on the stack"));
+        }
+        else {
+            // Set the this* for other functions. Expects this* in R2, loaded in loadData()
+            checkLabelAndAddQuad(new Quad("STR", "R2", indirect(TOS), null, null, "Store the this* on the stack"));
+        }
+        checkLabelAndAddQuad(new Quad("ADI", TOS, "-4", null, null, "Move TOS to new top"));
+    }
+
+    private static void call(Quad q) {
+        String function;
+        if(q == null) {
+            function = symbolTable.findInScope("main", "g");
+        }
+        else {
+            function = q.operand1;
+        }
+        // Do return address
+        checkLabelAndAddQuad(new Quad("MOV", "R1", PC, null, null, "PC incremented by 1 instruction"));
+        checkLabelAndAddQuad(new Quad("ADI", "R1", "18", null, null, "Compute return address"));
+        checkLabelAndAddQuad(new Quad("STR", "R1", indirect(FP), null, null, "Compute return address"));
+        checkLabelAndAddQuad(new Quad("JMP", function, null, null, null, "Call function"));
     }
 
     private static void doReturn(Quad q) {
-        targetCodeFile.write(new Quad("MOV", TOS, FP, null, null, "De-allocate current activation record (TOS = FP)").toString());
-        targetCodeFile.write(new Quad("MOV", "R1", TOS, null, null, "Copy TOS").toString());
-        targetCodeFile.write(new Quad("CMP", "R1", SB, null, null, "Compare TOS and SB").toString());
-        targetCodeFile.write(new Quad("BGT", "R1", "UNDERFLOW", null, null, "Underflow check").toString());
+        checkLabelAndAddQuad(new Quad("MOV", TOS, FP, null, null, "De-allocate current activation record (TOS = FP)"));
+        checkLabelAndAddQuad(new Quad("MOV", "R2", TOS, null, null, "Copy TOS"));
+        checkLabelAndAddQuad(new Quad("CMP", "R2", SB, null, null, "Compare TOS and SB"));
+        checkLabelAndAddQuad(new Quad("BGT", "R2", "UNDERFLOW", null, null, "Underflow check"));
 
-        targetCodeFile.write(new Quad("LDR", "R1", indirect(FP), null, null, "Return address pointed to by FP").toString());
-        targetCodeFile.write(new Quad("ADI", FP, "-4", null, null, "Point at PFP in Activation Record").toString());
-        targetCodeFile.write(new Quad("LDR", FP, indirect(FP), null, null, "FP = PFP").toString());
+        checkLabelAndAddQuad(new Quad("LDR", "R2", indirect(FP), null, null, "Return address pointed to by FP"));
+        checkLabelAndAddQuad(new Quad("MOV", "R3", FP, null, null, "Point at PFP in Activation Record"));
+        checkLabelAndAddQuad(new Quad("ADI", "R3", "-4", null, null, "Point at PFP in Activation Record"));
+        checkLabelAndAddQuad(new Quad("LDR", FP, indirect("R3"), null, null, "FP = PFP"));
         if(q.operand1 != null) // Has a return value
         {
-            targetCodeFile.write(new Quad("STR", "R1", indirect(TOS), null, null, "Put return value on the stack").toString());
+            checkLabelAndAddQuad(new Quad("STR", "R1", indirect(TOS), null, null, "Put return value on the stack"));
         }
-        targetCodeFile.write(new Quad("JMR", "R1", null, null, null, "Return from function call").toString());
+        checkLabelAndAddQuad(new Quad("JMR", "R2", null, null, null, "Return from function call"));
     }
 
     private static void doOverflowUnderflow() {
-        targetCodeFile.write("");
         String overflowString = "Stack overflow";
         String underflowString = "Stack underflow";
 
-        targetCodeFile.write(new Quad("LDA", "R1", "OVERFLOW_S", null, "OVERFLOW", "Print overflow message and quit").toString());
+        checkLabelAndAddQuad(new Quad("LDA", "R1", "OVERFLOW_S", null, "OVERFLOW", "Print overflow message and quit"));
         for(int i = 0; i < overflowString.length(); i++) {
-            targetCodeFile.write(new Quad("LDB", "R0", indirect("R1"), null, null, null).toString());
-            targetCodeFile.write(new Quad("TRP", "3", null, null, null, null).toString());
-            targetCodeFile.write(new Quad("ADI", "R1", "1", null, null, null).toString());
+            checkLabelAndAddQuad(new Quad("LDB", "R0", indirect("R1"), null, null, null));
+            checkLabelAndAddQuad(new Quad("TRP", "3", null, null, null, null));
+            checkLabelAndAddQuad(new Quad("ADI", "R1", "1", null, null, null));
 
             if(i == overflowString.length()) {
                 break;
             }
         }
-        targetCodeFile.write(new Quad("LDB", "R0", indirect("R1"), null, null, null).toString()); // Do a newline character (not shown in the above string)
-        targetCodeFile.write(new Quad("TRP", "3", null, null, null, null).toString());
-        targetCodeFile.write(new Quad("TRP", "0", null, null, null, "Overflow terminate").toString());
-        targetCodeFile.write("");
+        checkLabelAndAddQuad(new Quad("LDB", "R0", indirect("R1"), null, null, null)); // Do a newline character (not shown in the above string)
+        checkLabelAndAddQuad(new Quad("TRP", "3", null, null, null, null));
+        checkLabelAndAddQuad(new Quad("TRP", "0", null, null, null, "Overflow terminate"));
 
-        targetCodeFile.write(new Quad("LDA", "R1", "UNDERFLOW_S", null, "UNDERFLOW", "Print underflow message and quit").toString());
+        checkLabelAndAddQuad(new Quad("LDA", "R1", "UNDERFLOW_S", null, "UNDERFLOW", "Print underflow message and quit"));
         for(int i = 0; i < underflowString.length(); i++) {
-            targetCodeFile.write(new Quad("LDB", "R0", indirect("R1"), null, null, null).toString());
-            targetCodeFile.write(new Quad("TRP", "3", null, null, null, null).toString());
-            targetCodeFile.write(new Quad("ADI", "R1", "1", null, null, null).toString());
+            checkLabelAndAddQuad(new Quad("LDB", "R0", indirect("R1"), null, null, null));
+            checkLabelAndAddQuad(new Quad("TRP", "3", null, null, null, null));
+            checkLabelAndAddQuad(new Quad("ADI", "R1", "1", null, null, null));
 
             if(i == underflowString.length()) {
                 break;
             }
         }
-        targetCodeFile.write(new Quad("LDB", "R0", indirect("R1"), null, null, null).toString()); // Do a newline character (not shown in the above string)
-        targetCodeFile.write(new Quad("TRP", "3", null, null, null, null).toString());
-        targetCodeFile.write(new Quad("TRP", "0", null, null, null, "Underflow terminate").toString());
-        targetCodeFile.write("");
+        checkLabelAndAddQuad(new Quad("LDB", "R0", indirect("R1"), null, null, null)); // Do a newline character (not shown in the above string)
+        checkLabelAndAddQuad(new Quad("TRP", "3", null, null, null, null));
+        checkLabelAndAddQuad(new Quad("TRP", "0", null, null, null, "Underflow terminate"));
 
         // Do message string globals.
-        targetCodeFile.write(new Quad(".BYT", String.format("'%s'", overflowString.charAt(0)), null, null, "OVERFLOW_S", "Overflow string").toString());
+        checkLabelAndAddQuad(new Quad(".BYT", String.format("'%s'", overflowString.charAt(0)), null, null, "OVERFLOW_S", "Overflow string"));
         for(int i = 1; i < overflowString.length(); i++) {
-            targetCodeFile.write(new Quad(".BYT", String.format("'%s'", overflowString.charAt(i)), null, null, null, null).toString());
+            checkLabelAndAddQuad(new Quad(".BYT", String.format("'%s'", overflowString.charAt(i)), null, null, null, null));
         }
-        targetCodeFile.write(new Quad(".BYT", "'\\n'", null, null, null, null).toString());
-        targetCodeFile.write("");
+        checkLabelAndAddQuad(new Quad(".BYT", "'\\n'", null, null, null, null));
 
-        targetCodeFile.write(new Quad(".BYT", String.format("'%s'", underflowString.charAt(0)), null, null, "UNDERFLOW_S", "Underflow string").toString());
+        checkLabelAndAddQuad(new Quad(".BYT", String.format("'%s'", underflowString.charAt(0)), null, null, "UNDERFLOW_S", "Underflow string"));
         for(int i = 0; i < underflowString.length(); i++) {
-            targetCodeFile.write(new Quad(".BYT", String.format("'%s'", underflowString.charAt(i)), null, null, null, null).toString());
+            checkLabelAndAddQuad(new Quad(".BYT", String.format("'%s'", underflowString.charAt(i)), null, null, null, null));
         }
-        targetCodeFile.write(new Quad(".BYT", "'\\n'", null, null, null, null).toString());
+        checkLabelAndAddQuad(new Quad(".BYT", "'\\n'", null, null, null, null));
     }
 
     private static void doGlobals() {
-        targetCodeFile.write("");
-
         String operand;
         for(SymbolTableEntry entry : symbolTable.getGlobalSymbols()) {
             if("char".equals(entry.data.get("type"))
@@ -180,35 +223,40 @@ public final class RegisterManager {
             else {
                 operand = ".INT";
             }
-            targetCodeFile.write(new Quad(operand, entry.value, null, null, entry.symid, "Global data").toString());
+            checkLabelAndAddQuad(new Quad(operand, entry.value, null, null, entry.symid, "Global data"));
         }
     }
 
     public static void produceTargetCode() {
-        fakeAMainCall();
+        frame(null);
+        call(null);
+        checkLabelAndAddQuad(new Quad("TRP", "0", null, null, null, "Return from main - quit program"));
+
         for(Quad q : Generator.quads)
         {
             handleQuad(q);
         }
         doOverflowUnderflow();
         doGlobals();
+        checkLabelAndAddQuad(new Quad(".INT", "0", null, null, "FREE", "The this*, will be set at the start"));
     }
 
     private static void handleQuad(Quad q) {
+        checkLabelAndAddQuad(new Quad(null, null, null, null, q.label, q.comment));
+
         if("FUNC".equals(q.operator))
         {
             String label = q.label;
             int tempVars = symbolTable.getTotalTempVars(q.operand1); // operand 1 should be the func symid
-            targetCodeFile.write("");
-            targetCodeFile.write(new Quad("ADI", TOS, String.valueOf(4 * tempVars), null, label, q.comment).toString());
-            targetCodeFile.write(new Quad("MOV", "R5", TOS, null, null, q.comment).toString());
-            targetCodeFile.write(new Quad("CMP", "R5", SL, null, null, q.comment).toString());
-            targetCodeFile.write(new Quad("BLT", "R5", "OVERFLOW", null, null, q.comment).toString());
+            checkLabelAndAddQuad(new Quad("ADI", TOS, String.valueOf(-4 * tempVars), null, label, q.comment));
+            checkLabelAndAddQuad(new Quad("MOV", "R4", TOS, null, null, q.comment));
+            checkLabelAndAddQuad(new Quad("CMP", "R4", SL, null, null, q.comment));
+            checkLabelAndAddQuad(new Quad("BLT", "R4", "OVERFLOW", null, null, q.comment));
         }
         else if("MOV".equals(q.operator))
         {
             loadData(q);
-            targetCodeFile.write(new Quad("MOV", "R3", null, null, null, q.comment).toString()); // R1 -> R3
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment)); // R1 -> R3
             storeData(q);
         }
         else if("ADD".equals(q.operator)
@@ -217,25 +265,115 @@ public final class RegisterManager {
                 || "DIV".equals(q.operator))
         {
             loadData(q);
-            targetCodeFile.write(new Quad(q.operator, "R1", "R2", null, null, q.comment + " - Do op").toString()); // R1 op R2 -> R1
-            targetCodeFile.write(new Quad("MOV", "R3", "R1", null, null, q.comment + " - Copy result to R3").toString()); // R1 -> R3
+            checkLabelAndAddQuad(new Quad(q.operator, "R1", "R2", null, null, q.comment + " - Do op")); // R1 op R2 -> R1
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment + " - Copy result to R3")); // R1 -> R3
             storeData(q);
         }
         else if("ADI".equals(q.operator))
         {
             loadData(q);
-            targetCodeFile.write(new Quad(q.operator, "R1", q.operand2, null, null, q.comment + " - Add immediate " + q.operand2).toString()); // R1 op R2 -> R1
-            targetCodeFile.write(new Quad("MOV", "R3", "R1", null, null, q.comment + " - Copy result to R3").toString()); // R1 -> R3
+            checkLabelAndAddQuad(new Quad(q.operator, "R1", q.operand2, null, null, q.comment + " - Add immediate " + q.operand2)); // R1 op R2 -> R1
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment + " - Copy result to R3")); // R1 -> R3
             storeData(q);
         }
         else if("WRITE".equals(q.operator)) {
             loadData(q);
-            targetCodeFile.write(new Quad("MOV", "R0", null, "R1", null, q.comment + " - Load value for trap").toString()); // R1 -> R0
-            targetCodeFile.write(new Quad("TRP", q.operand2, null, null, null, q.comment + " - Trap").toString()); // operand2 is trap number
+            checkLabelAndAddQuad(new Quad("MOV", "R0", "R1", null, null, q.comment + " - Load value for trap")); // R1 -> R0
+            checkLabelAndAddQuad(new Quad("TRP", q.operand2, null, null, null, q.comment + " - Trap")); // operand2 is trap number
         }
         else if("RTN".equals(q.operator)) {
+            loadData(q);
             doReturn(q);
         }
+        else if("NEWI".equals(q.operator)) {
+            checkLabelAndAddQuad(new Quad("LDR", "R3", "FREE", null, null, q.comment + " - Get address of free space"));
+            checkLabelAndAddQuad(new Quad("MOV", "R2", "R3", null, null, q.comment + " - Copy address of free"));
+            checkLabelAndAddQuad(new Quad("ADI", "R2", q.operand1, null, null, q.comment + " - Increment this*"));
+            checkLabelAndAddQuad(new Quad("STR", "R2", "FREE", null, null, q.comment + " - Save incremented this*"));
+            storeData(q);
+        }
+        else if("NEW".equals(q.operator)) {
+            loadData(q); // Get array size in R1
+
+            checkLabelAndAddQuad(new Quad("LDR", "R3", "FREE", null, null, q.comment + " - Get this*"));
+            checkLabelAndAddQuad(new Quad("LDR", "R3", "FREE", null, null, q.comment + " - Get this*"));
+
+            getNumberInRegister("R2", symbolTable.getSize(symbolTable.get(q.operand1).data.get("type")));
+            checkLabelAndAddQuad(new Quad("MUL", "R2", "R1", null, null, q.comment + " - Get offset"));
+            checkLabelAndAddQuad(new Quad("ADD", "R2", "R3", null, null, q.comment + " - Increment this*"));
+            checkLabelAndAddQuad(new Quad("STR", "R2", "FREE", null, null, q.comment + " - Save incremented this*"));
+            storeData(q);
+        }
+        else if("FRAME".equals(q.operator)) {
+            loadData(q);
+            frame(q);
+        }
+        else if("PUSH".equals(q.operator)) {
+            int offset = symbolTable.getOffset(symbolTable.get(q.operand1));
+
+            // Can't use loadData since it's the previous frame that has the vars.
+            checkLabelAndAddQuad(new Quad("LDR", "R4", FP, null, null, "Get current frame"));
+            checkLabelAndAddQuad(new Quad("ADI", "R4", "-4", null, null, "PFP"));
+            checkLabelAndAddQuad(new Quad("LDR", "R4", indirect("R4"), null, null, "Get previous frame"));
+
+            checkLabelAndAddQuad(new Quad("ADI", "R4", String.valueOf(offset), null, null, "Get address of var"));
+            checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R4"), null, null, "Load value of var into R1"));
+            checkLabelAndAddQuad(new Quad("STR", "R1", indirect(TOS), null, null, "Put var on top of stack"));
+            checkLabelAndAddQuad(new Quad("ADI", TOS, "-4", null, null, "Move TOS"));
+        }
+        else if("CALL".equals(q.operator)) {
+            call(q);
+        }
+        else if("PEEK".equals(q.operator)) {
+            checkLabelAndAddQuad(new Quad("LDR", "R3", indirect(TOS), null, null, q.comment));
+            storeData(q);
+        }
+        else if("EQ".equals(q.operator)) {
+            loadData(q);
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment));
+            checkLabelAndAddQuad(new Quad("CMP", "R3", "R2", null, null, q.comment));
+//            String logicLabelTrue = getLogicLabel();
+//            String logicLabelEnd = getLogicLabel();
+//            checkLabelAndAddQuad(new Quad("BRZ", "R3", logicLabelEnd, null, null, q.comment));
+
+            // Handle false
+//            getNumberInRegister("R3", 1);
+//            checkLabelAndAddQuad(new Quad("JMP", logicLabelEnd, null, null, null, q.comment));
+
+            // Handle true/end (same since true already puts a 0 in R3)
+//            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing?
+            storeData(q); // Store 0 or 1
+        }
+        else if("NE".equals(q.operator)) {
+            loadData(q);
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment));
+            checkLabelAndAddQuad(new Quad("CMP", "R3", "R2", null, null, q.comment));
+//            String logicLabelTrue = getLogicLabel();
+            String logicLabelEnd = getLogicLabel();
+            checkLabelAndAddQuad(new Quad("BRZ", "R3", logicLabelEnd, null, null, q.comment));
+
+            // Handle false
+            getNumberInRegister("R3", 1);
+            checkLabelAndAddQuad(new Quad("JMP", logicLabelEnd, null, null, null, q.comment));
+
+            // Handle true/end (same since true already puts a 0 in R3)
+            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing?
+            storeData(q); // Store 0 or 1
+        }
+        else if("BF".equals(q.operator)) {
+            loadData(q);
+            checkLabelAndAddQuad(new Quad("BNZ", "R1", q.operand2, null, null, q.comment)); // Label for the next thing?
+        }
+        else if("BT".equals(q.operator)) {
+            loadData(q);
+            checkLabelAndAddQuad(new Quad("BRZ", "R1", q.operand2, null, null, q.comment)); // Label for the next thing?
+        }
+        else if("JMP".equals(q.operator)) {
+//            loadData(q);
+            checkLabelAndAddQuad(new Quad("JMP", q.operand1, null, null, null, q.comment)); // Label for the next thing?
+        }
+
+
 
 //        new Quad(s, s, s, null, label, q.comment);
     }
@@ -246,111 +384,125 @@ public final class RegisterManager {
      * @param q quad to load data for
      */
     private static void loadData(Quad q) {
-        String label = q.label;
+//        String label = q.label;
         String loadOp;
         String datatype;
 
-//        if("RTN".equals(q.operator)) // Special case: we want the value put into R3 where dest operands go
-//        {
-//            if(q.operand1 != null) {
-//                SymbolTableEntry entry = symbolTable.get(q.operand1);
-//                if(SymbolTableEntryType.PARAM.equals(entry.kind)
-//                        || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
-//                        || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
-//                    targetCodeFile.write(new Quad("MOV", "R3", null, FP, label, q.comment + " - Put FP in R3").toString());
-//                    targetCodeFile.write(new Quad("ADI", "R1", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment + " - FP + -offset").toString());
-//                    targetCodeFile.write(new Quad("LDR", "R1", null, "(R1)", null, q.comment + " - Load stack var, R3").toString()); // Load the value into R1
-//
-//                }
-//                else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
-//                    targetCodeFile.write(new Quad("LDR", "R1", null, q.operand1, null, q.comment + " - Load global label, R1").toString()); // Load label of literal into R1
-//
-//                    return "char".equals(entry.data.get("type"))
-//                            ? DataHandling.CHAR
-//                            : DataHandling.INT;
-//                }
-//                return;
-//            }
-//        }
-        boolean skipOperand1 = "READ".equals(q.operator);
-        boolean skipOperand2 = "WRITE".equals(q.operator) || "ADI".equals(q.operator) || q.operand2 == null;
+        boolean skipOperand1 = q.operand1 == null || "READ".equals(q.operator) || "FRAME".equals(q.operator)
+                || "JMP".equals(q.operator);
+        boolean skipOperand2 = q.operand2 == null || "WRITE".equals(q.operator) || "ADI".equals(q.operator)
+                || "BF".equals(q.operator) || "BT".equals(q.operator);
 
         SymbolTableEntry entry;
         if(!skipOperand1) {
-            entry = symbolTable.get(q.operand1);
-            datatype = entry.data.get("type");
-            if(SymbolTableEntryType.PARAM.equals(entry.kind)
-                    || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
-                    || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
-                if("int".equals(datatype)) {
-                    loadOp = "LDR";
-                }
-                else if("char".equals(datatype) || "bool".equals(datatype)) {
-                    loadOp = "LDB";
-                }
-                else {
-                    loadOp = "LDR"; // todo: this will probably change
-                }
-
-                targetCodeFile.write(new Quad("MOV", "R1", null, FP, label, q.comment + " - Put FP in R1").toString());
-                targetCodeFile.write(new Quad("ADI", "R1", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment + " - FP + -offset").toString());
-                targetCodeFile.write(new Quad(loadOp, "R1", null, "(R1)", null, q.comment + " - Load stack var, R1").toString()); // Load the value into R1
+            if("this".equals(q.operand1)) {
+                checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Load data (heap)")); // Put FP in R1
+                checkLabelAndAddQuad(new Quad("ADI", "R1", "-8", null, null, q.comment + " - Load data (heap)")); // Get the address of the this*
+                checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load data (heap)")); // Get this*
             }
-            else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
-                if("int".equals(datatype)) {
-                    loadOp = "LDR";
+            else {
+                entry = symbolTable.get(q.operand1);
+                datatype = entry.data.get("type");
+                if(SymbolTableEntryType.PARAM.equals(entry.kind)
+                        || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
+                        || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
+                    checkLabelAndAddQuad(new Quad("MOV", "R1", null, FP, null, q.comment + " - Put FP in R1"));
+                    checkLabelAndAddQuad(new Quad("ADI", "R1", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment + " - FP + -offset"));
+                    checkLabelAndAddQuad(new Quad("LDR", "R1", null, "(R1)", null, q.comment + " - Load stack var, R1")); // Load the value into R1
                 }
-                else if("char".equals(datatype) || "bool".equals(datatype)) {
-                    loadOp = "LDB";
+                else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
+                    if("int".equals(datatype)) {
+                        loadOp = "LDR";
+                    }
+                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                        loadOp = "LDB";
+                    }
+                    else {
+                        loadOp = "LDR"; // todo: this will probably change
+                    }
+                    checkLabelAndAddQuad(new Quad(loadOp, "R1", q.operand1, null, null, q.comment + " - Load global label, R1")); // Load label of literal into R1
                 }
-                else {
-                    loadOp = "LDR"; // todo: this will probably change
+                else if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
+                    checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Load data (heap)")); // Put FP in R1
+                    checkLabelAndAddQuad(new Quad("ADI", "R1", "-8", null, null, q.comment + " - Load data (heap)")); // Get the address of the this*
+                    checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load data (heap)")); // Get the address of the object on the heap
+
+                    getNumberInRegister("R4", symbolTable.getOffset(entry));
+                    checkLabelAndAddQuad(new Quad("ADD", "R1", "R4", null, null, q.comment + " - Load data (heap)")); // Base heap address in R1 + offset in R2 = address to write to
+
+                    if("int".equals(datatype)) {
+                        loadOp = "LDR";
+                    }
+                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                        loadOp = "LDB";
+                    }
+                    else {
+                        loadOp = "LDR"; // todo: this will probably change
+                    }
+
+                    checkLabelAndAddQuad(new Quad(loadOp, "R1", "(R1)", null, null, q.comment + " - Load data (heap)")); // Load actual value into R1
                 }
-                targetCodeFile.write(new Quad(loadOp, "R1", null, q.operand1, null, q.comment + " - Load global label, R1").toString()); // Load label of literal into R1
             }
         }
 
         if(!skipOperand2) {
-            entry = symbolTable.get(q.operand2);
-            datatype = entry.data.get("type");
-            if(SymbolTableEntryType.PARAM.equals(entry.kind)
-                    || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
-                    || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
-                if("int".equals(datatype)) {
-                    loadOp = "LDR";
-                }
-                else if("char".equals(datatype) || "bool".equals(datatype)) {
-                    loadOp = "LDB";
-                }
-                else {
-                    loadOp = "LDR"; // todo: this will probably change
-                }
-
-                targetCodeFile.write(new Quad("MOV", "R2", null, FP, null, q.comment + " - Put FP in R1").toString()); // Put FP in R2
-                targetCodeFile.write(new Quad("ADI", "R2", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment + " - FP + -offset").toString()); // FP + -offset
-                targetCodeFile.write(new Quad(loadOp, "R2", null, "(R2)", null, q.comment + " - Load stack var, R2").toString()); // Load the value into R2
+            if("this".equals(q.operand2)) {
+                checkLabelAndAddQuad(new Quad("MOV", "R2", FP, null, null, q.comment + " - Load data (heap)")); // Put FP in R1
+                checkLabelAndAddQuad(new Quad("ADI", "R2", "-8", null, null, q.comment + " - Load data (heap)")); // Get the address of the this*
+                checkLabelAndAddQuad(new Quad("LDR", "R2", indirect("R2"), null, null, q.comment + " - Load data (heap)")); // Get this*
             }
-            else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
-                if("int".equals(datatype)) {
-                    loadOp = "LDR";
+            else {
+                entry = symbolTable.get(q.operand2);
+                datatype = entry.data.get("type");
+                if(SymbolTableEntryType.PARAM.equals(entry.kind)
+                        || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
+                        || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
+                    checkLabelAndAddQuad(new Quad("MOV", "R2", null, FP, null, q.comment + " - Put FP in R1")); // Put FP in R2
+                    checkLabelAndAddQuad(new Quad("ADI", "R2", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment + " - FP + -offset")); // FP + -offset
+                    checkLabelAndAddQuad(new Quad("LDR", "R2", null, "(R2)", null, q.comment + " - Load stack var, R2")); // Load the value into R2
                 }
-                else if("char".equals(datatype) || "bool".equals(datatype)) {
-                    loadOp = "LDB";
-                }
-                else {
-                    loadOp = "LDR"; // todo: this will probably change
-                }
+                else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
+                    if("int".equals(datatype)) {
+                        loadOp = "LDR";
+                    }
+                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                        loadOp = "LDB";
+                    }
+                    else {
+                        loadOp = "LDR"; // todo: this will probably change
+                    }
 
-                targetCodeFile.write(new Quad(loadOp, "R2", null, q.operand2, null, q.comment + " - Load global label, R2").toString()); // Load label of literal into R2
+                    checkLabelAndAddQuad(new Quad(loadOp, "R2", null, q.operand2, null, q.comment + " - Load global label, R2")); // Load label of literal into R2
+                }
+                else if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
+                    checkLabelAndAddQuad(new Quad("MOV", "R2", FP, null, null, q.comment + " - Load data (heap)")); // Put FP in R2
+                    checkLabelAndAddQuad(new Quad("ADI", "R2", "-8", null, null, q.comment + " - Load data (heap)")); // Get the address of the this*
+                    checkLabelAndAddQuad(new Quad("LDR", "R2", indirect("R2"), null, null, q.comment + " - Load data (heap)")); // Get the address of the object on the heap
+
+                    getNumberInRegister("R4", symbolTable.getOffset(entry));
+                    checkLabelAndAddQuad(new Quad("ADD", "R2", "R4", null, null, q.comment + " - Load data (heap)")); // Base heap address in R2 + offset in R4 = address to read from
+
+                    if("int".equals(datatype)) {
+                        loadOp = "LDR";
+                    }
+                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                        loadOp = "LDB";
+                    }
+                    else {
+                        loadOp = "LDR"; // todo: this will probably change
+                    }
+
+                    checkLabelAndAddQuad(new Quad(loadOp, "R2", "(R2)", null, null, q.comment + " - Load data (heap)")); // Load actual value into R2
+                }
             }
         }
 
         // operand3 is destination, so there won't be a need to load that one
-//        targetCodeFile.write(new Quad("LD(R)", "<SOMETHING_I_DONT_KNOW_YET_SRC_1>", null, "R1", label, q.comment).toString());
+//        checkLabelAndAddQuad(new Quad("LD(R)", "<SOMETHING_I_DONT_KNOW_YET_SRC_1>", null, "R1", label, q.comment));
 //
 //        if(false) // obviously not known yet
 //        {
-//            targetCodeFile.write(new Quad("LD(R)", "<SOMETHING_I_DONT_KNOW_YET_SRC_2>", null, "R2", label, q.comment).toString());
+//            checkLabelAndAddQuad(new Quad("LD(R)", "<SOMETHING_I_DONT_KNOW_YET_SRC_2>", null, "R2", label, q.comment));
 //        }
     }
 
@@ -363,17 +515,73 @@ public final class RegisterManager {
         if(SymbolTableEntryType.PARAM.equals(entry.kind)
                 || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
                 || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
-            targetCodeFile.write(new Quad("MOV", "R1", null, FP, null, q.comment).toString()); // Put FP in R1
-            targetCodeFile.write(new Quad("ADI", "R1", null, String.valueOf(symbolTable.getOffset(entry)), null, q.comment).toString()); // FP + -offset
-            targetCodeFile.write(new Quad("STR", "R3", null, "(R1)", null, q.comment).toString()); // Store value in R3 to address in R1
+            checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store data (stack)")); // Put FP in R1
+            checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(entry)), null, null, q.comment + " - Store data (stack)")); // FP + -offset
+            checkLabelAndAddQuad(new Quad("STR", "R3", "(R1)", null, null, q.comment + " - Store data (stack)")); // Store value in R3 to address in R1
         }
-        else {
-            targetCodeFile.write(new Quad("ST(R)", "R3", null, "<SOMETHING_I_DONT_KNOW_YET_SRC_1>", null, q.comment).toString());
+        else if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
+            checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store data (heap)")); // Put FP in R1
+            checkLabelAndAddQuad(new Quad("ADI", "R1", "-8", null, null, q.comment + " - Store data (heap)")); // Get the address of the this*
+            checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Store data (heap)")); // Get the address of this object on the heap
+
+            getNumberInRegister("R2", symbolTable.getOffset(entry));
+            checkLabelAndAddQuad(new Quad("ADD", "R1", "R2", null, null, q.comment + " - Store data (heap)")); // Base heap address in R1 + offset in R2 = address to write to
+            checkLabelAndAddQuad(new Quad("STR", "R3", "(R1)", null, null, q.comment + " - Store data (heap)")); // Store value in R3 to address in R1
         }
     }
 
-    private static enum DataHandling {
-        CHAR,
-        INT
+    private static void checkLabelAndAddQuad(Quad q) {
+        if(finalQuads.size() < 1) {
+            finalQuads.add(q);
+            return;
+        }
+
+        Quad lastQuad = finalQuads.get(finalQuads.size() - 1);
+        if(lastQuad.operator == null) // This is label-only
+        {
+            if(q.label == null) {
+                lastQuad.fillData(q);
+            }
+            else {
+                lastQuad.fillData(q);
+                backPatch(lastQuad.label, q.label);
+            }
+        }
+        else {
+            finalQuads.add(q);
+        }
+    }
+
+    private static void backPatch(String oldLabel, String newLabel) {
+        Quad current;
+        for(int i = finalQuads.size() - 1; i >= 0; i--) {
+            current = finalQuads.get(i);
+            if(oldLabel.equals(current.label)) {
+//                log.debug("Backpatch replaced label");
+                current.label = newLabel;
+            }
+            if(oldLabel.equals(current.operand1)) {
+//                log.debug("Backpatch replaced operand1");
+                current.operand1 = newLabel;
+            }
+            if(oldLabel.equals(current.operand2)) {
+//                log.debug("Backpatch replaced operand2");
+                current.operand1 = newLabel;
+            }
+            if(oldLabel.equals(current.operand3)) {
+//                log.debug("Backpatch replaced operand3");
+                current.operand1 = newLabel;
+            }
+            if(oldLabel.equals(current.comment)) {
+//                log.debug("Backpatch replaced comment");
+                current.comment = newLabel;
+            }
+        }
+    }
+    
+    public static void dumpQuads() {
+        for(Quad q : finalQuads) {
+            targetCodeFile.write(q.toString());
+        }
     }
 }

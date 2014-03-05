@@ -33,6 +33,7 @@ public class SyntaxAnalyzer {
     private boolean passFailed = false;
     private int classOffset;
     private int methodOffset;
+    private boolean isConstructor = false;
 
     public SyntaxAnalyzer(LexicalAnalyzer lex) {
         this.lex = lex;
@@ -288,6 +289,10 @@ public class SyntaxAnalyzer {
                     data.put("Param", "[]");
                     addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data, true); // Added param to notify this is a method.
                 }
+                else {
+                    String funcSymId = symbolTable.find(identifier);
+                    Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
+                }
             }
             else {
                 // We have some params.
@@ -365,6 +370,7 @@ public class SyntaxAnalyzer {
          */
     private void constructor_declaration() throws Exception {
         if(passFailed) { return; }
+        isConstructor = true;
 
         String identifier;
         if(TokenType.IDENTIFIER.equals(lex.getToken().type))
@@ -396,6 +402,10 @@ public class SyntaxAnalyzer {
                 data.put("returnType", identifier); // Returns the type of the class that's being built, which is the method name.
                 addToSymbolTable(identifier, SymbolTableEntryType.METHOD, data, true); // Added param to notify this is a method.
             }
+            else {
+                String funcSymId = symbolTable.find(identifier);
+                Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
+            }
         }
         else {
             parameter_list(data); // Do not advance token - closing parenthesis check does advancement
@@ -421,6 +431,7 @@ public class SyntaxAnalyzer {
             Generator.doStaticInitPlaceholder();
         }
         method_body();
+        isConstructor = false;
     }
 
     /**
@@ -461,7 +472,25 @@ public class SyntaxAnalyzer {
                 if(passFailed) { return; }
             }
             // Got closing brace, generate a return.
-            Generator.addQuad("RTN", null, null, (String)null);
+            if(passTwo) {
+                if(isConstructor) {
+                    Generator.addQuad("RTN", "this", null, (String)null);
+                }
+                else {
+                    Generator.addQuad("RTN", null, null, (String)null);
+                }
+            }
+        }
+        else {
+            // Got closing brace, generate a return.
+            if(passTwo) {
+                if(isConstructor) {
+                    Generator.addQuad("RTN", "this", null, (String)null);
+                }
+                else {
+                    Generator.addQuad("RTN", null, null, (String)null);
+                }
+            }
         }
         trimScope();
     }

@@ -5,20 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" name="Default" comment="workspace.xml - not sure what this is for, but committing it for safety">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/tcode/Register.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/stack.kxi" />
-      <change type="MOVED" beforePath="C:\Users\Owner\IdeaProjects\CS4490\Compiler\src\icode\Something.java" afterPath="$PROJECT_DIR$/src/tcode/RegisterManager.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/AnalyzerConstants.java" afterPath="$PROJECT_DIR$/src/syntax/AnalyzerConstants.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/semantics/op/AssignmentOperator.java" afterPath="$PROJECT_DIR$/src/semantics/op/AssignmentOperator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/icode/Generator.java" afterPath="$PROJECT_DIR$/src/icode/Generator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/log/Log.java" afterPath="$PROJECT_DIR$/src/log/Log.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Main.java" afterPath="$PROJECT_DIR$/src/Main.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/icode/quad/Quad.java" afterPath="$PROJECT_DIR$/src/icode/quad/Quad.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/semantics/SemanticActions.java" afterPath="$PROJECT_DIR$/src/semantics/SemanticActions.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tcode/RegisterManager.java" afterPath="$PROJECT_DIR$/src/tcode/RegisterManager.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" afterPath="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntryType.java" afterPath="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntryType.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" afterPath="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/quad.icode" afterPath="$PROJECT_DIR$/quad.icode" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/stack.kxi" afterPath="$PROJECT_DIR$/stack.kxi" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Compiler.iws" />
@@ -27,13 +19,13 @@
     <file path="/Token.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1390432626668" ignored="false" />
     <file path="/LexicalAnalyzer.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1392756307176" ignored="false" />
     <file path="$PROJECT_DIR$/../../Threading/src/Main.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1389057341723" ignored="false" />
-    <file path="/Main.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393464703715" ignored="false" />
+    <file path="/Main.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393984176949" ignored="false" />
     <file path="$PROJECT_DIR$/../../TinkerProj/src/Main.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1392957851968" ignored="false" />
-    <file path="/fragment.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393959755893" ignored="false" />
-    <file path="/Dummy.txt" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393947820583" ignored="false" />
-    <file path="/SyntaxAnalyzer.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393949542811" ignored="false" />
+    <file path="/fragment.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393978107138" ignored="false" />
+    <file path="/Dummy.txt" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393969761580" ignored="false" />
+    <file path="/SyntaxAnalyzer.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393981782923" ignored="false" />
     <file path="/SymbolTableEntry.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1392755033344" ignored="false" />
-    <file path="/SymbolTable.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393957483166" ignored="false" />
+    <file path="/SymbolTable.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393971496113" ignored="false" />
     <file path="/SymbolTableEntryType.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393888553506" ignored="false" />
     <file path="/AnalyzerConstants.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393342048756" ignored="false" />
     <file path="/Lexical.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1391476384733" ignored="false" />
@@ -69,12 +61,13 @@
     <file path="/Generator.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393459133186" ignored="false" />
     <file path="/QuadBundle.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1392758480972" ignored="false" />
     <file path="/icode.kxi" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393347007675" ignored="false" />
-    <file path="/RegisterManager.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393960710043" ignored="false" />
+    <file path="/RegisterManager.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393985501241" ignored="false" />
     <file path="/RegisterDescriptor.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393456684321" ignored="false" />
     <file path="/Register.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393462383317" ignored="false" />
     <file path="/MemoryLocation.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393888051944" ignored="false" />
-    <file path="/stack.kxi" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393960345843" ignored="false" />
-    <file path="/a.dummy" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393958401031" ignored="false" />
+    <file path="/stack.kxi" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393985326706" ignored="false" />
+    <file path="/a.dummy" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393983927336" ignored="false" />
+    <file path="$PROJECT_DIR$/../../CS4380/Project4/src/VM.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393986117060" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,7 +120,7 @@
       </breakpoint>
     </breakpoint_any>
     <line_breakpoints default_suspend_policy="SuspendAll" default_condition_enabled="true">
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="61" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="62" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -172,7 +165,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="469" class="syntax.symbol.SymbolTable" package="syntax.symbol">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="492" class="syntax.symbol.SymbolTable" package="syntax.symbol">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -187,7 +180,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="256" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="257" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -202,7 +195,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="220" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="221" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -217,7 +210,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="284" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="285" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -232,7 +225,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="243" class="syntax.symbol.SymbolTable" package="syntax.symbol">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="266" class="syntax.symbol.SymbolTable" package="syntax.symbol">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -247,7 +240,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="451" class="syntax.symbol.SymbolTable" package="syntax.symbol">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="474" class="syntax.symbol.SymbolTable" package="syntax.symbol">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -262,7 +255,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="68" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="69" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -277,7 +270,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="72" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="73" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -292,7 +285,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="75" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="76" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -322,7 +315,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="565" class="syntax.symbol.SymbolTable" package="syntax.symbol">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="588" class="syntax.symbol.SymbolTable" package="syntax.symbol">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -457,7 +450,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="484" class="syntax.symbol.SymbolTable" package="syntax.symbol">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" line="507" class="syntax.symbol.SymbolTable" package="syntax.symbol">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -517,7 +510,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="350" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="355" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -532,7 +525,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="337" class="syntax.SyntaxAnalyzer" package="syntax">
+      <breakpoint url="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" line="342" class="syntax.SyntaxAnalyzer" package="syntax">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -577,7 +570,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/tcode/RegisterManager.java" line="299" class="tcode.RegisterManager" package="tcode">
+      <breakpoint url="file://$PROJECT_DIR$/src/tcode/RegisterManager.java" line="215" class="tcode.RegisterManager" package="tcode">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -592,7 +585,22 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/tcode/RegisterManager.java" line="333" class="tcode.RegisterManager" package="tcode">
+      <breakpoint url="file://$PROJECT_DIR$/src/tcode/RegisterManager.java" line="121" class="tcode.RegisterManager" package="tcode">
+        <option name="ENABLED" value="true" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="REMOVE_AFTER_HIT" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="SUSPEND" value="true" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="true" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+      <breakpoint url="file://$PROJECT_DIR$/src/tcode/RegisterManager.java" line="439" class="tcode.RegisterManager" package="tcode">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -620,7 +628,7 @@
       <file leaf-file-name="SemanticActions.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/semantics/SemanticActions.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="831" column="19" selection-start="35503" selection-end="35503" vertical-scroll-proportion="-9.28">
+            <state line="409" column="42" selection-start="17011" selection-end="17011" vertical-scroll-proportion="-12.68">
               <folding />
             </state>
           </provider>
@@ -638,18 +646,7 @@
       <file leaf-file-name="SymbolTable.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="698" column="0" selection-start="25499" selection-end="25499" vertical-scroll-proportion="-6.88">
-              <folding>
-                <element signature="e#25559#25577#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="semantics2.kxi" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/semantics2.kxi">
-          <provider selected="true" editor-type-id="text-editor">
-            <state line="27" column="50" selection-start="681" selection-end="681" vertical-scroll-proportion="0.0">
+            <state line="327" column="44" selection-start="11231" selection-end="11231" vertical-scroll-proportion="-17.24">
               <folding />
             </state>
           </provider>
@@ -658,7 +655,7 @@
       <file leaf-file-name="stack.kxi" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/stack.kxi">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="46" selection-start="138" selection-end="138" vertical-scroll-proportion="0.0">
+            <state line="20" column="99" selection-start="383" selection-end="383" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -667,28 +664,47 @@
       <file leaf-file-name="RegisterManager.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/tcode/RegisterManager.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="319" column="50" selection-start="15854" selection-end="15854" vertical-scroll-proportion="0.6862004">
+            <state line="457" column="69" selection-start="22556" selection-end="22556" vertical-scroll-proportion="0.53038675">
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1305#1324#0" expanded="true" />
+                <element signature="e#656#662#0" expanded="true" />
+                <element signature="e#1493#1512#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Register.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/tcode/Register.java">
+      <file leaf-file-name="List.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/src.zip!/java/util/List.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="1" column="40" selection-start="15" selection-end="15" vertical-scroll-proportion="0.0">
+            <state line="234" column="12" selection-start="9674" selection-end="9674" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Quad.java" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/icode/quad/Quad.java">
+      <file leaf-file-name="Collection.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/src.zip!/java/util/Collection.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="226" column="12" selection-start="7775" selection-end="7775" vertical-scroll-proportion="-12.88">
+            <state line="270" column="25" selection-start="12258" selection-end="12258" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Generator.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/icode/Generator.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="139" column="5" selection-start="2912" selection-end="4512" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Main.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/Main.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="49" column="87" selection-start="1253" selection-end="1253" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -697,8 +713,10 @@
       <file leaf-file-name="SyntaxAnalyzer.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="293" column="0" selection-start="9705" selection-end="9705" vertical-scroll-proportion="-13.6">
-              <folding />
+            <state line="481" column="0" selection-start="16958" selection-end="16958" vertical-scroll-proportion="-12.0">
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -727,14 +745,14 @@
         <option value="$PROJECT_DIR$/src/icode/Generator.java" />
         <option value="$PROJECT_DIR$/src/log/Log.java" />
         <option value="$PROJECT_DIR$/src/tcode/Register.java" />
-        <option value="$PROJECT_DIR$/src/Main.java" />
         <option value="$PROJECT_DIR$/src/syntax/symbol/MemoryLocation.java" />
         <option value="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntryType.java" />
         <option value="$PROJECT_DIR$/src/syntax/AnalyzerConstants.java" />
-        <option value="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" />
-        <option value="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" />
         <option value="$PROJECT_DIR$/src/icode/quad/Quad.java" />
         <option value="$PROJECT_DIR$/src/semantics/SemanticActions.java" />
+        <option value="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" />
+        <option value="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" />
+        <option value="$PROJECT_DIR$/src/Main.java" />
         <option value="$PROJECT_DIR$/stack.kxi" />
         <option value="$PROJECT_DIR$/src/tcode/RegisterManager.java" />
       </list>
@@ -772,8 +790,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -906,6 +922,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -1229,8 +1247,8 @@
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32466063" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3438914" sideWeight="0.82604057" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3438914" sideWeight="0.17395945" order="9" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3438914" sideWeight="0.82604057" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3280543" sideWeight="0.2289221" order="9" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32352942" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
@@ -1238,7 +1256,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2289221" sideWeight="0.6561086" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2289221" sideWeight="0.6719457" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3280543" sideWeight="0.77107793" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -1314,37 +1332,9 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/semantics/record/sar/RecordType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="13" column="15" selection-start="263" selection-end="263" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntry.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="34" column="21" selection-start="1047" selection-end="1057" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/log/Log.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="74" column="29" selection-start="1753" selection-end="1753" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/icode/Generator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="154" column="0" selection-start="4939" selection-end="4939" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="37" column="39" selection-start="962" selection-end="1267" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/syntax/AnalyzerConstants.java">
@@ -1361,9 +1351,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java">
+    <entry file="file://$PROJECT_DIR$/semantics2.kxi">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="293" column="0" selection-start="9705" selection-end="9705" vertical-scroll-proportion="-13.6">
+        <state line="38" column="58" selection-start="1053" selection-end="1053" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
@@ -1377,29 +1367,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/icode/quad/Quad.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="226" column="12" selection-start="7775" selection-end="7775" vertical-scroll-proportion="-12.88">
+        <state line="226" column="12" selection-start="7775" selection-end="7775" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/semantics/SemanticActions.java">
+    <entry file="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="831" column="19" selection-start="35503" selection-end="35503" vertical-scroll-proportion="-9.28">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/semantics2.kxi">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="27" column="50" selection-start="681" selection-end="681" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/stack.kxi">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="46" selection-start="138" selection-end="138" vertical-scroll-proportion="0.0">
-          <folding />
+        <state line="481" column="0" selection-start="16958" selection-end="16958" vertical-scroll-proportion="-12.0">
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -1410,21 +1388,62 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/semantics/SemanticActions.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="409" column="42" selection-start="17011" selection-end="17011" vertical-scroll-proportion="-12.68">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/Main.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="49" column="87" selection-start="1253" selection-end="1253" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/src.zip!/java/util/List.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="234" column="12" selection-start="9674" selection-end="9674" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://C:/Program Files/Java/jdk1.7.0_07/src.zip!/java/util/Collection.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="270" column="25" selection-start="12258" selection-end="12258" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/icode/Generator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="139" column="5" selection-start="2912" selection-end="4512" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="698" column="0" selection-start="25499" selection-end="25499" vertical-scroll-proportion="-6.88">
-          <folding>
-            <element signature="e#25559#25577#0" expanded="true" />
-          </folding>
+        <state line="327" column="44" selection-start="11231" selection-end="11231" vertical-scroll-proportion="-17.24">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/stack.kxi">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="20" column="99" selection-start="383" selection-end="383" vertical-scroll-proportion="0.0">
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/tcode/RegisterManager.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="319" column="50" selection-start="15854" selection-end="15854" vertical-scroll-proportion="0.6862004">
+        <state line="457" column="69" selection-start="22556" selection-end="22556" vertical-scroll-proportion="0.53038675">
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1305#1324#0" expanded="true" />
+            <element signature="e#656#662#0" expanded="true" />
+            <element signature="e#1493#1512#0" expanded="true" />
           </folding>
         </state>
       </provider>

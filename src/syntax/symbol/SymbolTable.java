@@ -131,6 +131,20 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return totalTempVars;
     }
 
+    public int getFuncSize(String funcSymId) {
+        int totalTempVars = 0;
+        for(String symid : scopesToSymIdsMap.get(innerTable.get(funcSymId).scope + "." + innerTable.get(funcSymId).value))
+        {
+            if(SymbolTableEntryType.LOCAL_VAR.equals(innerTable.get(symid).kind)
+                    || SymbolTableEntryType.TEMP_VAR.equals(innerTable.get(symid).kind)
+                    || SymbolTableEntryType.PARAM.equals(innerTable.get(symid).kind))
+            {
+                totalTempVars += 1;
+            }
+        }
+        return totalTempVars * 4;
+    }
+
     /**
      * Looks up an identifier in the symbol table and returns its SymId
      * @param member
@@ -230,7 +244,16 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return false;
     }
 
-    public int getSize(String datatype) {
+    public int getSize(String typeName) {
+        String datatype;
+        if(typeName.startsWith("@")) {
+            datatype = typeName.substring(2, typeName.length());
+        }
+        else {
+            datatype = typeName;
+        }
+
+
         if("bool".equals(datatype)
                 || "char".equals(datatype)) {
             return 1;

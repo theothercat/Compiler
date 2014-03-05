@@ -55,6 +55,7 @@ public class Main {
         }
 //        tokenTest(args[0]);
         Generator.dumpQuads();
+        RegisterManager.dumpQuads();
         LogManager.cleanup();
     }
 
