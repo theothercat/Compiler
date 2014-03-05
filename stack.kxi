@@ -1,7 +1,11 @@
     class Cat {
         public int lives;
+        public char c = 'c';
+        public int claws = 10;
+        public char b;
+
         Cat(int l, int j, int m) {
-            lives = l;
+            lives = m;
             cout << '(';
             cout << ')';
         }
@@ -23,11 +27,25 @@
     void main() {
 //        int fiveSixtySeven = 567;
 //        int negativeSeventeen = -17;
-        Cat c = new Cat(3, 4, 5);
+//        Cat c = new Cat(3, 4, 5);
 //        c.f();
 //        Cat d = new Cat();
+//        c.c = 'a';
 //        c.lives = 9;
-        cout << c.lives;
+//        cout << c.c;
+//        cout << c.lives;
+//        cout << c.claws;
+//        c.b = ' ';
+//        c.claws = -13;
+//        cout << c.b;
+//        cout << c.claws;
+
+        if(8 >= 7) {
+            cout << 'T';
+        }
+        else {
+            cout << 'F';
+        }
 
 //        cout << (50 + fiveSixtySeven + negativeSeventeen) / 2 + 21;
 //        cout << '!';

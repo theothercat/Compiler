@@ -747,10 +747,10 @@ public final class SemanticActions {
         }
         if(paramList!= null) {
             List<String> paramSymIds = symbolTable.parseParamIds(paramList);
-            for(int i = paramSymIds.size() - 1; i >= 0; i--) // Need to add these in reverse order
-//            for(int i = 0; i < paramSymIds.size(); i++)
+//            for(int i = paramSymIds.size() - 1; i >= 0; i--) // Need to add these in reverse order
+            for(int i = 0; i < paramSymIds.size(); i++)
             {
-                Generator.addQuad("PUSH", symbolTable.get(paramSymIds.get(i)), (SymbolTableEntry)null, (SymbolTableEntry)null);
+                Generator.addQuad("PUSH", symbolTable.get(paramSymIds.get(i)), (SymbolTableEntry)null, null);
             }
         }
 
