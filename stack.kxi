@@ -6,8 +6,8 @@
 
         Cat(int l, int j, int m) {
             lives = m;
-            cout << '(';
-            cout << ')';
+//            cout << '(';
+//            cout << ')';
         }
         public void f() {
             cout << lives;
@@ -27,7 +27,7 @@
     void main() {
 //        int fiveSixtySeven = 567;
 //        int negativeSeventeen = -17;
-//        Cat c = new Cat(3, 4, 5);
+        Cat c = new Cat(3, 4, 5);
 //        c.f();
 //        Cat d = new Cat();
 //        c.c = 'a';
@@ -40,12 +40,36 @@
 //        cout << c.b;
 //        cout << c.claws;
 
-        if(8 >= 7) {
-            cout << 'T';
+        int arr[] = new int[5];
+//        char c[];
+        int i = 1;
+        arr[0] = -54321;
+        while(i <= 10) {
+            arr[i] = i;
+            cout << i;
+            i = i + 1;
         }
-        else {
-            cout << 'F';
+        cout << ' ';
+        i = 10;
+        while(i > 0) {
+            cout << arr[i];
+            i = i - 1;
         }
+
+//        arr[0] = 54;
+//        arr[1] = 32;
+
+//        cin >> c.lives;
+        cout << '\n';
+        cout << arr[0];
+//        cout << arr[1];
+
+//        if(c.lives >= 0) {
+//            cout << '+';
+//        }
+//        else {
+//            cout << '-';
+//        }
 
 //        cout << (50 + fiveSixtySeven + negativeSeventeen) / 2 + 21;
 //        cout << '!';

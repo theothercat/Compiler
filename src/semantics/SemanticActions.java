@@ -278,7 +278,7 @@ public final class SemanticActions {
             doQuads("REF", obj, symbolTable.get(symid), newEntry);
             semanticRecordStack.push(SemanticActionRecord.getRecord(
                     newEntry.symid,
-                    RecordType.TEMP_VAR));
+                    RecordType.MEMBER_REF));
         }
 
         semanticLog.debug("Reference exists.");
@@ -670,9 +670,9 @@ public final class SemanticActions {
         else { arrItemSize = 4; }
 
         Generator.addQuad(
-                "MUL",
-                String.valueOf(arrItemSize),
+                "MULI",
                 arrSize,
+                String.valueOf(arrItemSize),
                 arraySizeVar
         );
 
@@ -707,6 +707,7 @@ public final class SemanticActions {
                 || SemanticCheck.COUT.equals(checkType)) {
             // todo: do I need type checks?
             if(RecordType.SYMID.equals(exp_sar.type)
+                    || RecordType.MEMBER_REF.equals(exp_sar.type)
                     || (SemanticCheck.COUT.equals(checkType)
                     && (RecordType.TEMP_VAR.equals(exp_sar.type) || RecordType.LITERAL.equals(exp_sar.type)))) // Can only use a literal with cout.
             {
@@ -747,7 +748,6 @@ public final class SemanticActions {
         }
         if(paramList!= null) {
             List<String> paramSymIds = symbolTable.parseParamIds(paramList);
-//            for(int i = paramSymIds.size() - 1; i >= 0; i--) // Need to add these in reverse order
             for(int i = 0; i < paramSymIds.size(); i++)
             {
                 Generator.addQuad("PUSH", symbolTable.get(paramSymIds.get(i)), (SymbolTableEntry)null, null);

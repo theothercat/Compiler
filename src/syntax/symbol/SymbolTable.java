@@ -331,7 +331,8 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
     public int getOffset(SymbolTableEntry entry) {
         if(SymbolTableEntryType.PARAM.equals(entry.kind)
                 || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
-                || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
+                || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)
+                || SymbolTableEntryType.ARR_ITEM.equals(entry.kind)) {
             return -12 - Integer.parseInt(entry.data.get("offset"));
         }
         return Integer.parseInt(entry.data.get("offset"));
@@ -481,7 +482,8 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
             theObj = innerTable.get(iFinder(container.data, scope));
         }
         else if(RecordType.TEMP_VAR.equals(container.type)
-                || RecordType.SYMID.equals(container.type)) // Can't be a literal because those are only primitives.
+                || RecordType.SYMID.equals(container.type)
+                || RecordType.MEMBER_REF.equals(container.type)) // Can't be a literal because those are only primitives.
         {
             theObj = innerTable.get(container.data);
         }
