@@ -12,7 +12,6 @@ import syntax.symbol.SymbolTableEntryType;
  */
 public class SubtractOperator extends Operator {
     public SubtractOperator() {
-//        super(getPrecedence("-"));
         super("-");
     }
 

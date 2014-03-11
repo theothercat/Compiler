@@ -14,7 +14,6 @@ public enum SymbolTableEntryType {
     INSTANCE_VAR,
     LOCAL_VAR,
     METHOD,
-//    NULL_ADDRESS,
     PARAM,
     REF_MEMBER,
     TEMP_VAR

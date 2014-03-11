@@ -15,10 +15,8 @@ import java.util.List;
  */
 public class SemanticRecordStack {
     private Log stackLog = null;
-//    private SemanticActionRecord tos;
     private List<SemanticActionRecord> stack = new ArrayList<SemanticActionRecord>();
 
-    public SemanticRecordStack() { }
     public SemanticRecordStack(String filename) { stackLog = new Log(filename); }
 
     public void push(SemanticActionRecord new_top) {

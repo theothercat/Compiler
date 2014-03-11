@@ -16,7 +16,6 @@ import java.util.List;
  */
 public class OperatorStack {
     private Log opstackLog = null;
-//    private Operator tos;
     private List<Operator> stack = new ArrayList<Operator>();
 
     public OperatorStack(String filename) { opstackLog = new Log(filename); }
@@ -43,11 +42,6 @@ public class OperatorStack {
             return topOp.Precedence >= newOp.Precedence;
         }
     }
-
-//    private void doExpression() throws Exception {
-
-//        throw new Exception("Can't do operation " + peek().Symbol + " on " + s1.data + " and " + s2.data);
-//    }
 
     public Operator pop() {
         return stack.isEmpty() ? null : stack.remove(0);

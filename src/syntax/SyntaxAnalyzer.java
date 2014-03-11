@@ -1,6 +1,6 @@
 package syntax;
 
-import icode.Generator;
+import icode.ICodeGenerator;
 import lex.LexicalAnalyzer;
 import lex.Token;
 import lex.TokenType;
@@ -9,7 +9,6 @@ import semantics.SemanticActions;
 import semantics.err.SemanticsException;
 import syntax.symbol.DuplicateSymbolException;
 import syntax.symbol.SymbolTable;
-import syntax.symbol.SymbolTableEntry;
 import syntax.symbol.SymbolTableEntryType;
 
 import java.util.*;
@@ -50,7 +49,6 @@ public class SyntaxAnalyzer {
             if(passTwo) {
                 lex.resetFile();
                 symbolTable.setScope("g");
-//                symbolTable.checkDuplicates();
             }
 
             compilation_unit();
@@ -63,8 +61,7 @@ public class SyntaxAnalyzer {
             if(passTwo) {
                 e.printStackTrace();
             }
-//            syntaxLog.log("Error: unexpected end of file on line " + lex.getLineNumber());
-//            System.out.println("Error: unexpected end of file on line " + lex.getLineNumber());
+            System.out.println("Error: unexpected end of file on line " + lex.getLineNumber());
         }
         catch(DuplicateSymbolException e) {
             System.out.println(String.format("Line %d: %s", lex.getLineNumber(), e.getMessage()));
@@ -74,12 +71,9 @@ public class SyntaxAnalyzer {
             failSemantics(e.getMessage());
         }
         catch (Exception e) {
-//            if(passTwo) {
-                e.printStackTrace();
-//            }
+            e.printStackTrace();
             // Easy escape from failed pass.
         }
-
         System.out.println();
     }
 
@@ -116,9 +110,9 @@ public class SyntaxAnalyzer {
             if(!passTwo) {
                 addToSymbolTable("main", SymbolTableEntryType.METHOD, data, true); // Extra param to trim the method off the scope.
             }
-            else {//if(passTwo) {
+            else {
                 String funcSymId = symbolTable.findInScope("main", "g");
-                Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
+                ICodeGenerator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId);
             }
         }
         else {
@@ -158,12 +152,12 @@ public class SyntaxAnalyzer {
             return;
         }
 
-        if(TokenType.IDENTIFIER.equals(lex.nextToken().type)) // todo: this should be class_name
+        if(TokenType.IDENTIFIER.equals(lex.nextToken().type))
         {
             classIdentifier = lex.getToken().lexeme;
             if(!passTwo) {
                 syntaxLog.debug("Found identifier for class declaration, adding class '" + classIdentifier + "' to symbol table");
-                addToSymbolTable(classIdentifier, SymbolTableEntryType.CLASS, null); // todo: empty hashmap?
+                addToSymbolTable(classIdentifier, SymbolTableEntryType.CLASS, null);
             }
         }
         else {
@@ -176,7 +170,7 @@ public class SyntaxAnalyzer {
             lex.nextToken(); // Advance the token now that we've adjusted the scope
 
             if(passTwo) {
-                Generator.prepareStaticInit();
+                ICodeGenerator.prepareStaticInit();
             }
             classOffset = 0;
         }
@@ -197,8 +191,7 @@ public class SyntaxAnalyzer {
         }
 
         if(passTwo) {
-            Generator.replaceStaticInit();
-//            Generator.quads.addAll(Generator.staticInitQuads);
+            ICodeGenerator.replaceStaticInit();
         }
         else {
             symbolTable.doSize(classIdentifier);
@@ -235,7 +228,6 @@ public class SyntaxAnalyzer {
      */
     private void class_member_declaration() throws Exception {
         if(passFailed) { return; }
-        // todo: add classStaticInit() to symbol table?
 
         if(MODIFIER_TOKENS.contains(lex.getToken().lexeme)) {
             HashMap<String, String> data = new HashMap<String, String>(2);
@@ -291,7 +283,7 @@ public class SyntaxAnalyzer {
                 }
                 else {
                     String funcSymId = symbolTable.find(identifier);
-                    Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
+                    ICodeGenerator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId);
                 }
             }
             else {
@@ -303,7 +295,7 @@ public class SyntaxAnalyzer {
                     }
                     else {
                         String funcSymId = symbolTable.find(identifier);
-                        Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
+                        ICodeGenerator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId);
                     }
                 }
                 else {
@@ -317,7 +309,7 @@ public class SyntaxAnalyzer {
         else // Instance variable.
         {
             if(passTwo) {
-                Generator.activateStaticInit();
+                ICodeGenerator.activateStaticInit();
             }
 
             if(OPENING_BRACKET.equals(lex.getToken().lexeme)) {
@@ -354,7 +346,7 @@ public class SyntaxAnalyzer {
             }
             else if(passTwo) {
                 SemanticActions.EOE();
-                Generator.deactivateStaticInit();
+                ICodeGenerator.deactivateStaticInit();
             }
         }
     }
@@ -404,7 +396,7 @@ public class SyntaxAnalyzer {
             }
             else {
                 String funcSymId = symbolTable.find(identifier);
-                Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
+                ICodeGenerator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId);
             }
         }
         else {
@@ -421,14 +413,13 @@ public class SyntaxAnalyzer {
             }
             else {
                 String funcSymId = symbolTable.find(identifier);
-                Generator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId); // todo: is this how to do it?
+                ICodeGenerator.addQuad("FUNC", symbolTable.get(funcSymId), null, null, funcSymId);
             }
         }
 
-        // todo: add logging
         lex.nextToken(); // Advance token - method_body() calls getToken()
         if(passTwo) {
-            Generator.doStaticInitPlaceholder();
+            ICodeGenerator.doStaticInitPlaceholder();
         }
         method_body();
         isConstructor = false;
@@ -474,10 +465,10 @@ public class SyntaxAnalyzer {
             // Got closing brace, generate a return.
             if(passTwo) {
                 if(isConstructor) {
-                    Generator.addQuad("RTN", "this", null, (String)null);
+                    ICodeGenerator.addQuad("RTN", "this", null, (String) null);
                 }
                 else {
-                    Generator.addQuad("RTN", null, null, (String)null);
+                    ICodeGenerator.addQuad("RTN", null, null, (String) null);
                 }
             }
         }
@@ -485,10 +476,10 @@ public class SyntaxAnalyzer {
             // Got closing brace, generate a return.
             if(passTwo) {
                 if(isConstructor) {
-                    Generator.addQuad("RTN", "this", null, (String)null);
+                    ICodeGenerator.addQuad("RTN", "this", null, (String) null);
                 }
                 else {
-                    Generator.addQuad("RTN", null, null, (String)null);
+                    ICodeGenerator.addQuad("RTN", null, null, (String) null);
                 }
             }
         }
@@ -525,7 +516,7 @@ public class SyntaxAnalyzer {
         data.put("type", lex.getToken().lexeme);
 
         if(!TokenType.IDENTIFIER.equals(lex.nextToken().type)) {
-            failGrammar("variable_declaration", "identifier"); // todo: this comes from multiple places. fix it to work for all?
+            failGrammar("variable_declaration", "identifier");
             return;
         }
         String identifier = lex.getToken().lexeme; // Save the identifier.
@@ -858,7 +849,7 @@ public class SyntaxAnalyzer {
 
             expressionz();
         }
-        else if(TokenType.IDENTIFIER.equals(thisToken.type)) // todo: identifier should call the appropriate method instead?
+        else if(TokenType.IDENTIFIER.equals(thisToken.type))
         {
             // Found an identifier.
             if(passTwo) {
@@ -872,13 +863,6 @@ public class SyntaxAnalyzer {
             }
 
             if(passFailed) { return; }
-//            if(passTwo) {
-//                try { SemanticActions.iExist(); }
-//                catch(Exception e) {
-//                    failSemantics(e.getMessage());
-//                    return;
-//                }
-//            }
 
             member_refz();
             if(passFailed) { return; }
@@ -1158,7 +1142,6 @@ public class SyntaxAnalyzer {
                 lex.getLineNumber(),
                 failMessage));
         passFailed = true;
-//        throw new Exception();
     }
 
     /**

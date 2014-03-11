@@ -289,9 +289,7 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         SymbolTableEntry newEntry = new SymbolTableEntry(scope, type.name().substring(0, 1), lexeme, type, data);
         innerTable.put(newEntry.symid, newEntry);
 
-//        if(!SymbolTableEntryType.PARAM.equals(newEntry.kind)) {
             scopesToSymIdsMap.get(scope).add(newEntry.symid);
-//        }
 
         // Logging
         symLog.log("Added new entry to symbol table: " + newEntry.symid);
@@ -308,22 +306,6 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
             }
         }
         return newEntry;
-    }
-
-    public boolean isObject(SymbolTableEntry entry) {
-        if(entry.data != null) {
-            String type = entry.data.get("type");
-            if(type == null) {
-                return false;
-            }
-            if(!type.startsWith("@") && ("int".equals(type)
-                    || "char".equals(type)
-                    || "bool".equals(type))) {
-                return true;
-            }
-            return false;
-        }
-        return false;
     }
 
     private int getMaxOffset(String scope) {
@@ -357,15 +339,6 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return Integer.parseInt(entry.data.get("offset"));
     }
 
-//    public int getOffset(SymbolTableEntry entry, boolean heapOverride) {
-//        if(heapOverride) {
-//            return Integer.parseInt(entry.data.get("offset"));
-//        }
-//        else {
-//            return -12 - Integer.parseInt(entry.data.get("offset"));
-//        }
-//    }
-
     public SymbolTableEntry add(SymbolTableEntryType type, Map<String, String> data) {
         int offset = getMaxOffset(scope) + 4;
         data.put("offset", String.valueOf(offset));
@@ -373,34 +346,7 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         SymbolTableEntry newEntry = new SymbolTableEntry(scope, type.name().substring(0, 1), type, data);
         innerTable.put(newEntry.symid, newEntry);
 
-//        if(!SymbolTableEntryType.PARAM.equals(newEntry.kind)) {
         scopesToSymIdsMap.get(scope).add(newEntry.symid);
-//        }
-
-        // Logging
-        symLog.log("Added new entry to symbol table: " + newEntry.symid);
-        symLog.log("\t" + "identifier = " + newEntry.value);
-        symLog.log("\t" + "scope = " + newEntry.scope);
-        symLog.log("\t" + "type = " + newEntry.kind.name());
-        if(newEntry.data == null) {
-            symLog.log("\t" + "data = none;");
-        }
-        else {
-            symLog.log("\t" + "data =");
-            for(String s : data.keySet()) {
-                symLog.log(s + " : " + data.get(s));
-            }
-        }
-        return newEntry;
-    }
-
-    public SymbolTableEntry addStaticInit() {
-        SymbolTableEntryType type = SymbolTableEntryType.METHOD;
-        HashMap<String, String> data = new HashMap<String, String>();
-        data.put("returnType", "void");
-        SymbolTableEntry newEntry = new SymbolTableEntry(scope, type.name().substring(0, 1), type, data);
-        innerTable.put(newEntry.symid, newEntry);
-//        scopesToSymIdsMap.get(scope).add(newEntry.symid);
 
         // Logging
         symLog.log("Added new entry to symbol table: " + newEntry.symid);
@@ -425,13 +371,10 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
             SymbolTableEntry newEntry;
             if("null".equals(lexeme)) {
                 newEntry = new SymbolTableEntry("g", lexeme, data);
-//                SymbolTableEntry secretNullEntry = new SymbolTableEntry("g", "G", "null_addr", SymbolTableEntryType.NULL_ADDRESS, data);
-//                innerTable.put(secretNullEntry.symid, secretNullEntry);
             }
             else {
                 newEntry = new SymbolTableEntry("g", "G", lexeme, SymbolTableEntryType.GLOBAL_LITERAL, data);
             }
-//            SymbolTableEntry newEntry = new SymbolTableEntry("g", "G", lexeme, SymbolTableEntryType.GLOBAL_LITERAL, data);
 
             innerTable.put(newEntry.symid, newEntry);
             scopesToSymIdsMap.get("g").add(newEntry.symid);
@@ -450,7 +393,6 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
             }
         }
         else {
-//            symLog.debug("Literal already exists in symbol table and was not added.");
             symLog.log("Literal already exists in symbol table and was not added.");
         }
     }
@@ -463,39 +405,6 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
             scopesToSymIdsMap.put(newScope, new ArrayList<String>());
         }
     }
-
-//    public void checkDuplicates() throws DuplicateSymbolException {
-//        for(List<String> symids : scopesToSymIdsMap.values()) {
-//            for(String symid : symids) {
-//                SymbolTableEntry s1 = innerTable.get(symid);
-//                for(String symid2 : symids) {
-//                    if(!symid.equals(symid2) // Can't be the same symbol
-//                        && isDuplicate(innerTable.get(symid), innerTable.get(symid2))) {
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-//    public boolean isDuplicate(SymbolTableEntry s1, SymbolTableEntry s2) {
-//        if(s1.value.equals(s2.value)) {
-//            if((SymbolTableEntryType.METHOD.equals(s1.kind)
-//                    || SymbolTableEntryType.METHOD.equals(s2.kind))) // One is a method
-//            {
-//                if(!s1.kind.equals(s2.kind)) // One is a method, and the other is not
-//                {
-//                    return false; // Possible to have a method and a variable that share a name.
-//                }
-//                else {
-//                    return isMethodMatch(s1.data, s2.data); // Both are methods, so find out if they are the same.
-//                }
-//            }
-//            else {
-//                return true; // If they aren't methods, they can't share a name.
-//            }
-//        }
-//        return false; // If the names aren't the same, they aren't a duplicate!
-//    }
 
     /**
      * Based on my testing in Java, these things are irrelevant here:
@@ -678,15 +587,6 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return size;
     }
 
-
-    public Integer sizeOfObj(String objSymId) {
-        SymbolTableEntry s = innerTable.get(objSymId);
-        if(s.data == null || s.data.get("type") == null) {
-            return null;
-        }
-        return sizeOf("g." + innerTable.get(objSymId).data.get("type"));
-    }
-
     public void dumpSymbolTable() {
         SymbolTableEntry entry;
         for(String symid : innerTable.keySet()) {
@@ -707,56 +607,6 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         }
     }
 
-    public static String whereDoesItLive(String symid) {
-        SymbolTableEntry entry = innerTable.get(symid);
-        if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
-            return entry.symid;
-        }
-
-        if(SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)) {
-            return String.valueOf(-1 * getStackOffset(entry));
-        }
-        if(SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
-            return String.valueOf(-1 * getStackOffset(entry));
-        }
-        if(SymbolTableEntryType.PARAM.equals(entry.kind)) {
-            return String.valueOf(-1 * getStackOffset(entry));
-        }
-
-        if(SymbolTableEntryType.ARR_ITEM.equals(entry.kind)) {
-            return String.valueOf(getHeapOffset(entry));
-        }
-        if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
-            return String.valueOf(getHeapOffset(entry));
-        }
-
-        // todo: is this stack or heap???
-        if(SymbolTableEntryType.REF_MEMBER.equals(entry.kind)) {
-            return String.valueOf(-1 * getStackOffset(entry));
-        }
-
-        // Note these should never be used.
-        if(SymbolTableEntryType.CLASS.equals(entry.kind)) {
-            return String.valueOf(0);
-        }
-        if(SymbolTableEntryType.METHOD.equals(entry.kind)) {
-            return String.valueOf(0);
-        }
-        return null;
-    }
-
-    private static int getStackOffset(SymbolTableEntry s) {
-        int stackOffset = 3 * AnalyzerConstants.SIZE_OF_INT; // Return address at 0, PFP at 4, this* at 8.
-        // Do some stuff.
-        return stackOffset;
-    }
-
-    private static int getHeapOffset(SymbolTableEntry s) {
-        int heapOffset = 0; // Return address at 0, PFP at 4, this* at 8.
-        // Do some stuff.
-        return heapOffset;
-    }
-
     public static List<SymbolTableEntry> getGlobalSymbols() {
         List<SymbolTableEntry> globalSymbols = new ArrayList<SymbolTableEntry>();
         SymbolTableEntry entry;
@@ -768,41 +618,4 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         }
         return globalSymbols;
     }
-
-//    public static MemoryLocation whereDoesItLive(String symid) {
-//        SymbolTableEntry entry = innerTable.get(symid);
-//        if(SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)) {
-//            return MemoryLocation.STACK;
-//        }
-//        if(SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
-//            return MemoryLocation.STACK;
-//        }
-//        if(SymbolTableEntryType.PARAM.equals(entry.kind)) {
-//            return MemoryLocation.STACK;
-//        }
-//
-//        if(SymbolTableEntryType.ARR_ITEM.equals(entry.kind)) {
-//            return MemoryLocation.HEAP;
-//        }
-//        if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
-//            return MemoryLocation.HEAP;
-//        }
-//        if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
-//            return MemoryLocation.GLOBAL_MEM;
-//        }
-//
-//        // todo: is this stack or heap???
-//        if(SymbolTableEntryType.REF_MEMBER.equals(entry.kind)) {
-//            return MemoryLocation.STACK;
-//        }
-//
-//        // Note these should never be used.
-//        if(SymbolTableEntryType.CLASS.equals(entry.kind)) {
-//            return MemoryLocation.PROBABLY_GLOBAL_MEM_SHOULD_NOT_BE_USED;
-//        }
-//        if(SymbolTableEntryType.METHOD.equals(entry.kind)) {
-//            return MemoryLocation.PROBABLY_GLOBAL_MEM_SHOULD_NOT_BE_USED;
-//        }
-//        return null;
-//    }
 }

@@ -12,7 +12,6 @@ import syntax.symbol.SymbolTableEntryType;
  */
 public class OrOperator extends Operator {
     public OrOperator() {
-//        super(getPrecedence("*"));
         super("||");
     }
 

@@ -42,6 +42,7 @@
 
         Cat arr[] = new Cat[5];
         Cat arr2[];
+        int iArr[] = new int[5];
         Cat c = new Cat(9, 9, 9);
         Cat d = new Cat(4, 4, 4);
         int q;
@@ -122,4 +123,6 @@
 //        int x;
 //        bool y;
 //        int z;
+        iArr[0] = 321;
+        cout << iArr[0];
     }

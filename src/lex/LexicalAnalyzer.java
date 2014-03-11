@@ -35,7 +35,6 @@ public class LexicalAnalyzer {
             "void",
             "while");
     private static final List<Character> NUM_TOKENS = Arrays.asList('-', '+');
-//    private static final List<String> ESCAPE_CHARACTERS = Arrays.asList("0", "a", "b", "f", "n", "r", "t", "v", "\"", "&", "'", "\\");
     private static final int READ_AHEAD_LIMIT = 100000;
     private static final Token EMPTY_TOKEN = new Token();
 
@@ -62,12 +61,6 @@ public class LexicalAnalyzer {
         }
         this.currentLine = "";
         this.lineNumber = 0;
-//        try {
-//            file.mark(READ_AHEAD_LIMIT);
-//        }
-//        catch (IOException e) {
-//            System.out.println("Could not mark file for pass two.");
-//        }
 
         if(lexLog == null) {
             lexLog = new Log("lex.log");
@@ -225,13 +218,10 @@ public class LexicalAnalyzer {
         if(numEx.matches(s)) {
             return new Token(s, TokenType.NUMBER);
         }
-//        else if(charEx.matches(s)) {
-//            return new Token(s, TokenType.CHARACTER);
-//        }
         else if(isKeyword(s)) {
             return new Token(s, TokenType.KEYWORD);
         }
-        else if(identEx.matches(s)) { // todo: make type declarations their own TokenType so we can not classify an identifier if it's in the wrong place?
+        else if(identEx.matches(s)) {
             return new Token(s, TokenType.IDENTIFIER);
         }
         else
@@ -239,35 +229,8 @@ public class LexicalAnalyzer {
         return new Token(s, TokenType.UNKNOWN);
     }
 
-//    public String checkOperands(String s) {
-//        if(s == null || s.isEmpty()) {
-//            return s; //todo: throw exception?
-//        }
-//
-//
-//
-//        if(isSymbol(s.charAt(0))) {
-//            return s.substring(0,1);
-//        }
-//        if(s.length() > 1 && isSymbol(s.substring(0,2))) {
-//            return s.substring(0,2);
-//        }
-//
-//        for(int i = 1; i < s.length(); i++){
-//            if((i < s.length() - 1)
-//                    && isSymbol(s.substring(i, i+1))) {
-//                return s.substring(0, i);
-//            }
-//            if(isSymbol(s.charAt(i))) {
-//                return s.substring(0, i-1);
-//            }
-//        }
-//        return s;
-//    }
-
     private boolean isSymbol(char c) {
         return (c == '+') || (c == '-') || (c == '*') || (c == '/')
-                || (c == '%') // todo: is this something we need?
                 || (c == '<') || (c == '>')
                 || (c == '=')
                 || (c == '[')
@@ -291,9 +254,6 @@ public class LexicalAnalyzer {
 
     private boolean isPunctuation(char c) {
         return (c == ',') || (c == ';') || (c == '.');
-                // todo: verify these
-//                || (c == '!') || (c == '?') //|| (c == '\"')
-//                || (c == ':');
     }
 
     private boolean isKeyword(String s) {
@@ -340,8 +300,6 @@ public class LexicalAnalyzer {
             String actualCharacterString = s.substring(0, indexOfApostrophe + 2);
 
             return charEx.matches(actualCharacterString);
-
-//            return false;
         }
     }
     private String getCharacter(String s) {

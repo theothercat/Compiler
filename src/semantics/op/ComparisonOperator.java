@@ -12,7 +12,6 @@ import syntax.symbol.SymbolTableEntryType;
  */
 public class ComparisonOperator extends Operator {
     public ComparisonOperator(String operator) {
-//        super(getPrecedence("*"));
         super(operator);
     }
 

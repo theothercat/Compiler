@@ -12,7 +12,6 @@ import syntax.symbol.SymbolTableEntryType;
  */
 public class DivideOperator extends Operator {
     public DivideOperator() {
-//        super(getPrecedence("/"));
         super("/");
     }
 

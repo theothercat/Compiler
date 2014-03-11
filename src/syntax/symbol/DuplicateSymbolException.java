@@ -10,7 +10,6 @@ package syntax.symbol;
 public class DuplicateSymbolException extends Exception {
     public static SymbolTable symbolTable = SymbolTable.get();
 
-//    public DuplicateSymbolException() { }
     public DuplicateSymbolException(String identifier, String scope) {
         super(new StringBuilder("Duplicate identifier ")
                 .append(identifier)

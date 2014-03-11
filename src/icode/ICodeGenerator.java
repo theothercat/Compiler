@@ -14,7 +14,7 @@ import java.util.List;
  * Time: 2:16 PM
  * To change this template use File | Settings | File Templates.
  */
-public class Generator {
+public class ICodeGenerator {
     private static final String STATIC_INIT = "STATIC_INIT_PLACEHOLDER";
 
     public static Log quadFile = new Log("quad.icode"); // The actual quads
@@ -38,7 +38,6 @@ public class Generator {
 
     public static void doStaticInitPlaceholder() {
         quads.add(new Quad(STATIC_INIT, STATIC_INIT, STATIC_INIT, STATIC_INIT, STATIC_INIT)); // Add placeholder for static init
-//        addQuad(STATIC_INIT, STATIC_INIT, STATIC_INIT, STATIC_INIT); // Add placeholder for static init
     }
 
     private static List<Quad> getActiveQuadsList() {
@@ -84,12 +83,6 @@ public class Generator {
         checkLabelAndAddQuad(q, getActiveQuadsList());
     }
 
-//    public static void addQuads(LinkedList<Quad> list) {
-//        for(Quad q : list) {
-//            addQuad(q);
-//        }
-//    }
-
     private static void checkLabelAndAddQuad(Quad q, List<Quad> quads) {
         if(quads.size() < 1) {
             quads.add(q);
@@ -117,23 +110,18 @@ public class Generator {
         for(int i = quads.size() - 1; i >= 0; i--) {
             current = quads.get(i);
             if(oldLabel.equals(current.label)) {
-//                log.debug("Backpatch replaced label");
                 current.label = newLabel;
             }
             if(oldLabel.equals(current.operand1)) {
-//                log.debug("Backpatch replaced operand1");
                 current.operand1 = newLabel;
             }
             if(oldLabel.equals(current.operand2)) {
-//                log.debug("Backpatch replaced operand2");
                 current.operand1 = newLabel;
             }
             if(oldLabel.equals(current.operand3)) {
-//                log.debug("Backpatch replaced operand3");
                 current.operand1 = newLabel;
             }
             if(oldLabel.equals(current.comment)) {
-//                log.debug("Backpatch replaced comment");
                 current.comment = newLabel;
             }
         }
@@ -163,5 +151,4 @@ public class Generator {
             quadFile.log(q.toString());
         }
     }
-
 }

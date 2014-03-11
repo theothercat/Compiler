@@ -13,7 +13,6 @@ import syntax.symbol.SymbolTableEntryType;
  */
 public class EqualityOperator extends Operator {
     public EqualityOperator(String operator) {
-//        super(getPrecedence("*"));
         super(operator);
     }
 

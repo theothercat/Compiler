@@ -1,6 +1,6 @@
 package tcode;
 
-import icode.Generator;
+import icode.ICodeGenerator;
 import icode.quad.Quad;
 import log.Log;
 import syntax.symbol.SymbolTable;
@@ -8,9 +8,7 @@ import syntax.symbol.SymbolTableEntry;
 import syntax.symbol.SymbolTableEntryType;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -19,7 +17,7 @@ import java.util.Map;
  * Time: 3:56 PM
  * To change this template use File | Settings | File Templates.
  */
-public final class RegisterManager {
+public final class TCodeGenerator {
     public static final int VAL_REGISTER_COUNT = 6;
 
     public static List<Quad> finalQuads = new ArrayList<Quad>();
@@ -29,48 +27,14 @@ public final class RegisterManager {
     public static final String SL = "R8";
     public static final String SB = "R9";
     public static final String PC = "R10";
-    public static final Map<Integer, Register> registers = initRegisterDescriptors();
 
     public static Log targetCodeFile = new Log("tcode.asm");
     private static SymbolTable symbolTable = SymbolTable.get();
 
     private static int logicLabelCounter = 1;
-    private static int currentFreeRegister = 0;
 
     private static String getLogicLabel() {
         return "LL" + logicLabelCounter++;
-    }
-
-
-    private static Map<Integer, Register> initRegisterDescriptors() {
-        Map<Integer, Register> registers =  new HashMap<Integer, Register>(VAL_REGISTER_COUNT);
-        for(int i = 0; i < VAL_REGISTER_COUNT; i++) {
-            registers.put(i, new Register(i));
-        }
-        return registers;
-    }
-
-    public static Register getFreeRegister() {
-        int freeRegister = currentFreeRegister++;
-        if(currentFreeRegister == VAL_REGISTER_COUNT)
-        {
-            currentFreeRegister = 0;
-        }
-        return registers.get(freeRegister);
-    }
-
-    public static Integer getContainingRegister(String symid) {
-        for(Register r : registers.values())
-        {
-            for(String id : r.symids)
-            {
-                if(id.equals(symid))
-                {
-                    return r.registerNumber;
-                }
-            }
-        }
-        return null;
     }
 
     private static void getNumberInRegister(String register, int number) {
@@ -219,27 +183,21 @@ public final class RegisterManager {
     }
 
     public static void produceTargetCode() {
-        // Do handling of null
+        // Do handling of null*
         checkLabelAndAddQuad(new Quad("LDA", "R0", SymbolTableEntry.NULL_SYMID, null, null, "Get address of null*")); // This tells you where the next free space is.
         checkLabelAndAddQuad(new Quad("STR", "R0", SymbolTableEntry.NULL_SYMID, null, null, "Point null* at itself"));
-//        checkLabelAndAddQuad(new Quad("STR", "R5", indirect(TOS), null, null, "Store the this* on the stack"));
-//        getNumberInRegister("R1", 0);
 
-//        checkLabelAndAddQuad(new Quad(".INT", "0", null, null, "FREE", "The this*, will be set at the start"));
-
-
+        // Do main
         frame(null);
         call(null);
         checkLabelAndAddQuad(new Quad("TRP", "0", null, null, null, "Return from main - quit program"));
 
-        for(Quad q : Generator.quads)
+        for(Quad q : ICodeGenerator.quads)
         {
             handleQuad(q);
         }
         doOverflowUnderflow();
         doGlobals();
-//        SymbolTableEntry secretNullEntry = symbolTable.get
-        checkLabelAndAddQuad(new Quad(".INT", "0", null, null, "FREE", "The this*, will be set at the start"));
         checkLabelAndAddQuad(new Quad(".INT", "0", null, null, "FREE", "The this*, will be set at the start"));
     }
 
@@ -311,33 +269,24 @@ public final class RegisterManager {
             checkLabelAndAddQuad(new Quad("LDR", "R3", "FREE", null, null, q.comment + " - Get this*"));
             checkLabelAndAddQuad(new Quad("ADD", "R2", "R3", null, null, q.comment + " - FREE + sizeof(array)"));
             checkLabelAndAddQuad(new Quad("STR", "R2", "FREE", null, null, q.comment + " - Save incremented FREE"));
-//            checkLabelAndAddQuad(new Quad("MOV", "R0", "R2", null, null, q.comment + " - Save incremented FREE"));
-//            checkLabelAndAddQuad(new Quad("TRP", "1", null, null, null, q.comment + " - Save incremented FREE"));
-
-            storeData(q); // Save the this* into R1
+            storeData(q); // Save the this*
         }
         else if("AEF".equals(q.operator)) {
             loadData(q, true); // Load R2 value
             getNumberInRegister("R1", symbolTable.getSize(symbolTable.get(q.operand1).data.get("type"))); // Get size of data type
-            checkLabelAndAddQuad(new Quad("MUL", "R2", "R1", null, null, q.comment + " - Load arr member (compute heap address of array item)")); // Put FP in R1
+            checkLabelAndAddQuad(new Quad("MUL", "R2", "R1", null, null, q.comment + " - Load arr member (compute heap address of array item)"));
 
             checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Load arr member (copy FP)")); // Put FP in R1
             checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(symbolTable.get(q.operand1))), null, null, q.comment + " - Load arr member (get op1 stack address)"));
             checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load arr member (get main array heap address from stack)")); // Load the value of container on the stack? (should be a mem address)
 
-            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment + " - Load arr member (copy container heap address)")); // Label for the next thing?
-            checkLabelAndAddQuad(new Quad("ADD", "R3", "R2", null, null, q.comment + " - Load arr member (add offset to container heap address to get member heap address)")); // Label for the next thing?
-//            checkLabelAndAddQuad(new Quad("MOV", "R0", "R3", null, null, q.comment + " - Load arr member (copy container heap address)")); // Label for the next thing?
-//            checkLabelAndAddQuad(new Quad("TRP", "1", null, null, null, q.comment + " - Load arr member (copy container heap address)")); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment + " - Load arr member (copy container heap address)"));
+            checkLabelAndAddQuad(new Quad("ADD", "R3", "R2", null, null, q.comment + " - Load arr member (add offset to container heap address to get member heap address)"));
 
             SymbolTableEntry entry = symbolTable.get(q.operand3);
             checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store arr member (copy FP again)"));
             checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(entry)), null, null, q.comment + " - Store arr member (compute address of arr_item temp var on stack)"));
             checkLabelAndAddQuad(new Quad("STR", "R3", indirect("R1"), null, null, q.comment + " - Store arr member (store heap address to the arr_item temp var)")); // Store the heap address on the stack in the temp var for the ref
-
-//            checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store arr member (copy FP again)"));
-//            checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(symbolTable.get(q.operand3))), null, null, q.comment + " - Store arr member (compute address of arr_item temp var on stack)"));
-//            checkLabelAndAddQuad(new Quad("STR", "R3", indirect("R1"), null, null, q.comment + " - Store arr member (store heap address to the arr_item temp var)")); // Store the heap address on the stack in the temp var for the ref
         }
         else if("REF".equals(q.operator)) {
             boolean extraDepth = q.operand1.startsWith("A"); // It's an array item. Could just check the symbol table entry, but only array items start with an A.
@@ -354,9 +303,6 @@ public final class RegisterManager {
 
             checkLabelAndAddQuad(new Quad("MOV", "R1", null, FP, null, q.comment + " - Store Ref member (copy FP again)"));
             checkLabelAndAddQuad(new Quad("ADI", "R1", null, String.valueOf(symbolTable.getOffset(symbolTable.get(q.operand3))), null, q.comment + " - Store Ref member (compute address of ref temp var on stack)"));
-//            if(extraDepth) {
-//                checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load Ref member (that was an array, getting the heap address of the actual container)")); // Load the value of container on the stack? (should be a mem address)
-//            }
             checkLabelAndAddQuad(new Quad("STR", "R3", null, indirect("R1"), null, q.comment + " - Store Ref member (store heap address to the temp var)")); // Store the heap address on the stack in the temp var for the ref
         }
         else if("FRAME".equals(q.operator)) {
@@ -365,8 +311,6 @@ public final class RegisterManager {
         }
         else if("PUSH".equals(q.operator)) {
             loadData(q, false);
-//            int offset = symbolTable.getOffset(symbolTable.get(q.operand1));
-
             checkLabelAndAddQuad(new Quad("STR", "R1", indirect(TOS), null, null, "Put var on top of stack"));
             checkLabelAndAddQuad(new Quad("ADI", TOS, "-4", null, null, "Move TOS"));
         }
@@ -399,10 +343,10 @@ public final class RegisterManager {
 
             // Handle true
             checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelTrue, q.comment)); // Label to jump to if it really is less than.
-            getNumberInRegister("R3", 0); // Guaranteed nonzero.
+            getNumberInRegister("R3", 0); // Guaranteed zero.
 
             // Handle true/end (same since true already puts a 0 in R3)
-            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing
             storeData(q); // Store 0 or 1
         }
         else if("LT".equals(q.operator)) {
@@ -424,7 +368,7 @@ public final class RegisterManager {
             checkLabelAndAddQuad(new Quad("JMP", logicLabelEnd, null, null, null, q.comment));
 
             // Store the value
-            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing
             storeData(q); // Store 0 or 1
         }
         else if("GT".equals(q.operator)) {
@@ -446,7 +390,7 @@ public final class RegisterManager {
             checkLabelAndAddQuad(new Quad("JMP", logicLabelEnd, null, null, null, q.comment));
 
             // Store the value
-            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing
             storeData(q); // Store 0 or 1
         }
         else if("LE".equals(q.operator)) {
@@ -460,8 +404,6 @@ public final class RegisterManager {
 
             // Handle less than (true)
             getNumberInRegister("R3", 0);
-
-            // Handle
 
             // Store the value
             checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing?
@@ -480,19 +422,19 @@ public final class RegisterManager {
             getNumberInRegister("R3", 0);
 
             // Store the value
-            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing
             storeData(q); // Store 0 or 1
         }
         else if("BF".equals(q.operator)) {
             loadData(q, true);
-            checkLabelAndAddQuad(new Quad("BNZ", "R1", q.operand2, null, null, q.comment)); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad("BNZ", "R1", q.operand2, null, null, q.comment));
         }
         else if("BT".equals(q.operator)) {
             loadData(q, true);
-            checkLabelAndAddQuad(new Quad("BRZ", "R1", q.operand2, null, null, q.comment)); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad("BRZ", "R1", q.operand2, null, null, q.comment));
         }
         else if("JMP".equals(q.operator)) {
-            checkLabelAndAddQuad(new Quad("JMP", q.operand1, null, null, null, q.comment)); // Label for the next thing?
+            checkLabelAndAddQuad(new Quad("JMP", q.operand1, null, null, null, q.comment));
         }
         else if("READ".equals(q.operator)) {
             SymbolTableEntry entry = symbolTable.get(q.operand3);
@@ -554,21 +496,13 @@ public final class RegisterManager {
                     }
                 }
                 else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
-//                    if("null".equals(datatype)) {
-//                        checkLabelAndAddQuad(new Quad(loadOp, "R1", q.operand1, null, null, q.comment + " - Load global label, R1")); // Load label of literal into R1
-//                    }
-//                    else {
-                        if("int".equals(datatype)) {
-                            loadOp = "LDR";
-                        }
-                        else if("char".equals(datatype) || "bool".equals(datatype)) {
-                            loadOp = "LDB";
-                        }
-                        else {
-                            loadOp = "LDR"; // todo: this will probably change
-                        }
-                        checkLabelAndAddQuad(new Quad(loadOp, "R1", q.operand1, null, null, q.comment + " - Load global label, R1")); // Load label of literal into R1
-//                    }
+                    if("char".equals(datatype) || "bool".equals(datatype)) {
+                        loadOp = "LDB";
+                    }
+                    else {
+                        loadOp = "LDR";
+                    }
+                    checkLabelAndAddQuad(new Quad(loadOp, "R1", q.operand1, null, null, q.comment + " - Load global label, R1")); // Load label of literal into R1
                 }
                 else if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
                     checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Load data (heap)")); // Put FP in R1
@@ -578,14 +512,11 @@ public final class RegisterManager {
                     getNumberInRegister("R4", symbolTable.getOffset(entry));
                     checkLabelAndAddQuad(new Quad("ADD", "R1", "R4", null, null, q.comment + " - Load data (heap)")); // Base heap address in R1 + offset in R2 = address to write to
 
-                    if("int".equals(datatype)) {
-                        loadOp = "LDR";
-                    }
-                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                    if("char".equals(datatype) || "bool".equals(datatype)) {
                         loadOp = "LDB";
                     }
                     else {
-                        loadOp = "LDR"; // todo: this will probably change
+                        loadOp = "LDR";
                     }
 
                     checkLabelAndAddQuad(new Quad(loadOp, "R1", "(R1)", null, null, q.comment + " - Load data (heap)")); // Load actual value into R1
@@ -593,14 +524,11 @@ public final class RegisterManager {
                 else if(SymbolTableEntryType.REF_MEMBER.equals(entry.kind)
                         || SymbolTableEntryType.ARR_ITEM.equals(entry.kind)) {
                     // This is a temp var holding an address on the heap.
-                    if("int".equals(datatype)) {
-                        loadOp = "LDR";
-                    }
-                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                    if("char".equals(datatype) || "bool".equals(datatype)) {
                         loadOp = "LDB";
                     }
                     else {
-                        loadOp = "LDR"; // todo: this will probably change
+                        loadOp = "LDR";
                     }
 
                     // First treat it like a stack variable:
@@ -642,14 +570,11 @@ public final class RegisterManager {
                         checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R4"), null, null, "Load value of var into R1"));
                     }                }
                 else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
-                    if("int".equals(datatype)) {
-                        loadOp = "LDR";
-                    }
-                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                    if("char".equals(datatype) || "bool".equals(datatype)) {
                         loadOp = "LDB";
                     }
                     else {
-                        loadOp = "LDR"; // todo: this will probably change
+                        loadOp = "LDR";
                     }
 
                     checkLabelAndAddQuad(new Quad(loadOp, "R2", null, q.operand2, null, q.comment + " - Load global label, R2")); // Load label of literal into R2
@@ -662,14 +587,11 @@ public final class RegisterManager {
                     getNumberInRegister("R4", symbolTable.getOffset(entry));
                     checkLabelAndAddQuad(new Quad("ADD", "R2", "R4", null, null, q.comment + " - Load data (heap)")); // Base heap address in R2 + offset in R4 = address to read from
 
-                    if("int".equals(datatype)) {
-                        loadOp = "LDR";
-                    }
-                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                    if("char".equals(datatype) || "bool".equals(datatype)) {
                         loadOp = "LDB";
                     }
                     else {
-                        loadOp = "LDR"; // todo: this will probably change
+                        loadOp = "LDR";
                     }
 
                     checkLabelAndAddQuad(new Quad(loadOp, "R2", "(R2)", null, null, q.comment + " - Load data (heap)")); // Load actual value into R2
@@ -677,14 +599,11 @@ public final class RegisterManager {
                 else if(SymbolTableEntryType.REF_MEMBER.equals(entry.kind)
                         || SymbolTableEntryType.ARR_ITEM.equals(entry.kind)) {
                     // This is a temp var holding an address on the heap.
-                    if("int".equals(datatype)) {
-                        loadOp = "LDR";
-                    }
-                    else if("char".equals(datatype) || "bool".equals(datatype)) {
+                    if("char".equals(datatype) || "bool".equals(datatype)) {
                         loadOp = "LDB";
                     }
                     else {
-                        loadOp = "LDR"; // todo: this will probably change
+                        loadOp = "LDR";
                     }
 
                     // First treat it like a stack variable:
@@ -716,14 +635,11 @@ public final class RegisterManager {
         else if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
             String datatype = entry.data.get("type");
 
-            if("int".equals(datatype)) {
-                storeOp = "STR";
-            }
-            else if("char".equals(datatype) || "bool".equals(datatype)) {
+            if("char".equals(datatype) || "bool".equals(datatype)) {
                 storeOp = "STB";
             }
             else {
-                storeOp = "STR"; // todo: this will probably change
+                storeOp = "STR";
             }
 
             checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store data (heap)")); // Put FP in R1
@@ -742,14 +658,11 @@ public final class RegisterManager {
             checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Store data, REF_MEMBER (get heap address from stack)")); // Get heap address out of the stack var
 
             String datatype = entry.data.get("type");
-            if("int".equals(datatype)) {
-                storeOp = "STR";
-            }
-            else if("char".equals(datatype) || "bool".equals(datatype)) {
+            if("char".equals(datatype) || "bool".equals(datatype)) {
                 storeOp = "STB";
             }
             else {
-                storeOp = "STR"; // todo: this will probably change
+                storeOp = "STR";
             }
             checkLabelAndAddQuad(new Quad(storeOp, "R3", indirect("R1"), null, null, q.comment + " - Store data, REF_MEMBER (heap reference on stack)")); // Get heap address out of the stack var
         }

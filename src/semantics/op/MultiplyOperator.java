@@ -12,7 +12,6 @@ import syntax.symbol.SymbolTableEntryType;
  */
 public class MultiplyOperator extends Operator {
     public MultiplyOperator() {
-//        super(getPrecedence("*"));
         super("*");
     }
 

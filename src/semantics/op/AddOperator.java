@@ -13,7 +13,6 @@ import syntax.symbol.SymbolTableEntryType;
 public class AddOperator extends Operator {
     public AddOperator() {
         super("+");
-//        super(getPrecedence("+"));
     }
 
     @Override

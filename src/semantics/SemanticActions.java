@@ -1,6 +1,6 @@
 package semantics;
 
-import icode.Generator;
+import icode.ICodeGenerator;
 import icode.quad.Quad;
 import log.Log;
 import semantics.err.SemanticsException;
@@ -29,8 +29,6 @@ public final class SemanticActions {
     public static OperatorStack operatorStack = new OperatorStack("op_stack.log");
     public static List<String> labelStack = new ArrayList<String>();
     public static int labelGen = 1;
-//    public static
-
 
     private static SymbolTable symbolTable = SymbolTable.get(); // A reference to the symbol table singleton.
     private static Log semanticLog = new Log("semantic_actions.log");
@@ -137,7 +135,7 @@ public final class SemanticActions {
                             newEntry.symid,
                             RecordType.TEMP_VAR
                     ));
-                    Generator.addQuad("PEEK", newEntry, (String)null, null);
+                    ICodeGenerator.addQuad("PEEK", newEntry, (String) null, null);
                 }
             }
         }
@@ -165,12 +163,12 @@ public final class SemanticActions {
             HashMap<String, String> data = new HashMap<String, String>(1);
             data.put("type", itemType);
 
-            SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.ARR_ITEM, data); // todo: get the right SymbolTableEntryType ?
+            SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.ARR_ITEM, data);
             semanticRecordStack.push(SemanticActionRecord.getRecord(
                     newEntry.symid,
                     RecordType.TEMP_VAR
             ));
-            Generator.addQuad("AEF", array, index, newEntry); // newEntry should have baseAddress + size(1 or 4) * offset
+            ICodeGenerator.addQuad("AEF", array, index, newEntry); // newEntry should have baseAddress + size(1 or 4) * offset
         }
         else {
             throw new SemanticsException(top_sar.type + " not handled by iExist");
@@ -234,17 +232,13 @@ public final class SemanticActions {
                             "voidReturnPlaceholderSAR",
                             RecordType.VOID_RETURN
                     ));
-//                    Generator.addQuad("CALL", foundFunction, (String)null, null);
                 }
                 else {
-//                Generator.addQuad("CALL", foundFunction, (String)null, null);
-
-
                     HashMap<String, String> data = new HashMap<String, String>(1);
                     data.put("type", refType);
 
                     SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
-                    Generator.addQuad("PEEK", newEntry, (String)null, null);
+                    ICodeGenerator.addQuad("PEEK", newEntry, (String) null, null);
 
                     semanticRecordStack.push(SemanticActionRecord.getRecord(
                             newEntry.symid,
@@ -280,20 +274,7 @@ public final class SemanticActions {
                     newEntry.symid,
                     RecordType.MEMBER_REF));
         }
-
         semanticLog.debug("Reference exists.");
-//        if(RecordType.IDENTIFIER.equals(top_sar.type)) {
-//            if(!symbolTable.identifierExists(top_sar.data)) {
-//                throw new SemanticsException (top_sar.toString() + " does not exist.");
-//            }
-//            else {
-//                semanticLog.debug("Symbol exists.");
-//                semanticRecordStack.push(SemanticActionRecord.getRecord(symbolTable.find(top_sar.data), RecordType.SYMID));
-//            }
-//        }
-//        else {
-//            throw new SemanticsException(top_sar.type + " is not an identifier?");
-//        }
     }
 
     public static void closeBracket() throws SemanticsException {
@@ -334,46 +315,45 @@ public final class SemanticActions {
         SymbolTableEntry boolParam = checkType("bool");
         semanticLog.debug("if, bool check passed");
         String label = "SKIPIF" + labelGen++;
-        Generator.addQuad(new Quad("BF", boolParam, label, null));
+        ICodeGenerator.addQuad(new Quad("BF", boolParam, label, null));
         labelStack.add(0, label);
     }
 
     public static void endIf() throws SemanticsException {
-        Generator.addQuad(labelStack.remove(0));
+        ICodeGenerator.addQuad(labelStack.remove(0));
     }
 
     public static void endElse() throws SemanticsException {
-        Generator.addQuad(labelStack.remove(0));
+        ICodeGenerator.addQuad(labelStack.remove(0));
     }
 
     public static void beginElse() throws SemanticsException {
         String label = "SKIPELSE" + labelGen++;
-        Generator.addQuad(new Quad("JMP", label, null, (String)null));
-        Generator.addQuad(labelStack.remove(0));
+        ICodeGenerator.addQuad(new Quad("JMP", label, null, (String) null));
+        ICodeGenerator.addQuad(labelStack.remove(0));
         labelStack.add(0, label);
     }
 
     public static void doWhile() throws SemanticsException {
         semanticLog.debug("while, checking if arg is type bool");
-//        Generator.addQuad(labelStack.remove(0));
         SymbolTableEntry boolParam = checkType("bool");
         semanticLog.debug("while, bool check passed");
         String label = "ENDWHILE" + labelGen++;
-        Generator.addQuad("BF", boolParam, label, null);
+        ICodeGenerator.addQuad("BF", boolParam, label, null);
         labelStack.add(0, label);
     }
 
     public static void beginWhile() {
         String label = "BEGIN" + labelGen++;
         labelStack.add(0, label);
-        Generator.addQuad(label);
+        ICodeGenerator.addQuad(label);
     }
 
     public static void endWhile() {
         String endLabel = labelStack.remove(0);
         String beginLabel = labelStack.remove(0);
-        Generator.addQuad(new Quad("JMP", beginLabel, null, (String)null));
-        Generator.addQuad(endLabel);
+        ICodeGenerator.addQuad(new Quad("JMP", beginLabel, null, (String) null));
+        ICodeGenerator.addQuad(endLabel);
     }
 
     private static SymbolTableEntry checkType(String type) throws SemanticsException {
@@ -422,7 +402,6 @@ public final class SemanticActions {
 
         EOE(); // Finish the stack.
 
-        // todo: how is this supposed to work with void returns of return; ???
         String expectedReturnType = currentScope.data.get("returnType");
         SemanticActionRecord final_sar = semanticRecordStack.pop();
         if(final_sar == null) {
@@ -434,7 +413,7 @@ public final class SemanticActions {
             }
             else {
                 semanticLog.debug("void return value is valid for function " + currentScope.scope + "." + currentScope.value);
-                Generator.addQuad("RTN", null, null, (String)null);
+                ICodeGenerator.addQuad("RTN", null, null, (String) null);
                 return;
             }
         }
@@ -457,7 +436,7 @@ public final class SemanticActions {
             }
         }
         semanticLog.debug("Return value is valid for function " + currentScope.scope + "." + currentScope.value);
-        Generator.addQuad("RTN",returnValue, (SymbolTableEntry)null, null);
+        ICodeGenerator.addQuad("RTN", returnValue, (SymbolTableEntry) null, null);
     }
 
     public static void cin() throws SemanticsException {
@@ -500,13 +479,11 @@ public final class SemanticActions {
         semanticLog.debug("Begin argument list");
         semanticRecordStack.push(
                 new SemanticActionRecord("", RecordType.BAL));
-//        );
     }
     public static void EAL() {
         semanticLog.debug("End argument list");
         SemanticActionRecord sar;
         String paramList = "[";
-//        boolean trim = false;
         List<String> params = new ArrayList<String>();
         while(!RecordType.BAL.equals(
                 (sar = semanticRecordStack.pop()).type))
@@ -531,23 +508,6 @@ public final class SemanticActions {
                 )
         );
     }
-
-    // todo: use the version that did the check here, or the other version I think is probably correct?
-//    public static void func() throws SemanticsException {
-//        SemanticActionRecord arglist = semanticRecordStack.pop();
-//        SemanticActionRecord funcName = semanticRecordStack.pop();
-//        semanticLog.debug("Checking for function " + funcName.data + " with params " + arglist.data);
-//
-//        SymbolTableEntry foundFunction = symbolTable.findFunction(funcName, arglist);
-//        if(foundFunction == null) {
-//            throw new SemanticsException("Function " + funcName.data + " with params " + arglist.data + " does not exist");
-//        }
-//        semanticLog.debug("Function found.");
-//        semanticRecordStack.push(SemanticActionRecord.getRecord(
-//                foundFunction.symid,
-//                RecordType.FUNC
-//        ));
-//    }
 
     public static void func() throws SemanticsException {
         SemanticActionRecord arglist = semanticRecordStack.pop();
@@ -591,10 +551,7 @@ public final class SemanticActions {
         }
 
         HashMap<String, String> data = new HashMap<String, String>(1);
-//        String typeData = arrType.substring(2, arrType.length()); // It's an element of the array, now.
         data.put("type", arrType);
-
-//        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
                 symid,
                 RecordType.ARR_INDEX,
@@ -625,7 +582,7 @@ public final class SemanticActions {
         SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
 
         int classSize = symbolTable.sizeOf(identifier.data);
-        Generator.addQuad("NEWI", String.valueOf(classSize), (String)null, newEntry);
+        ICodeGenerator.addQuad("NEWI", String.valueOf(classSize), (String) null, newEntry);
         generateFuncQuads(newEntry, foundFunction, argList.data);
 
         SymbolTableEntry newEntry2 = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
@@ -633,7 +590,7 @@ public final class SemanticActions {
                 newEntry2.symid,
                 RecordType.TEMP_VAR
         ));
-        Generator.addQuad("PEEK", (String)null, (String)null, newEntry2);
+        ICodeGenerator.addQuad("PEEK", (String) null, (String) null, newEntry2);
     }
 
     public static void new_arrBrackets() throws SemanticsException {
@@ -655,7 +612,6 @@ public final class SemanticActions {
         HashMap<String, String> data = new HashMap<String, String>(1);
         String typeData = "@:" + arrType.data;
         data.put("type", typeData);
-//        data.put("length", expression.data);
 
         SymbolTableEntry arraySizeVar = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
         SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
@@ -669,14 +625,14 @@ public final class SemanticActions {
         }
         else { arrItemSize = 4; }
 
-        Generator.addQuad(
+        ICodeGenerator.addQuad(
                 "MULI",
                 arrSize,
                 String.valueOf(arrItemSize),
                 arraySizeVar
         );
 
-        Generator.addQuad("NEW", arraySizeVar, (String)null, newEntry);
+        ICodeGenerator.addQuad("NEW", arraySizeVar, (String) null, newEntry);
 
     }
 
@@ -705,7 +661,6 @@ public final class SemanticActions {
         semanticLog.debug("Checking validity of arg " + exp_sar.data + " with behavior " + checkType.name());
         if(SemanticCheck.CIN.equals(checkType)
                 || SemanticCheck.COUT.equals(checkType)) {
-            // todo: do I need type checks?
             if(RecordType.SYMID.equals(exp_sar.type)
                     || RecordType.MEMBER_REF.equals(exp_sar.type)
                     || (SemanticCheck.COUT.equals(checkType)
@@ -732,29 +687,29 @@ public final class SemanticActions {
         boolean isCin = SemanticCheck.CIN.equals(checkType);
         String intCharArg = "int".equals(entry.data.get("type")) ? "1" : "3";
         if(isCin) {
-            Generator.addQuad("READ", intCharArg, (SymbolTableEntry)null, entry);
+            ICodeGenerator.addQuad("READ", intCharArg, (SymbolTableEntry) null, entry);
         }
         else {
-            Generator.addQuad("WRITE", entry, intCharArg, null);
+            ICodeGenerator.addQuad("WRITE", entry, intCharArg, null);
         }
     }
 
     private static void generateFuncQuads(SymbolTableEntry container, SymbolTableEntry member, String paramList) {
         if(container == null) {
-            Generator.addQuad("FRAME", member, "this", null);
+            ICodeGenerator.addQuad("FRAME", member, "this", null);
         }
         else {
-            Generator.addQuad("FRAME", member, container, null);
+            ICodeGenerator.addQuad("FRAME", member, container, null);
         }
         if(paramList!= null) {
             List<String> paramSymIds = symbolTable.parseParamIds(paramList);
             for(int i = 0; i < paramSymIds.size(); i++)
             {
-                Generator.addQuad("PUSH", symbolTable.get(paramSymIds.get(i)), (SymbolTableEntry)null, null);
+                ICodeGenerator.addQuad("PUSH", symbolTable.get(paramSymIds.get(i)), (SymbolTableEntry) null, null);
             }
         }
 
-        Generator.addQuad("CALL", member, (SymbolTableEntry)null, null);
+        ICodeGenerator.addQuad("CALL", member, (SymbolTableEntry) null, null);
     }
 
     public static void doExpression() throws SemanticsException {
@@ -798,7 +753,6 @@ public final class SemanticActions {
             if(rhs.data != null && lhs.data != null) {
                 typeString = ", of types " + lhs.data.get("type") + " and " + rhs.data.get("type");
             }
-//                String t1 = e1.data.get("type");
             throw new SemanticsException("Can't perform operation " + op.Symbol
                     + " on operands " + lhs.value + " and " + rhs.value
                     + typeString
@@ -821,66 +775,66 @@ public final class SemanticActions {
     private static void doQuads(String symbol, SymbolTableEntry lhs, SymbolTableEntry rhs, SymbolTableEntry newEntry) {
         if("=".equals(symbol)) {
             iLog.debug("Assignment expression, generating icode");
-            Generator.addQuad("MOV", rhs, (SymbolTableEntry)null, lhs);
+            ICodeGenerator.addQuad("MOV", rhs, (SymbolTableEntry) null, lhs);
         }
         else if("+".equals(symbol)) {
             iLog.debug("Add expression, generating icode");
             if(SymbolTableEntryType.GLOBAL_LITERAL.equals(lhs.kind)) {
-                Generator.addQuad("ADI", rhs, lhs.value, newEntry); // Addition is commutative, so we can flip the params so the immediate is in slot 2.
+                ICodeGenerator.addQuad("ADI", rhs, lhs.value, newEntry); // Addition is commutative, so we can flip the params so the immediate is in slot 2.
             }
             else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(rhs.kind)) {
-                Generator.addQuad("ADI", lhs, rhs.value, newEntry);
+                ICodeGenerator.addQuad("ADI", lhs, rhs.value, newEntry);
             }
             else {
-                Generator.addQuad("ADD", lhs, rhs, newEntry);
+                ICodeGenerator.addQuad("ADD", lhs, rhs, newEntry);
             }
         }
         else if("-".equals(symbol)) {
             iLog.debug("Subtract expression, generating icode");
-            Generator.addQuad("SUB", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("SUB", lhs, rhs, newEntry);
         }
         else if("*".equals(symbol)) {
             iLog.debug("Multiply expression, generating icode");
-            Generator.addQuad("MUL", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("MUL", lhs, rhs, newEntry);
         }
         else if("/".equals(symbol)) {
             iLog.debug("Divide expression, generating icode");
-            Generator.addQuad("DIV", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("DIV", lhs, rhs, newEntry);
         }
         else if("==".equals(symbol)) {
             iLog.debug("Equals expression, generating icode");
-            Generator.addQuad("EQ", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("EQ", lhs, rhs, newEntry);
         }
         else if("!=".equals(symbol)) {
             iLog.debug("Does-not-equal expression, generating icode");
-            Generator.addQuad("NE", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("NE", lhs, rhs, newEntry);
         }
         else if("<".equals(symbol)) {
             iLog.debug("Less-than expression, generating icode");
-            Generator.addQuad("LT", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("LT", lhs, rhs, newEntry);
         }
         else if(">".equals(symbol)) {
             iLog.debug("Greater-than expression, generating icode");
-            Generator.addQuad("GT", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("GT", lhs, rhs, newEntry);
         }
         else if("<=".equals(symbol)) {
             iLog.debug("Less-than-or-equals expression, generating icode");
-            Generator.addQuad("LE", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("LE", lhs, rhs, newEntry);
         }
         else if(">=".equals(symbol)) {
             iLog.debug("Greater-than-or-equals expression, generating icode");
-            Generator.addQuad("GE", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("GE", lhs, rhs, newEntry);
         }
         else if("&&".equals(symbol)) {
             iLog.debug("And expression, generating icode");
-            Generator.addQuad("AND", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("AND", lhs, rhs, newEntry);
         }
         else if("||".equals(symbol)) {
             iLog.debug("Equals expression, generating icode");
-            Generator.addQuad("OR", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("OR", lhs, rhs, newEntry);
         }
         else if("REF".equals(symbol)) {
-            Generator.addQuad("REF", lhs, rhs, newEntry);
+            ICodeGenerator.addQuad("REF", lhs, rhs, newEntry);
         }
     }
 

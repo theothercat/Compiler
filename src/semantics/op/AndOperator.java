@@ -12,7 +12,6 @@ import syntax.symbol.SymbolTableEntryType;
  */
 public class AndOperator extends Operator {
     public AndOperator() {
-//        super(getPrecedence("*"));
         super("&&");
     }
 
