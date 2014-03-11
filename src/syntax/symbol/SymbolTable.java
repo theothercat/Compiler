@@ -310,6 +310,22 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return newEntry;
     }
 
+    public boolean isObject(SymbolTableEntry entry) {
+        if(entry.data != null) {
+            String type = entry.data.get("type");
+            if(type == null) {
+                return false;
+            }
+            if(!type.startsWith("@") && ("int".equals(type)
+                    || "char".equals(type)
+                    || "bool".equals(type))) {
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
     private int getMaxOffset(String scope) {
         int maxOffset = 0;
         int temp;
@@ -318,7 +334,9 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
             entry = innerTable.get(symid);
             if(SymbolTableEntryType.PARAM.equals(entry.kind)
                     || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
-                    || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)) {
+                    || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)
+                    || SymbolTableEntryType.ARR_ITEM.equals(entry.kind)
+                    || SymbolTableEntryType.REF_MEMBER.equals(entry.kind)) {
                 temp = Integer.parseInt(innerTable.get(symid).data.get("offset"));
                 if(temp > maxOffset) {
                     maxOffset = temp;
@@ -332,11 +350,21 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         if(SymbolTableEntryType.PARAM.equals(entry.kind)
                 || SymbolTableEntryType.LOCAL_VAR.equals(entry.kind)
                 || SymbolTableEntryType.TEMP_VAR.equals(entry.kind)
-                || SymbolTableEntryType.ARR_ITEM.equals(entry.kind)) {
+                || SymbolTableEntryType.ARR_ITEM.equals(entry.kind)
+                || SymbolTableEntryType.REF_MEMBER.equals(entry.kind)) {
             return -12 - Integer.parseInt(entry.data.get("offset"));
         }
         return Integer.parseInt(entry.data.get("offset"));
     }
+
+//    public int getOffset(SymbolTableEntry entry, boolean heapOverride) {
+//        if(heapOverride) {
+//            return Integer.parseInt(entry.data.get("offset"));
+//        }
+//        else {
+//            return -12 - Integer.parseInt(entry.data.get("offset"));
+//        }
+//    }
 
     public SymbolTableEntry add(SymbolTableEntryType type, Map<String, String> data) {
         int offset = getMaxOffset(scope) + 4;
@@ -394,7 +422,16 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
     public void addLiteral(String lexeme, Map<String, String> data) {
         if(!iExists(lexeme, "g")) // Look for literal in global scope
         {
-            SymbolTableEntry newEntry = new SymbolTableEntry("g", "G", lexeme, SymbolTableEntryType.GLOBAL_LITERAL, data);
+            SymbolTableEntry newEntry;
+            if("null".equals(lexeme)) {
+                newEntry = new SymbolTableEntry("g", lexeme, data);
+//                SymbolTableEntry secretNullEntry = new SymbolTableEntry("g", "G", "null_addr", SymbolTableEntryType.NULL_ADDRESS, data);
+//                innerTable.put(secretNullEntry.symid, secretNullEntry);
+            }
+            else {
+                newEntry = new SymbolTableEntry("g", "G", lexeme, SymbolTableEntryType.GLOBAL_LITERAL, data);
+            }
+//            SymbolTableEntry newEntry = new SymbolTableEntry("g", "G", lexeme, SymbolTableEntryType.GLOBAL_LITERAL, data);
 
             innerTable.put(newEntry.symid, newEntry);
             scopesToSymIdsMap.get("g").add(newEntry.symid);

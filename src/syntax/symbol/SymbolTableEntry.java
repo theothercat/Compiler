@@ -11,7 +11,9 @@ import java.util.Map;
  * Time: 5:04 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SymbolTableEntry {
+public class SymbolTableEntry
+{
+    public static final String NULL_SYMID = "NULL";
     private static int id = 1;
     public static SymbolTableEntry THIS_PLACEHOLDER = new SymbolTableEntry("", "THIS", "this", SymbolTableEntryType.GLOBAL_LITERAL, null);
 
@@ -34,6 +36,15 @@ public class SymbolTableEntry {
         this.symid = symid + (id++);
         this.value = this.symid;
         this.kind = kind;
+        this.data = data;
+    }
+
+    // Constructor for null symid
+    public SymbolTableEntry(String scope, String value, Map<String, String> data) {
+        this.scope = scope;
+        this.symid = NULL_SYMID;
+        this.value = value;
+        this.kind = SymbolTableEntryType.GLOBAL_LITERAL;
         this.data = data;
     }
 }

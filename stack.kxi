@@ -27,7 +27,7 @@
     void main() {
 //        int fiveSixtySeven = 567;
 //        int negativeSeventeen = -17;
-        Cat c = new Cat(3, 4, 5);
+//        Cat c = new Cat(3, 4, 5);
 //        c.f();
 //        Cat d = new Cat();
 //        c.c = 'a';
@@ -40,28 +40,74 @@
 //        cout << c.b;
 //        cout << c.claws;
 
-        int arr[] = new int[5];
+        Cat arr[] = new Cat[5];
+        Cat arr2[];
+        Cat c = new Cat(9, 9, 9);
+        Cat d = new Cat(4, 4, 4);
+        int q;
+        Cat a = null;
+        arr = arr2;
+        arr[2] = null;
+        if(d != null) {
+            cout << '+';
+//            if(arr[2] == a) {
+//                if(arr[2] == null) {
+//                    cout << '!';
+//                }
+//                else {
+//                    cout << '?';
+//                }
+//            }
+//            else {
+//                cout << '.';
+//            }
+        }
+        else {
+            cout << '-';
+        }
+
+        c.lives = -53;
+        d.lives = 4;
+        arr[3] = c;
+        arr[4] = d;
+//        cout << d.lives;
+//        cout << arr[4].lives;
+//        cout << arr2[4].lives;
 //        char c[];
-        int i = 1;
-        arr[0] = -54321;
-        while(i <= 10) {
-            arr[i] = i;
-            cout << i;
-            i = i + 1;
-        }
-        cout << ' ';
-        i = 10;
-        while(i > 0) {
-            cout << arr[i];
-            i = i - 1;
-        }
+//        int i = 1;
+//        arr[0] = -54321;
+//        while(i <= 10) {
+//            arr[i] = i;
+//            cout << i;
+//            i = i + 1;
+//        }
+//        cout << ' ';
+//        i = 10;
+//        while(i > 0) {
+//            cout << arr[i];
+//            i = i - 1;
+//        }
+//        q = d.lives;
+//        cout << q;
+//        cout << arr[3].lives;
+//        cout << arr[4].lives;
+//        cout << arr[3].lives + arr[arr[(d.lives + q) / 2].lives - 1].lives;
+
+        arr[0] = d;
+        arr2[0].f();
+        arr[4].c = 'q';
+        arr[4].claws = -4444444;
+        cout << arr2[d.lives].c;
+        cout << arr2[4].claws;
+        arr[4].lives = 15;
+        cout << arr2[4].lives;
 
 //        arr[0] = 54;
 //        arr[1] = 32;
 
 //        cin >> c.lives;
-        cout << '\n';
-        cout << arr[0];
+//        cout << '\n';
+//        cout << arr[0];
 //        cout << arr[1];
 
 //        if(c.lives >= 0) {
