@@ -1,0 +1,367 @@
+    class CatBag {
+        public Cat cats[];
+
+        CatBag(Cat c[]) {
+            cats = c;
+        }
+
+        public Cat letTheCatOutOfTheBag(int i) {
+            return cats[i];
+        }
+    }
+
+    class Dog {
+        private int feet;
+        private bool isDogMute;
+
+        Dog(bool isDogCrippled, bool canDogBark) {
+            int numberOfFeetADogHas = 4;
+            if(isDogCrippled) {
+                feet = numberOfFeetADogHas - 1; // Assume 3
+            }
+            else {
+                feet = numberOfFeetADogHas;
+            }
+            isDogMute = canDogBark;
+        }
+
+        private void bark() {
+            if(isDogMute) {
+                return;
+            }
+
+            cout << 'b';
+            cout << 'a';
+            cout << 'r';
+            cout << 'k';
+            cout << '\n';
+        }
+
+        public void dogsBehavingBadly(bool dogSeesMailman) {
+            int totalTimesBarked = 0;
+            int baseNumberOfBarks = 100;
+            int loopIndex = 0;
+            char message[] = new char[8];
+            message[0] = 'B';
+            message[1] = 'a';
+            message[2] = 'd';
+            message[3] = ' ';
+            message[4] = 'd';
+            message[5] = 'o';
+            message[6] = 'g';
+            message[7] = '!';
+
+            if(dogSeesMailman) {
+                baseNumberOfBarks = 400;
+            }
+            while(dogSeesMailman && totalTimesBarked < baseNumberOfBarks + (feet * 150)) {
+                bark();
+                totalTimesBarked = totalTimesBarked + 1;
+            }
+            while(dogSeesMailman != true || baseNumberOfBarks > 100) {
+                bark();
+                baseNumberOfBarks = baseNumberOfBarks - 1;
+                if(baseNumberOfBarks == 0) {
+                    dogSeesMailman = false;
+                }
+            }
+            while(loopIndex < 8) {
+                cout << message[loopIndex];
+                loopIndex = loopIndex + 1;
+            }
+        }
+    }
+
+    class Cat {
+        public int lives = 9;
+        public char name[];
+        private int nameLength;
+
+        Cat(char nameOfCat[], int passedNameLength) {
+            name = nameOfCat;
+            nameLength = passedNameLength; // We don't have a way to get array size, so this will have to do.
+        }
+
+        public void meow() {
+            cout << 'M';
+            cout << 'e';
+            cout << 'o';
+            cout << 'w';
+            cout << '!';
+            cout << '\n';
+        }
+
+        public void printName() {
+            int i = 0;
+            while(i < nameLength) {
+                cout << name[i];
+                i = i + 1;
+            }
+            cout << '\n';
+        }
+
+        public void die(int times) {
+            lives = lives - times;
+        }
+
+        public void eat() {
+            int amount;
+            char choice = 'z';
+
+            cout << 'H';
+            cout << 'o';
+            cout << 'w';
+            cout << ' ';
+            cout << 'm';
+            cout << 'u';
+            cout << 'c';
+            cout << 'h';
+            cout << '?';
+            cout << ' ';
+            cin >> amount;
+
+            while(choice != 'a' && choice != 'A' && choice != 'b' && choice != 'B' && choice != 'c' && choice != 'C')
+            {
+                cout << '\n';
+                cout << 'W';
+                cout << 'h';
+                cout << 'i';
+                cout << 'c';
+                cout << 'h';
+                cout << ' ';
+                cout << 'f';
+                cout << 'o';
+                cout << 'o';
+                cout << 'd';
+                cout << '?';
+                cout << '\n';
+
+                cout << '(';
+                cout << 'a';
+                cout << ')';
+                cout << ' ';
+                cout << 'C';
+                cout << 'a';
+                cout << 'n';
+                cout << 'n';
+                cout << 'e';
+                cout << 'd';
+                cout << ' ';
+                cout << 'f';
+                cout << 'o';
+                cout << 'o';
+                cout << 'd';
+                cout << '\n';
+
+                cout << '(';
+                cout << 'b';
+                cout << ')';
+                cout << 'D';
+                cout << 'r';
+                cout << 'y';
+                cout << ' ';
+                cout << 'f';
+                cout << 'o';
+                cout << 'o';
+                cout << 'd';
+                cout << '\n';
+
+                cout << '(';
+                cout << 'c';
+                cout << ')';
+                cout << 'S';
+                cout << 't';
+                cout << 'e';
+                cout << 'a';
+                cout << 'k';
+                cout << '\n';
+
+                cin >> choice;
+            }
+
+            cout << 'A';
+            cout << 't';
+            cout << 'e';
+            cout << ' ';
+            cout << amount;
+
+            if(choice == 'a' || choice == 'A') {
+                cout << 'c';
+                cout << 'a';
+                cout << 'n';
+                cout << 's';
+
+                cout << ' ';
+
+                cout << 'o';
+                cout << 'f';
+
+                cout << ' ';
+
+                cout << 'c';
+                cout << 'a';
+                cout << 't';
+                cout << ' ';
+                cout << 'f';
+                cout << 'o';
+                cout << 'o';
+                cout << 'd';
+                cout << '.';
+                cout << '\n';
+            }
+            else if(choice == 'b' || choice == 'B') {
+                cout << 'b';
+                cout << 'o';
+                cout << 'w';
+                cout << 'l';
+                cout << 's';
+
+                cout << ' ';
+
+                cout << 'o';
+                cout << 'f';
+
+                cout << ' ';
+
+                cout << 'd';
+                cout << 'r';
+                cout << 'y';
+                cout << ' ';
+                cout << 'f';
+                cout << 'o';
+                cout << 'o';
+                cout << 'd';
+                cout << '.';
+                cout << '\n';
+            }
+            else if(choice == 'c' || choice == 'C') {
+                cout << 's';
+                cout << 't';
+                cout << 'e';
+                cout << 'a';
+                cout << 'k';
+                cout << 's';
+                cout << '.';
+                cout << '\n';
+            }
+        }
+
+        public Cat getSelf(int j) {
+            Cat self = this;
+            if(j < 0) {
+                return null;
+            }
+            return self;
+        }
+    }
+
+    class Calculator {
+        public int timesCalled;
+
+        public bool tryNestedIfs() {
+            int retVal;
+            int x;
+            int y;
+            int z;
+
+            x = 1;
+            y = 2;
+            z = 3;
+            if(x == y) {
+                return false; // Should have been false.
+            }
+            else {
+                if(x == 2) {
+                    return false; // Should have been false.
+                }
+                else {
+                    if(x != 2) {
+                        x = 2; // Now x and y are both 2
+                    }
+                }
+                if(x + 1 == z && z - 1 == y) {
+                    // Should be true.
+                    x = 0;
+                    y = 50;
+                    z = 100;
+                }
+                while(z - x > 0) {
+                    if(y <= 50 || y > 50) {
+                        // Should always happen.
+                        x = x + 1;
+                        z = z - 1;
+                    }
+                    else {
+                        cout << '!';
+                        return false; // Did not finish the loop; something went terribly wrong.
+                    }
+                }
+            }
+            return true; // Finished the loop.
+        }
+
+        public bool isInAlphabeticalOrder(char a, char b) {
+            return a < b;
+        }
+
+        public int pow(int base, int exponent) {
+            int total;
+            int exponentCopy;
+            total = 1;
+            exponentCopy = exponent;
+            while(exponentCopy > 0) {
+                total = total * base;
+            }
+            return total;
+        }
+    }
+
+    void main() {
+        char cat1Name[] = new char[6];
+        char cat2Name[] = new char[4];
+        char cat3Name[] = new char[7];
+        char cat4Name[] = new char[8];
+        Cat cats[] = new Cat[4];
+        CatBag bag = new CatBag(cats);
+
+        cat1Name[0] = 'F';
+        cat1Name[1] = 'l';
+        cat1Name[2] = 'u';
+        cat1Name[3] = 'f';
+        cat1Name[4] = 'f';
+        cat1Name[5] = 'y';
+
+        cat2Name[0] = 'S';
+        cat2Name[1] = 'n';
+        cat2Name[2] = 'o';
+        cat2Name[3] = 'w';
+
+        cat3Name[0] = 'M';
+        cat3Name[1] = 'i';
+        cat3Name[2] = 't';
+        cat3Name[3] = 't';
+        cat3Name[4] = 'e';
+        cat3Name[5] = 'n';
+        cat3Name[6] = 's';
+
+        cat4Name[0] = 'P';
+        cat4Name[1] = 'r';
+        cat4Name[2] = 'i';
+        cat4Name[3] = 'n';
+        cat4Name[4] = 'c';
+        cat4Name[5] = 'e';
+        cat4Name[6] = 's';
+        cat4Name[7] = 's';
+
+        cats[0] = new Cat(cat1Name, 6);
+        cats[1] = new Cat(cat2Name, 4);
+        cats[2] = new Cat(cat3Name, 7);
+        cats[3] = new Cat(cat4Name, 8);
+
+        cats[0].printName();
+        cats[1].printName();
+        cats[2].printName();
+        cats[3].printName();
+
+        bag.letTheCatOutOfTheBag(3).printName();
+    }

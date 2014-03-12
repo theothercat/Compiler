@@ -15,6 +15,9 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class SymbolTable implements Map<String, SymbolTableEntry> {
+    public static final String NULL_SYMID = "NULL";
+    public static final SymbolTableEntry THIS_PLACEHOLDER = new SymbolTableEntry("", "THIS", "this", SymbolTableEntryType.GLOBAL_LITERAL, null);
+
     private static Log symLog = new Log("symbol_table.log");
     private static Log symDump = new Log("symbol_table_dump.log");
     private static SymbolTable theInstance = new SymbolTable();
@@ -29,8 +32,8 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         scopesToSymIdsMap.put("g", new ArrayList<String>());
 
         // Deal with THIS_PLACEHOLDER
-        SymbolTableEntry.THIS_PLACEHOLDER.data = new HashMap<String, String>(1);
-        SymbolTableEntry.THIS_PLACEHOLDER.data.put("type", "this");
+        THIS_PLACEHOLDER.data = new HashMap<String, String>(1);
+        THIS_PLACEHOLDER.data.put("type", "this");
     }
 
     /**
@@ -137,7 +140,9 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         {
             if(SymbolTableEntryType.LOCAL_VAR.equals(innerTable.get(symid).kind)
                     || SymbolTableEntryType.TEMP_VAR.equals(innerTable.get(symid).kind)
-                    || SymbolTableEntryType.PARAM.equals(innerTable.get(symid).kind))
+                    || SymbolTableEntryType.PARAM.equals(innerTable.get(symid).kind)
+                    || SymbolTableEntryType.REF_MEMBER.equals(innerTable.get(symid).kind)
+                    || SymbolTableEntryType.ARR_ITEM.equals(innerTable.get(symid).kind))
             {
                 totalTempVars += 1;
             }
@@ -242,6 +247,16 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
             }
         }
         return false;
+    }
+
+    public int getSizeForOffset(String typeName) {
+        if("bool".equals(typeName)
+                || "char".equals(typeName)) {
+            return 1;
+        }
+        else {
+            return 4;
+        }
     }
 
     public int getSize(String typeName) {
@@ -370,7 +385,7 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         {
             SymbolTableEntry newEntry;
             if("null".equals(lexeme)) {
-                newEntry = new SymbolTableEntry("g", lexeme, data);
+                newEntry = new SymbolTableEntry("g", NULL_SYMID, lexeme, data);
             }
             else {
                 newEntry = new SymbolTableEntry("g", "G", lexeme, SymbolTableEntryType.GLOBAL_LITERAL, data);

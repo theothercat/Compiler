@@ -135,7 +135,7 @@ public final class SemanticActions {
                             newEntry.symid,
                             RecordType.TEMP_VAR
                     ));
-                    ICodeGenerator.addQuad("PEEK", newEntry, (String) null, null);
+                    ICodeGenerator.addQuad("PEEK", (String)null, (String) null, newEntry);
                 }
             }
         }
@@ -238,7 +238,7 @@ public final class SemanticActions {
                     data.put("type", refType);
 
                     SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
-                    ICodeGenerator.addQuad("PEEK", newEntry, (String) null, null);
+                    ICodeGenerator.addQuad("PEEK", (String)null, (String) null, newEntry);
 
                     semanticRecordStack.push(SemanticActionRecord.getRecord(
                             newEntry.symid,
@@ -732,10 +732,10 @@ public final class SemanticActions {
                             + s1.data);
         }
         SymbolTableEntry rhs = RecordType.THIS_PLACEHOLDER.equals(s1.type)
-                ? SymbolTableEntry.THIS_PLACEHOLDER
+                ? SymbolTable.THIS_PLACEHOLDER
                 : symbolTable.get(s1.data); // Assume is symid by now, else this would fail
         SymbolTableEntry lhs = RecordType.THIS_PLACEHOLDER.equals(s2.type)
-                ? SymbolTableEntry.THIS_PLACEHOLDER
+                ? SymbolTable.THIS_PLACEHOLDER
                 : symbolTable.get(s2.data);
 
         if(rhs == null) {

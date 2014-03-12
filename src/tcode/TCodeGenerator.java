@@ -57,6 +57,10 @@ public final class TCodeGenerator {
         if(q != null) {
             frameSize -= symbolTable.getFuncSize(q.operand1);
         }
+        else {
+            frameSize -= symbolTable.getFuncSize(symbolTable.findInScope("main", "g"));
+        }
+
 
         checkLabelAndAddQuad(new Quad("MOV", "R1", TOS, null, null, "Copy TOS into R1"));
         checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(frameSize), null, null, "Space for RTN addr, PFP, this, and locals?"));
@@ -165,12 +169,24 @@ public final class TCodeGenerator {
     private static void doGlobals() {
         String operand;
         for(SymbolTableEntry entry : symbolTable.getGlobalSymbols()) {
+//            if(SymbolTable.THIS_PLACEHOLDER.equals(entry)) { continue; }
+
             if("null".equals(entry.data.get("type"))) {
                 checkLabelAndAddQuad(new Quad(".INT", "0", null, null, entry.symid, "Global data"));
             }
+            else if("bool".equals(entry.data.get("type"))) // true and false globals
+            {
+                if("true".equals(entry.value)) {
+                    checkLabelAndAddQuad(new Quad(".BYT", "0", null, null, entry.symid, "Global true"));
+                }
+                else // if("false".equals(entry.value))
+                {
+                    checkLabelAndAddQuad(new Quad(".BYT", "1", null, null, entry.symid, "Global false"));
+                }
+
+            }
             else {
-                if("char".equals(entry.data.get("type"))
-                        || "bool".equals(entry.data.get("type")))
+                if("char".equals(entry.data.get("type")))
                 {
                     operand = ".BYT";
                 }
@@ -184,8 +200,10 @@ public final class TCodeGenerator {
 
     public static void produceTargetCode() {
         // Do handling of null*
-        checkLabelAndAddQuad(new Quad("LDA", "R0", SymbolTableEntry.NULL_SYMID, null, null, "Get address of null*")); // This tells you where the next free space is.
-        checkLabelAndAddQuad(new Quad("STR", "R0", SymbolTableEntry.NULL_SYMID, null, null, "Point null* at itself"));
+        if(symbolTable.findInScope("null", "g") != null) {
+            checkLabelAndAddQuad(new Quad("LDA", "R0", SymbolTable.NULL_SYMID, null, null, "Get address of null*"));
+            checkLabelAndAddQuad(new Quad("STR", "R0", SymbolTable.NULL_SYMID, null, null, "Point null* at itself"));
+        }
 
         // Do main
         frame(null);
@@ -194,7 +212,13 @@ public final class TCodeGenerator {
 
         for(Quad q : ICodeGenerator.quads)
         {
-            handleQuad(q);
+            try {
+                handleQuad(q);
+            }
+            catch(Exception e) {
+                System.out.println("Exception in quad " + q.toString() + ": " + e.toString());
+                return;
+            }
         }
         doOverflowUnderflow();
         doGlobals();
@@ -202,7 +226,9 @@ public final class TCodeGenerator {
     }
 
     private static void handleQuad(Quad q) {
-        checkLabelAndAddQuad(new Quad(null, null, null, null, q.label, q.comment));
+        if(q.label != null) {
+            checkLabelAndAddQuad(new Quad(null, null, null, null, q.label, q.comment));
+        }
 
         if("FUNC".equals(q.operator))
         {
@@ -276,9 +302,18 @@ public final class TCodeGenerator {
             getNumberInRegister("R1", symbolTable.getSize(symbolTable.get(q.operand1).data.get("type"))); // Get size of data type
             checkLabelAndAddQuad(new Quad("MUL", "R2", "R1", null, null, q.comment + " - Load arr member (compute heap address of array item)"));
 
-            checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Load arr member (copy FP)")); // Put FP in R1
-            checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(symbolTable.get(q.operand1))), null, null, q.comment + " - Load arr member (get op1 stack address)"));
-            checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load arr member (get main array heap address from stack)")); // Load the value of container on the stack? (should be a mem address)
+            if(SymbolTableEntryType.INSTANCE_VAR.equals(symbolTable.get(q.operand1).kind)) {
+                checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Load data (heap)")); // Put FP in R1
+                checkLabelAndAddQuad(new Quad("ADI", "R1", "-8", null, null, q.comment + " - Load data (heap)")); // Get the address of the this*
+                checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load data (heap)")); // Get the address of the object on the heap
+                checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(symbolTable.get(q.operand1))), null, null, q.comment + " - Load arr member (get op1 stack address)"));
+                checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load data (heap), get address of the actual array")); // Get the address of the object on the heap
+            }
+            else {
+                checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Load arr member (copy FP)")); // Put FP in R1
+                checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(symbolTable.get(q.operand1))), null, null, q.comment + " - Load arr member (get op1 stack address)"));
+                checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load arr member (get main array heap address from stack)")); // Load the value of container on the stack? (should be a mem address)
+            }
 
             checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment + " - Load arr member (copy container heap address)"));
             checkLabelAndAddQuad(new Quad("ADD", "R3", "R2", null, null, q.comment + " - Load arr member (add offset to container heap address to get member heap address)"));
@@ -488,11 +523,11 @@ public final class TCodeGenerator {
                         int offset = symbolTable.getOffset(entry);
 
                         // Can't use loadData since it's the previous frame that has the vars.
-                        checkLabelAndAddQuad(new Quad("LDR", "R4", FP, null, null, "Get current frame"));
-                        checkLabelAndAddQuad(new Quad("ADI", "R4", "-4", null, null, "PFP"));
-                        checkLabelAndAddQuad(new Quad("LDR", "R4", indirect("R4"), null, null, "Get previous frame"));
-                        checkLabelAndAddQuad(new Quad("ADI", "R4", String.valueOf(offset), null, null, "Get address of var"));
-                        checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R4"), null, null, "Load value of var into R1"));
+                        checkLabelAndAddQuad(new Quad("MOV", "R4", FP, null, null, q.comment + " - Get current frame"));
+                        checkLabelAndAddQuad(new Quad("ADI", "R4", "-4", null, null, q.comment + " - PFP"));
+                        checkLabelAndAddQuad(new Quad("LDR", "R4", indirect("R4"), null, null, q.comment + " - Get previous frame"));
+                        checkLabelAndAddQuad(new Quad("ADI", "R4", String.valueOf(offset), null, null, q.comment + " - Get address of var"));
+                        checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R4"), null, null, q.comment + " - Load value of var into R1"));
                     }
                 }
                 else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
@@ -507,10 +542,8 @@ public final class TCodeGenerator {
                 else if(SymbolTableEntryType.INSTANCE_VAR.equals(entry.kind)) {
                     checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Load data (heap)")); // Put FP in R1
                     checkLabelAndAddQuad(new Quad("ADI", "R1", "-8", null, null, q.comment + " - Load data (heap)")); // Get the address of the this*
-                    checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load data (heap)")); // Get the address of the object on the heap
-
-                    getNumberInRegister("R4", symbolTable.getOffset(entry));
-                    checkLabelAndAddQuad(new Quad("ADD", "R1", "R4", null, null, q.comment + " - Load data (heap)")); // Base heap address in R1 + offset in R2 = address to write to
+                    checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Load data (heap), address of object on the heap")); // Get the address of the object on the heap
+                    checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(entry)), null, null, q.comment + " - Load data (heap)")); // Base heap address in R1 + offset in R2 = address to write to
 
                     if("char".equals(datatype) || "bool".equals(datatype)) {
                         loadOp = "LDB";
@@ -563,11 +596,11 @@ public final class TCodeGenerator {
                         int offset = symbolTable.getOffset(entry);
 
                         // Can't use loadData since it's the previous frame that has the vars.
-                        checkLabelAndAddQuad(new Quad("LDR", "R4", FP, null, null, "Get current frame"));
+                        checkLabelAndAddQuad(new Quad("MOV", "R4", FP, null, null, q.comment + " - Get current frame"));
                         checkLabelAndAddQuad(new Quad("ADI", "R4", "-4", null, null, "PFP"));
-                        checkLabelAndAddQuad(new Quad("LDR", "R4", indirect("R4"), null, null, "Get previous frame"));
-                        checkLabelAndAddQuad(new Quad("ADI", "R4", String.valueOf(offset), null, null, "Get address of var"));
-                        checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R4"), null, null, "Load value of var into R1"));
+                        checkLabelAndAddQuad(new Quad("LDR", "R4", indirect("R4"), null, null, q.comment + " - Get previous frame"));
+                        checkLabelAndAddQuad(new Quad("ADI", "R4", String.valueOf(offset), null, null, q.comment + " - Get address of var"));
+                        checkLabelAndAddQuad(new Quad("LDR", "R2", indirect("R4"), null, null, q.comment + " - Load value of var into R2"));
                     }                }
                 else if(SymbolTableEntryType.GLOBAL_LITERAL.equals(entry.kind)) {
                     if("char".equals(datatype) || "bool".equals(datatype)) {
@@ -584,8 +617,7 @@ public final class TCodeGenerator {
                     checkLabelAndAddQuad(new Quad("ADI", "R2", "-8", null, null, q.comment + " - Load data (heap)")); // Get the address of the this*
                     checkLabelAndAddQuad(new Quad("LDR", "R2", indirect("R2"), null, null, q.comment + " - Load data (heap)")); // Get the address of the object on the heap
 
-                    getNumberInRegister("R4", symbolTable.getOffset(entry));
-                    checkLabelAndAddQuad(new Quad("ADD", "R2", "R4", null, null, q.comment + " - Load data (heap)")); // Base heap address in R2 + offset in R4 = address to read from
+                    checkLabelAndAddQuad(new Quad("ADI", "R2", String.valueOf(symbolTable.getOffset(entry)), null, null, q.comment + " - Load data (heap)")); // Base heap address in R2 + offset in R4 = address to read from
 
                     if("char".equals(datatype) || "bool".equals(datatype)) {
                         loadOp = "LDB";
@@ -644,15 +676,14 @@ public final class TCodeGenerator {
 
             checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store data (heap)")); // Put FP in R1
             checkLabelAndAddQuad(new Quad("ADI", "R1", "-8", null, null, q.comment + " - Store data (heap)")); // Get the address of the this*
-            checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Store data (heap)")); // Get the address of this object on the heap
+            checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Store data (heap), get address of this on the heap")); // Get the address of this object on the heap
 
-            getNumberInRegister("R2", symbolTable.getOffset(entry));
-            checkLabelAndAddQuad(new Quad("ADD", "R1", "R2", null, null, q.comment + " - Store data (heap)")); // Base heap address in R1 + offset in R2 = address to write to
+            checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(symbolTable.getOffset(entry)), null, null, q.comment + " - Store data (heap), get the address of the variable on the heap")); // Base heap address in R1 + offset in R2 = address to write to
             checkLabelAndAddQuad(new Quad(storeOp, "R3", indirect("R1"), null, null, q.comment + " - Store data (heap)")); // Store value in R3 to address in R1
         }
         else if(SymbolTableEntryType.REF_MEMBER.equals(entry.kind)
                 || SymbolTableEntryType.ARR_ITEM.equals(entry.kind)) {
-            int offset = symbolTable.getOffset(symbolTable.get(q.operand3));
+            int offset = symbolTable.getOffset(symbolTable.get(q.operand3)); // Stack offset
             checkLabelAndAddQuad(new Quad("MOV", "R1", FP, null, null, q.comment + " - Store data, REF_MEMBER (get FP)")); // Put FP in R1
             checkLabelAndAddQuad(new Quad("ADI", "R1", String.valueOf(offset), null, null, q.comment + " - Store data, REF_MEMBER (get address of operand2)")); // FP + -offset
             checkLabelAndAddQuad(new Quad("LDR", "R1", indirect("R1"), null, null, q.comment + " - Store data, REF_MEMBER (get heap address from stack)")); // Get heap address out of the stack var

@@ -13,9 +13,7 @@ import java.util.Map;
  */
 public class SymbolTableEntry
 {
-    public static final String NULL_SYMID = "NULL";
     private static int id = 1;
-    public static SymbolTableEntry THIS_PLACEHOLDER = new SymbolTableEntry("", "THIS", "this", SymbolTableEntryType.GLOBAL_LITERAL, null);
 
     public String scope;
     public String symid;
@@ -39,10 +37,10 @@ public class SymbolTableEntry
         this.data = data;
     }
 
-    // Constructor for null symid
-    public SymbolTableEntry(String scope, String value, Map<String, String> data) {
+    // Constructor for null/this symid
+    public SymbolTableEntry(String scope, String symid, String value, Map<String, String> data) {
         this.scope = scope;
-        this.symid = NULL_SYMID;
+        this.symid = symid;
         this.value = value;
         this.kind = SymbolTableEntryType.GLOBAL_LITERAL;
         this.data = data;

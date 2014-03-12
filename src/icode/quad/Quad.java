@@ -1,6 +1,7 @@
 package icode.quad;
 
 import log.Log;
+import syntax.symbol.SymbolTable;
 import syntax.symbol.SymbolTableEntry;
 
 /**
@@ -59,7 +60,7 @@ public class Quad {
 
     public Quad(String op, SymbolTableEntry o1, String o2, String o3, String label) {
         operator = op;
-        operand1 = o1 == null ? null : o1.symid;
+        operand1 = getSymid(o1);
         operand2 = o2;
         operand3 = o3;
         this.label = label;
@@ -73,9 +74,9 @@ public class Quad {
 
     public Quad(String op, SymbolTableEntry o1, SymbolTableEntry o2, SymbolTableEntry o3) {
         operator = op;
-        operand1 = o1 == null ? null : o1.symid;
-        operand2 = o2 == null ? null : o2.symid;
-        operand3 = o3 == null ? null : o3.symid;
+        operand1 = getSymid(o1);
+        operand2 = getSymid(o2);
+        operand3 = getSymid(o3);
 
         comment = operator
                 + (o1 == null ? "" : (" " + o1.value))
@@ -87,8 +88,8 @@ public class Quad {
     public Quad(String op, String o1, SymbolTableEntry o2, SymbolTableEntry o3) {
         operator = op;
         operand1 = o1;
-        operand2 = o2 == null ? null : o2.symid;
-        operand3 = o3 == null ? null : o3.symid;
+        operand2 = getSymid(o2);
+        operand3 = getSymid(o3);
 
         comment = operator
                 + (o1 == null ? "" : (" " + o1))
@@ -100,9 +101,9 @@ public class Quad {
     // For read/write
     public Quad(String op, SymbolTableEntry o1, String o2, SymbolTableEntry o3) {
         operator = op;
-        operand1 = o1 == null ? null : o1.symid;
+        operand1 = getSymid(o1);
         operand2 = o2;
-        operand3 = o3 == null ? null : o3.symid;
+        operand3 = getSymid(o3);
 
         comment = operator
                 + (o1 == null ? "" : (" " + o1.value))
@@ -116,7 +117,7 @@ public class Quad {
         operator = op;
         operand1 = o1;
         operand2 = o2;
-        operand3 = o3 == null ? null : o3.symid;
+        operand3 = getSymid(o3);
 
         comment = operator
                 + (o1 == null ? "" : (" " + o1))
@@ -151,5 +152,15 @@ public class Quad {
                 + (operand2 == null ? "" : (" " + operand2))
                 + (operand3 == null ? "" : (" " + operand3))
                 + (comment == null ? "" : " ; " + comment);
+    }
+
+    private String getSymid(SymbolTableEntry entry) {
+        if(entry == null) {
+            return null;
+        }
+        if(SymbolTable.THIS_PLACEHOLDER.equals(entry)) {
+            return "this";
+        }
+        return entry.symid;
     }
 }

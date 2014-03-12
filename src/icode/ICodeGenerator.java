@@ -116,10 +116,10 @@ public class ICodeGenerator {
                 current.operand1 = newLabel;
             }
             if(oldLabel.equals(current.operand2)) {
-                current.operand1 = newLabel;
+                current.operand2 = newLabel;
             }
             if(oldLabel.equals(current.operand3)) {
-                current.operand1 = newLabel;
+                current.operand3 = newLabel;
             }
             if(oldLabel.equals(current.comment)) {
                 current.comment = newLabel;

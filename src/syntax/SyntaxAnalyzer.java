@@ -327,7 +327,7 @@ public class SyntaxAnalyzer {
             }
             else {
                 data.put("offset", String.valueOf(classOffset));
-                classOffset += symbolTable.getSize(data.get("type"));
+                classOffset += symbolTable.getSizeForOffset(data.get("type"));
                 addToSymbolTable(identifier, SymbolTableEntryType.INSTANCE_VAR, data);
             }
 
