@@ -460,6 +460,18 @@ public final class TCodeGenerator {
             checkLabelAndAddQuad(new Quad(null, null, null, null, logicLabelEnd, q.comment)); // Label for the next thing
             storeData(q); // Store 0 or 1
         }
+        else if("AND".equals(q.operator)) {
+            loadData(q, true);
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment));
+            checkLabelAndAddQuad(new Quad("AND", "R3", "R2", null, null, q.comment));
+            storeData(q); // Store 0 or 1
+        }
+        else if("OR".equals(q.operator)) {
+            loadData(q, true);
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R1", null, null, q.comment));
+            checkLabelAndAddQuad(new Quad("OR", "R3", "R2", null, null, q.comment));
+            storeData(q); // Store 0 or 1
+        }
         else if("BF".equals(q.operator)) {
             loadData(q, true);
             checkLabelAndAddQuad(new Quad("BNZ", "R1", q.operand2, null, null, q.comment));

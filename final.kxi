@@ -27,6 +27,7 @@
 
         private void bark() {
             if(isDogMute) {
+                cout << '.';
                 return;
             }
 
@@ -41,7 +42,8 @@
             int totalTimesBarked = 0;
             int baseNumberOfBarks = 100;
             int loopIndex = 0;
-            char message[] = new char[8];
+            char message[] = new char[9];
+            int i = 0;
             message[0] = 'B';
             message[1] = 'a';
             message[2] = 'd';
@@ -50,22 +52,23 @@
             message[5] = 'o';
             message[6] = 'g';
             message[7] = '!';
+            message[8] = '\n';
 
             if(dogSeesMailman) {
-                baseNumberOfBarks = 400;
+                baseNumberOfBarks = 20;
             }
-            while(dogSeesMailman && totalTimesBarked < baseNumberOfBarks + (feet * 150)) {
+            while(dogSeesMailman && (totalTimesBarked < (baseNumberOfBarks + (feet * 10)))) {
                 bark();
                 totalTimesBarked = totalTimesBarked + 1;
             }
-            while(dogSeesMailman != true || baseNumberOfBarks > 100) {
-                bark();
-                baseNumberOfBarks = baseNumberOfBarks - 1;
-                if(baseNumberOfBarks == 0) {
-                    dogSeesMailman = false;
-                }
-            }
-            while(loopIndex < 8) {
+//            while((dogSeesMailman != true) || (baseNumberOfBarks > 100)) {
+//                bark();
+//                baseNumberOfBarks = baseNumberOfBarks - 1;
+//                if(baseNumberOfBarks == 0) {
+//                    dogSeesMailman = false;
+//                }
+//            }
+            while(loopIndex < 9) {
                 cout << message[loopIndex];
                 loopIndex = loopIndex + 1;
             }
@@ -323,6 +326,8 @@
         char cat4Name[] = new char[8];
         Cat cats[] = new Cat[4];
         CatBag bag = new CatBag(cats);
+        Dog badDog = new Dog(false, false);
+        Dog muteDog = new Dog(false, true);
 
         cat1Name[0] = 'F';
         cat1Name[1] = 'l';
@@ -364,4 +369,7 @@
         cats[3].printName();
 
         bag.letTheCatOutOfTheBag(3).printName();
+
+        muteDog.dogsBehavingBadly(true);
+        badDog.dogsBehavingBadly(true);
     }

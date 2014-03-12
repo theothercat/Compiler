@@ -5,16 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" name="Default" comment="workspace.xml - not sure what this is for, but committing it for safety">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/final.kxi" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/icode/ICodeGenerator.java" afterPath="$PROJECT_DIR$/src/icode/ICodeGenerator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/icode/quad/Quad.java" afterPath="$PROJECT_DIR$/src/icode/quad/Quad.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/semantics/SemanticActions.java" afterPath="$PROJECT_DIR$/src/semantics/SemanticActions.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" afterPath="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntry.java" afterPath="$PROJECT_DIR$/src/syntax/symbol/SymbolTableEntry.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" afterPath="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/tcode/TCodeGenerator.java" afterPath="$PROJECT_DIR$/src/tcode/TCodeGenerator.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/final.kxi" afterPath="$PROJECT_DIR$/final.kxi" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/quad.icode" afterPath="$PROJECT_DIR$/quad.icode" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Compiler.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -70,11 +63,15 @@
     <file path="/MemoryLocation.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1393888051944" ignored="false" />
     <file path="/stack.kxi" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394575957578" ignored="false" />
     <file path="/a.dummy" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394594509547" ignored="false" />
-    <file path="$PROJECT_DIR$/../../CS4380/Project4/src/VM.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394490273852" ignored="false" />
-    <file path="/VM.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394490258411" ignored="false" />
+    <file path="$PROJECT_DIR$/../../CS4380/Project4/src/VM.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394598298184" ignored="false" />
+    <file path="/VM.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394598297762" ignored="false" />
     <file path="$PROJECT_DIR$/../../CS4380/Project4/src/Main.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394490524324" ignored="false" />
-    <file path="/final.kxi" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394589478893" ignored="false" />
+    <file path="/final.kxi" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394598492891" ignored="false" />
     <file path="/TCodeGenerator.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394588882412" ignored="false" />
+    <file path="$PROJECT_DIR$/../../CS4380/Project4/src/DataManager.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394597086151" ignored="false" />
+    <file path="/DataManager.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394596120020" ignored="false" />
+    <file path="$PROJECT_DIR$/../../CS4380/Project4/src/util/Constants.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394597180879" ignored="false" />
+    <file path="/Constants.java" changelist="7dd580d8-efe4-4c93-8e60-1dfb3949df7b" time="1394597180879" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -525,7 +522,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/tcode/TCodeGenerator.java" line="551" class="tcode.TCodeGenerator" package="tcode">
+      <breakpoint url="file://$PROJECT_DIR$/src/tcode/TCodeGenerator.java" line="563" class="tcode.TCodeGenerator" package="tcode">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -570,7 +567,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/tcode/TCodeGenerator.java" line="691" class="tcode.TCodeGenerator" package="tcode">
+      <breakpoint url="file://$PROJECT_DIR$/src/tcode/TCodeGenerator.java" line="703" class="tcode.TCodeGenerator" package="tcode">
         <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -615,7 +612,7 @@
         <option name="CONDITION" value="&#13;&#13;JAVA" />
         <option name="LOG_MESSAGE" value="&#13;&#13;JAVA" />
       </breakpoint>
-      <breakpoint url="file://$PROJECT_DIR$/src/tcode/TCodeGenerator.java" line="659" class="tcode.TCodeGenerator" package="tcode">
+      <breakpoint url="file://$PROJECT_DIR$/src/tcode/TCodeGenerator.java" line="671" class="tcode.TCodeGenerator" package="tcode">
         <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
@@ -680,7 +677,7 @@
       <file leaf-file-name="Quad.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/icode/quad/Quad.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="104" column="14" selection-start="3222" selection-end="3222" vertical-scroll-proportion="-14.72">
+            <state line="94" column="25" selection-start="2905" selection-end="2905" vertical-scroll-proportion="-7.92">
               <folding />
             </state>
           </provider>
@@ -689,7 +686,7 @@
       <file leaf-file-name="final.kxi" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/final.kxi">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="38" selection-start="144" selection-end="144" vertical-scroll-proportion="-4.76">
+            <state line="26" column="35" selection-start="596" selection-end="596" vertical-scroll-proportion="-17.68">
               <folding />
             </state>
           </provider>
@@ -704,19 +701,19 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="TCodeGenerator.java" pinned="false" current="false" current-in-tab="false">
+      <file leaf-file-name="TCodeGenerator.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/tcode/TCodeGenerator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="354" column="16" selection-start="20147" selection-end="20147" vertical-scroll-proportion="-7.08">
+            <state line="468" column="104" selection-start="26196" selection-end="26196" vertical-scroll-proportion="0.7433962">
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SemanticActions.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="SemanticActions.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/semantics/SemanticActions.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="251" column="76" selection-start="10446" selection-end="10446" vertical-scroll-proportion="0.6637324">
+            <state line="181" column="47" selection-start="7149" selection-end="7149" vertical-scroll-proportion="-12.88">
               <folding />
             </state>
           </provider>
@@ -752,7 +749,7 @@
       <file leaf-file-name="ICodeGenerator.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/icode/ICodeGenerator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="85" column="24" selection-start="2698" selection-end="2698" vertical-scroll-proportion="0.0">
+            <state line="91" column="106" selection-start="2887" selection-end="2887" vertical-scroll-proportion="-10.64">
               <folding />
             </state>
           </provider>
@@ -797,10 +794,10 @@
         <option value="$PROJECT_DIR$/src/icode/quad/Quad.java" />
         <option value="$PROJECT_DIR$/src/syntax/symbol/SymbolTable.java" />
         <option value="$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java" />
-        <option value="$PROJECT_DIR$/src/tcode/TCodeGenerator.java" />
         <option value="$PROJECT_DIR$/stack.kxi" />
-        <option value="$PROJECT_DIR$/final.kxi" />
         <option value="$PROJECT_DIR$/src/semantics/SemanticActions.java" />
+        <option value="$PROJECT_DIR$/src/tcode/TCodeGenerator.java" />
+        <option value="$PROJECT_DIR$/final.kxi" />
       </list>
     </option>
   </component>
@@ -1425,13 +1422,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/icode/ICodeGenerator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="85" column="24" selection-start="2698" selection-end="2698" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/semantics/record/sar/RecordType.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="21" column="31" selection-start="374" selection-end="374" vertical-scroll-proportion="0.0">
@@ -1442,6 +1432,27 @@
     <entry file="file://$PROJECT_DIR$/src/syntax/SyntaxAnalyzer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state line="329" column="60" selection-start="11229" selection-end="11229" vertical-scroll-proportion="-7.28">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/icode/quad/Quad.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="94" column="25" selection-start="2905" selection-end="2905" vertical-scroll-proportion="-7.92">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/icode/ICodeGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="91" column="106" selection-start="2887" selection-end="2887" vertical-scroll-proportion="-10.64">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/semantics/SemanticActions.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="181" column="47" selection-start="7149" selection-end="7149" vertical-scroll-proportion="-12.88">
           <folding />
         </state>
       </provider>
@@ -1460,30 +1471,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/icode/quad/Quad.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="104" column="14" selection-start="3222" selection-end="3222" vertical-scroll-proportion="-14.72">
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/final.kxi">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="38" selection-start="144" selection-end="144" vertical-scroll-proportion="-4.76">
+        <state line="26" column="35" selection-start="596" selection-end="596" vertical-scroll-proportion="-17.68">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/tcode/TCodeGenerator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="354" column="16" selection-start="20147" selection-end="20147" vertical-scroll-proportion="-7.08">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/semantics/SemanticActions.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="251" column="76" selection-start="10446" selection-end="10446" vertical-scroll-proportion="0.6637324">
+        <state line="468" column="104" selection-start="26196" selection-end="26196" vertical-scroll-proportion="0.7433962">
           <folding />
         </state>
       </provider>
