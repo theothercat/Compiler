@@ -81,8 +81,15 @@
         private int nameLength;
 
         Cat(char nameOfCat[], int passedNameLength) {
+            int i = 0;
             name = nameOfCat;
             nameLength = passedNameLength; // We don't have a way to get array size, so this will have to do.
+
+            while(i < passedNameLength) {
+                cout << nameOfCat[i];
+                i = i + 1;
+            }
+            cout << '\n';
         }
 
         public void meow() {
@@ -100,6 +107,40 @@
                 cout << name[i];
                 i = i + 1;
             }
+            cout << '\n';
+        }
+
+        public int returnAnInt() {
+            int x = 10;
+            int i = ((x + 4) / 7) * 55;
+            return i - x; // Should return 100
+        }
+
+        public Cat spawnAKitten(char nameOfCat[], int passedNameLength) {
+            Cat c = new Cat(nameOfCat, passedNameLength);
+            return c;
+        }
+
+        public void curiosityKilledTheCat(Cat c) {
+            c.printName();
+            cout << ' ';
+            cout << 'h';
+            cout << 'a';
+            cout << 's';
+            cout << ' ';
+            cout << c.lives;
+            cout << '.';
+            cout << '\n';
+
+            c.die(1);
+            c.printName();
+            cout << ' ';
+            cout << 'h';
+            cout << 'a';
+            cout << 's';
+            cout << ' ';
+            cout << c.lives;
+            cout << '.';
             cout << '\n';
         }
 
@@ -249,11 +290,8 @@
             }
         }
 
-        public Cat getSelf(int j) {
+        public Cat getSelf() {
             Cat self = this;
-            if(j < 0) {
-                return null;
-            }
             return self;
         }
     }
@@ -328,6 +366,7 @@
         CatBag bag = new CatBag(cats);
         Dog badDog = new Dog(false, false);
         Dog muteDog = new Dog(false, true);
+        int index;
 
         cat1Name[0] = 'F';
         cat1Name[1] = 'l';
@@ -358,18 +397,74 @@
         cat4Name[6] = 's';
         cat4Name[7] = 's';
 
+//        index = 0;
+//        while(index < 7) {
+//            cout << cat3Name[index];
+//            index = index + 1;
+//        }
+//        cout << '\n';
+
+
         cats[0] = new Cat(cat1Name, 6);
         cats[1] = new Cat(cat2Name, 4);
         cats[2] = new Cat(cat3Name, 7);
-        cats[3] = new Cat(cat4Name, 8);
+        cats[3] = cats[2].spawnAKitten(cat4Name, 8);
+
+        cout << '\n';
+        cout << '\n';
+        cout << cats[3].lives;
+
+        cats[3].lives = 12358;
+        cout << cats[3].lives;
+
+        cout << '\n';
+        cout << '\n';
 
         cats[0].printName();
         cats[1].printName();
         cats[2].printName();
         cats[3].printName();
 
-        bag.letTheCatOutOfTheBag(3).printName();
+//        bag.letTheCatOutOfTheBag(3).printName();
 
-        muteDog.dogsBehavingBadly(true);
-        badDog.dogsBehavingBadly(true);
+//        muteDog.dogsBehavingBadly(true);
+//        badDog.dogsBehavingBadly(true);
+
+//        if(true && false) {
+//            cout << 'T';
+//        }
+//        else {
+//            cout << 'F';
+//            cout << '!';
+//        }
+//        cout << '\n';
+
+//        if(true || false) {
+//            cout << 'T';
+//            cout << '!';
+//        }
+//        else {
+//            cout << 'F';
+//        }
+//        cout << '\n';
+
+
+        cats[0].lives = 7;
+        cats[1].lives = 8;
+        cats[2].lives = 9;
+        cats[3].lives = 42;
+
+        index = 0;
+
+//        cats[0].printName();
+        cout << '\n';
+//        while(index < 4) {
+//            cout << cats[index].lives + 0;
+            cout << ' ';
+            cats[index].meow();
+//            cout << '\n';
+            index = index + 1;
+        }
+
+        cout << '\n';
     }

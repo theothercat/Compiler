@@ -1,11 +1,42 @@
     class Cat {
         public Dog dog;
         public int lives = 9;
+        public int timesPettedPerDay[];
         public char y;
 
-        Cat(int i, char j) {
-            y = j;
-            lives = lives + i;
+//        Cat(int i, char j) {
+        Cat() {
+//            y = j;
+//            lives = lives + i;
+        }
+
+        public void print(int printArray[]) {
+            timesPettedPerDay = new int[7];
+            timesPettedPerDay[3] = 468;
+
+            cout << '\n';
+            cout << '*';
+            cout << ' ';
+            cout << '*';
+            cout << ' ';
+            cout << '*';
+            cout << ' ';
+            cout << '*';
+            cout << ' ';
+            cout << '*';
+            cout << ' ';
+            cout << '*';
+            cout << '\n';
+
+            cout << printArray[3];
+            cout << '\n';
+            cout << timesPettedPerDay[3];
+            cout << '\n';
+            timesPettedPerDay = printArray;
+            cout << timesPettedPerDay[3];
+            cout << '\n';
+
+//            cout << lives;
         }
 
         public Dog j(int a, int b) {
@@ -40,13 +71,14 @@
     void main() {
 //        int x;
 //        int y;
-        int g;
-        int f;
-        int k;
+//        int g;
+//        int f;
+//        int k;
+        int arr[] = new int[5];
 //        int r;
-//        Cat c;
-        Cat y; // = new Cat();
-        Cat x; // = new Cat();
+        Cat c = new Cat();
+//        Cat y; // = new Cat();
+//        Cat x; // = new Cat();
 //        Dog d;
         char r;
 //        x.f(k, g).g(true).y = r;
@@ -83,4 +115,30 @@
 //            y = y - 1;
 //        }
 //        return;
+
+        arr[0] = 123;
+        arr[1] = 234;
+        arr[2] = 345;
+        arr[3] = 456;
+        cout << arr[0];
+        cout << ' ';
+        cout << arr[1];
+
+        cout << '\n';
+//        cout << '\n';
+//        cout << '\n';
+
+        c.print(arr);
+
+//        c.y = '?';
+//        c.print();
+//        c.lives = 55555;
+//        cout << c.y;
+//        cout << ' ';
+//        cout << c.lives;
+
+//        cout << '\n';
+//        cout << '\n';
+//        cout << '\n';
+
     }
