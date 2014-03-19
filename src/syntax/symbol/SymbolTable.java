@@ -18,7 +18,7 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
     public static final String NULL_SYMID = "NULL";
     public static final SymbolTableEntry THIS_PLACEHOLDER = new SymbolTableEntry("", "THIS", "this", SymbolTableEntryType.GLOBAL_LITERAL, null);
 
-    private static Log symLog = new Log("symbol_table.log");
+    private static Log symLog = new Log("symbol_table_compiler.log");
     private static Log symDump = new Log("symbol_table_dump.log");
     private static SymbolTable theInstance = new SymbolTable();
 
@@ -121,33 +121,36 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
         return iFinder(identifier, scope);
     }
 
-    public int getTotalTempVars(String funcSymId) {
-        int totalTempVars = 0;
-        for(String symid : scopesToSymIdsMap.get(innerTable.get(funcSymId).scope + "." + innerTable.get(funcSymId).value))
-        {
-            if(SymbolTableEntryType.LOCAL_VAR.equals(innerTable.get(symid).kind)
-                    || SymbolTableEntryType.TEMP_VAR.equals(innerTable.get(symid).kind))
-            {
-                totalTempVars += 1;
-            }
-        }
-        return totalTempVars;
-    }
-
     public int getFuncSize(String funcSymId) {
         int totalTempVars = 0;
         for(String symid : scopesToSymIdsMap.get(innerTable.get(funcSymId).scope + "." + innerTable.get(funcSymId).value))
         {
             if(SymbolTableEntryType.LOCAL_VAR.equals(innerTable.get(symid).kind)
                     || SymbolTableEntryType.TEMP_VAR.equals(innerTable.get(symid).kind)
-                    || SymbolTableEntryType.PARAM.equals(innerTable.get(symid).kind)
                     || SymbolTableEntryType.REF_MEMBER.equals(innerTable.get(symid).kind)
-                    || SymbolTableEntryType.ARR_ITEM.equals(innerTable.get(symid).kind))
+                    || SymbolTableEntryType.ARR_ITEM.equals(innerTable.get(symid).kind)
+                    || (SymbolTableEntryType.PARAM.equals(innerTable.get(symid).kind))) // Non-main functions will have their params added onto the stack when called.
             {
                 totalTempVars += 1;
             }
         }
         return totalTempVars * 4;
+    }
+
+    public int getTotalTempVars(String funcSymId) {
+        int totalTempVars = 0;
+        for(String symid : scopesToSymIdsMap.get(innerTable.get(funcSymId).scope + "." + innerTable.get(funcSymId).value))
+        {
+            if(SymbolTableEntryType.LOCAL_VAR.equals(innerTable.get(symid).kind)
+                    || SymbolTableEntryType.TEMP_VAR.equals(innerTable.get(symid).kind)
+                    || SymbolTableEntryType.REF_MEMBER.equals(innerTable.get(symid).kind)
+                    || SymbolTableEntryType.ARR_ITEM.equals(innerTable.get(symid).kind))
+//                    || (SymbolTableEntryType.PARAM.equals(innerTable.get(symid).kind))) // Non-main functions will have their params added onto the stack when called.
+            {
+                totalTempVars += 1;
+            }
+        }
+        return totalTempVars;
     }
 
     /**

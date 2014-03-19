@@ -4,6 +4,7 @@ import lex.LexicalAnalyzer;
 import log.LogLevel;
 import log.LogManager;
 import syntax.SyntaxAnalyzer;
+import syntax.symbol.SymbolTable;
 import tcode.TCodeGenerator;
 
 import java.util.Arrays;
@@ -35,6 +36,7 @@ public class Main {
             sa.pass();
 
             sa.pass();
+            SymbolTable.get().dumpSymbolTable();
             la.closeFile();
 
             TCodeGenerator.produceTargetCode();

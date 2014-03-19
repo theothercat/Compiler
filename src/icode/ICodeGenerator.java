@@ -125,6 +125,25 @@ public class ICodeGenerator {
                 current.comment = newLabel;
             }
         }
+
+        for(int i = staticInitQuads.size() - 1; i >= 0; i--) {
+            current = staticInitQuads.get(i);
+            if(oldLabel.equals(current.label)) {
+                current.label = newLabel;
+            }
+            if(oldLabel.equals(current.operand1)) {
+                current.operand1 = newLabel;
+            }
+            if(oldLabel.equals(current.operand2)) {
+                current.operand2 = newLabel;
+            }
+            if(oldLabel.equals(current.operand3)) {
+                current.operand3 = newLabel;
+            }
+            if(oldLabel.equals(current.comment)) {
+                current.comment = newLabel;
+            }
+        }
     }
 
     public static void replaceStaticInit() {

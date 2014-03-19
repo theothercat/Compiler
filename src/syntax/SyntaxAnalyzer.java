@@ -54,7 +54,6 @@ public class SyntaxAnalyzer {
             compilation_unit();
             if(!passTwo) {
                 passTwo = true;
-                symbolTable.dumpSymbolTable();
             }
         }
         catch (NullPointerException e) {
@@ -774,6 +773,8 @@ public class SyntaxAnalyzer {
             }
 
             if(passTwo) {
+                // todo: eoe?
+                SemanticActions.EOE();
                 SemanticActions.doReturn();
             }
         }
@@ -786,6 +787,8 @@ public class SyntaxAnalyzer {
             lex.nextToken(); // Advance token - expression_with_semicolon() uses getToken()
             expression_with_semicolon();
             if(passTwo) {
+                // todo: eoe?
+                SemanticActions.EOE();
                 SemanticActions.cin();
             }
         }
@@ -798,6 +801,8 @@ public class SyntaxAnalyzer {
             lex.nextToken(); // Advance token - expression_with_semicolon() uses getToken()
             expression_with_semicolon();
             if(passTwo) {
+                // todo: eoe?
+                SemanticActions.EOE();
                 SemanticActions.cout();
             }
         }

@@ -1,14 +1,18 @@
 class Cat {
+
+    Cat() { }
+
     public int f(int k, int g) {
 
     }
 }
 
 void main() {
-    Cat y;
-    int k;
-    int g;
-    int r;
+    Cat y[] = new Cat[5];
+    y[0] = new Cat();
+//    int k;
+//    int g;
+//    int r;
 
-    int x = y.f(k, g) + g * r;
+//    int x = y.f(k, g) + g * r;
 }

@@ -247,7 +247,7 @@ public final class TCodeGenerator {
         checkLabelAndAddQuad(new Quad(".INT", "0", null, null, "FREE", "The this*, will be set at the start"));
     }
 
-    private static void handleQuad(Quad q) {
+    private static void handleQuad(Quad q) throws Exception {
         if(q.label != null) {
             checkLabelAndAddQuad(new Quad(null, null, null, null, q.label, q.comment));
         }
@@ -505,6 +505,9 @@ public final class TCodeGenerator {
             checkLabelAndAddQuad(new Quad("MOV", "R3", "R0", null, null, q.comment));
             storeData(q);
         }
+        else {
+            throw new Exception("Found bad operator: " + q.toString());
+        }
     }
 
     /**
@@ -579,7 +582,7 @@ public final class TCodeGenerator {
     }
 
     private static void putThisPointerInRegister(String register, boolean isCurrentFrame) {
-        putFramePointerInRegister(register, isCurrentFrame);
+        putFramePointerInRegister(register, true); // This pointer doesn't change between frames!
         checkLabelAndAddQuad(new Quad("ADI", register, "-8", null, null, "this* stack address")); // Get the address of the this*
         checkLabelAndAddQuad(new Quad("LDR", register, indirect(register), null, null, "Get this* (heap address)"));
 
@@ -734,9 +737,17 @@ public final class TCodeGenerator {
 
         Quad lastQuad = finalQuads.get(finalQuads.size() - 1);
         if(lastQuad.operator == null) {
-            // This is label-only
+            if(lastQuad.comment == null) {
+                System.out.println("This should never happen ");
+            }
+
 //            if(q.label == null) {
                 lastQuad.fillData(q);
+//            }
+//            else {
+//            }
+            // This is label-only
+//            if(q.label == null) {
 //            }
         }
         else {

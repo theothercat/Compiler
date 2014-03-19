@@ -107,7 +107,6 @@
                 cout << name[i];
                 i = i + 1;
             }
-            cout << '\n';
         }
 
         public int returnAnInt() {
@@ -129,6 +128,12 @@
             cout << 's';
             cout << ' ';
             cout << c.lives;
+            cout << ' ';
+            cout << 'l';
+            cout << 'i';
+            cout << 'v';
+            cout << 'e';
+            cout << 's';
             cout << '.';
             cout << '\n';
 
@@ -140,6 +145,12 @@
             cout << 's';
             cout << ' ';
             cout << c.lives;
+            cout << ' ';
+            cout << 'l';
+            cout << 'i';
+            cout << 'v';
+            cout << 'e';
+            cout << 's';
             cout << '.';
             cout << '\n';
         }
@@ -200,6 +211,7 @@
                 cout << '(';
                 cout << 'b';
                 cout << ')';
+                cout << ' ';
                 cout << 'D';
                 cout << 'r';
                 cout << 'y';
@@ -213,6 +225,7 @@
                 cout << '(';
                 cout << 'c';
                 cout << ')';
+                cout << ' ';
                 cout << 'S';
                 cout << 't';
                 cout << 'e';
@@ -223,11 +236,15 @@
                 cin >> choice;
             }
 
-            cout << 'A';
+            printName();
+
+            cout << ' ';
+            cout << 'a';
             cout << 't';
             cout << 'e';
             cout << ' ';
             cout << amount;
+            cout << ' ';
 
             if(choice == 'a' || choice == 'A') {
                 cout << 'c';
@@ -297,7 +314,75 @@
     }
 
     class Calculator {
-        public int timesCalled;
+
+        Calculator() { }
+
+        public int factorial(int n) {
+            if(n == 0) {
+                return 1;
+            }
+            return n * factorial(n - 1);
+        }
+
+        private void printInputMessage() {
+                cout << 'I';
+                cout << 'n';
+                cout << 'p';
+                cout << 'u';
+                cout << 't';
+                cout << ' ';
+                cout << 'a';
+                cout << ' ';
+                cout << 'n';
+                cout << 'u';
+                cout << 'm';
+                cout << 'b';
+                cout << 'e';
+                cout << 'r';
+                cout << ' ';
+                cout << '(';
+                cout << '-';
+                cout << '1';
+                cout << ' ';
+                cout << 't';
+                cout << 'o';
+                cout << ' ';
+                cout << 'q';
+                cout << 'u';
+                cout << 'i';
+                cout << 't';
+                cout << ')';
+                cout << ':';
+                cout << ' ';
+        }
+
+        public void interactiveFactorial() {
+            int input;
+
+            printInputMessage();
+            cin >> input;
+            while(input != -1) {
+                cout << 'F';
+                cout << 'a';
+                cout << 'c';
+                cout << 't';
+                cout << ' ';
+                cout << 'o';
+                cout << 'f';
+                cout << ' ';
+                cout << input;
+                cout << ' ';
+                cout << 'i';
+                cout << 's';
+                cout << ' ';
+                cout << factorial(input);
+                cout << '.';
+                cout << '\n';
+
+                printInputMessage();
+                cin >> input;
+            }
+        }
 
         public bool tryNestedIfs() {
             int retVal;
@@ -366,6 +451,7 @@
         CatBag bag = new CatBag(cats);
         Dog badDog = new Dog(false, false);
         Dog muteDog = new Dog(false, true);
+        Calculator calc = new Calculator();
         int index;
 
         cat1Name[0] = 'F';
@@ -397,14 +483,6 @@
         cat4Name[6] = 's';
         cat4Name[7] = 's';
 
-//        index = 0;
-//        while(index < 7) {
-//            cout << cat3Name[index];
-//            index = index + 1;
-//        }
-//        cout << '\n';
-
-
         cats[0] = new Cat(cat1Name, 6);
         cats[1] = new Cat(cat2Name, 4);
         cats[2] = new Cat(cat3Name, 7);
@@ -413,6 +491,7 @@
         cout << '\n';
         cout << '\n';
         cout << cats[3].lives;
+        cout << '\n';
 
         cats[3].lives = 12358;
         cout << cats[3].lives;
@@ -421,22 +500,48 @@
         cout << '\n';
 
         cats[0].printName();
+        cout << '\n';
         cats[1].printName();
+        cout << '\n';
         cats[2].printName();
+        cout << '\n';
         cats[3].printName();
+        cout << '\n';
 
-//        bag.letTheCatOutOfTheBag(3).printName();
+        cout << '\n';
 
-//        muteDog.dogsBehavingBadly(true);
-//        badDog.dogsBehavingBadly(true);
+        bag.letTheCatOutOfTheBag(0).printName();
+        cout << '\n';
+        bag.letTheCatOutOfTheBag(1).printName();
+        cout << '\n';
+        bag.letTheCatOutOfTheBag(2).printName();
+        cout << '\n';
+        bag.letTheCatOutOfTheBag(3).printName();
+        cout << '\n';
 
-//        if(true && false) {
-//            cout << 'T';
-//        }
-//        else {
-//            cout << 'F';
-//            cout << '!';
-//        }
+        muteDog.dogsBehavingBadly(true);
+        badDog.dogsBehavingBadly(true);
+
+        if(true && false) {
+            cout << 'T';
+        }
+        else {
+            if(true || false) {
+                cout << 't';
+            }
+            else {
+                cout << 'f';
+            }
+
+            if(true) {
+                cout << 'A';
+            }
+            else {
+                cout << 'B';
+            }
+            cout << 'F';
+            cout << '!';
+        }
 //        cout << '\n';
 
 //        if(true || false) {
@@ -458,13 +563,20 @@
 
 //        cats[0].printName();
         cout << '\n';
-//        while(index < 4) {
-//            cout << cats[index].lives + 0;
+        while(index < 4) {
+            cout << cats[index].lives + 0;
             cout << ' ';
             cats[index].meow();
-//            cout << '\n';
             index = index + 1;
         }
 
         cout << '\n';
+        cout << '\n';
+
+        cats[0].eat();
+
+        cats[3].curiosityKilledTheCat(cats[3]);
+        cout << cats[3].lives;
+        cout << '\n';
+        calc.interactiveFactorial();
     }
