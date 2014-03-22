@@ -18,8 +18,6 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public final class TCodeGenerator {
-    public static final int VAL_REGISTER_COUNT = 6;
-
     public static List<Quad> finalQuads = new ArrayList<Quad>();
 
     public static final String TOS = "R6";
@@ -174,8 +172,6 @@ public final class TCodeGenerator {
     private static void doGlobals() {
         String operand;
         for(SymbolTableEntry entry : symbolTable.getGlobalSymbols()) {
-//            if(SymbolTable.THIS_PLACEHOLDER.equals(entry)) { continue; }
-
             if("null".equals(entry.data.get("type"))) {
                 checkLabelAndAddQuad(new Quad(".INT", "0", null, null, entry.symid, "Global data"));
             }
@@ -200,23 +196,6 @@ public final class TCodeGenerator {
                 }
                 checkLabelAndAddQuad(new Quad(operand, entry.value, null, null, entry.symid, "Global data"));
             }
-            checkLabelAndAddQuad(new Quad(".BYT", "'!'", null, null, "EXCLAMATION", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'S'", null, null, "S_IS_FOR_STACK", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'H'", null, null, "H_IS_FOR_HEAP", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'^'", null, null, "CARROT", "debug")); // todo: remove debug code
-
-            checkLabelAndAddQuad(new Quad(".BYT", "'-'", null, null, "HYPHEN", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "' '", null, null, "SPACE", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'\\n'", null, null, "NEWLINE", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'~'", null, null, "TILDE", "debug")); // todo: remove debug code
-
-            checkLabelAndAddQuad(new Quad(".BYT", "'A'", null, null, "AEF1", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'E'", null, null, "AEF2", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'F'", null, null, "AEF3", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'N'", null, null, "NEWI1", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'E'", null, null, "NEWI2", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'W'", null, null, "NEWI3", "debug")); // todo: remove debug code
-            checkLabelAndAddQuad(new Quad(".BYT", "'I'", null, null, "NEWI4", "debug")); // todo: remove debug code
         }
     }
 
@@ -351,8 +330,6 @@ public final class TCodeGenerator {
             else {
                 putHeapBaseAddressInRegister("R2", q.operand2, true);
             }
-//            debug("R2", "HYPHEN", true, true);
-
             frame(q);
         }
         else if("PUSH".equals(q.operator)) {
@@ -502,6 +479,18 @@ public final class TCodeGenerator {
                     : "4";
 
             checkLabelAndAddQuad(new Quad("TRP", trpNumber, null, null, null, q.comment));
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R0", null, null, q.comment));
+            storeData(q);
+        }
+        else if("ATOI".equals(q.operator)) {
+            loadDataInRegister("R0", q.operand1, q.comment, true);
+            checkLabelAndAddQuad(new Quad("TRP", "10", null, null, null, q.comment));
+            checkLabelAndAddQuad(new Quad("MOV", "R3", "R0", null, null, q.comment));
+            storeData(q);
+        }
+        else if("ITOA".equals(q.operator)) {
+            loadDataInRegister("R0", q.operand1, q.comment, true);
+            checkLabelAndAddQuad(new Quad("TRP", "11", null, null, null, q.comment));
             checkLabelAndAddQuad(new Quad("MOV", "R3", "R0", null, null, q.comment));
             storeData(q);
         }

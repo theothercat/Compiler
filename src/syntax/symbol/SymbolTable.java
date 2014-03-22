@@ -145,7 +145,6 @@ public class SymbolTable implements Map<String, SymbolTableEntry> {
                     || SymbolTableEntryType.TEMP_VAR.equals(innerTable.get(symid).kind)
                     || SymbolTableEntryType.REF_MEMBER.equals(innerTable.get(symid).kind)
                     || SymbolTableEntryType.ARR_ITEM.equals(innerTable.get(symid).kind))
-//                    || (SymbolTableEntryType.PARAM.equals(innerTable.get(symid).kind))) // Non-main functions will have their params added onto the stack when called.
             {
                 totalTempVars += 1;
             }

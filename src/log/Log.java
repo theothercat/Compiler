@@ -17,9 +17,11 @@ import java.util.Map;
  */
 public class Log {
     private BufferedWriter writer = null;
+    private String logFileName;
 
     public Log(String logFileName) {
         if(LogLevel.NONE.equals(ProgramConstants.logLevel)) {
+            this.logFileName = logFileName;
             return;
         }
 
@@ -72,6 +74,11 @@ public class Log {
      */
     public void write(String s) {
         try {
+            if(writer == null && LogLevel.NONE.equals(ProgramConstants.logLevel)) {
+                writer = new BufferedWriter(new FileWriter(logFileName));
+                LogManager.registerLog(this);
+            }
+
             if(writer != null) {
                 writer.write(s);
                 writer.newLine();
@@ -79,7 +86,7 @@ public class Log {
             }
         }
         catch (IOException e) {
-
+            System.out.println("Could not open log file successfully.");
         }
     }
 

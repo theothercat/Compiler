@@ -61,19 +61,21 @@ public class SyntaxAnalyzer {
                 e.printStackTrace();
             }
             System.out.println("Error: unexpected end of file on line " + lex.getLineNumber());
+            throw new Exception();
         }
         catch(DuplicateSymbolException e) {
             System.out.println(String.format("Line %d: %s", lex.getLineNumber(), e.getMessage()));
             passFailed = true;
+            throw new Exception();
         }
         catch(SemanticsException e) {
             failSemantics(e.getMessage());
+            throw new Exception();
         }
         catch (Exception e) {
-            e.printStackTrace();
             // Easy escape from failed pass.
+            throw new Exception();
         }
-        System.out.println();
     }
 
     /**
@@ -134,12 +136,6 @@ public class SyntaxAnalyzer {
 
     /**
      * Class keyword should be current token.
-     *
-     * Uses getToken()
-     *
-     * Optional? No.
-     *
-     * Complete? Round 2.5.
      */
     private void class_declaration() throws Exception {
         if(passFailed) { return; }
@@ -218,12 +214,6 @@ public class SyntaxAnalyzer {
 
     /**
      * Current token should be part of class_member_declaration.
-     *
-     * Uses: getToken()
-     *
-     * Optional? No?
-     *
-     * Complete? Round 2.
      */
     private void class_member_declaration() throws Exception {
         if(passFailed) { return; }
@@ -258,10 +248,6 @@ public class SyntaxAnalyzer {
     /**
      * Uses getToken()
      * Ends with: current token is semicolon (or fail)
-     *
-     * Optional? No.
-     *
-     * Complete? Probably.
      */
     private void field_declaration(String identifier, HashMap<String, String> data) throws Exception {
         if(passFailed) { return; }
@@ -351,13 +337,7 @@ public class SyntaxAnalyzer {
     }
 
         /**
-         * Uses getToken()
-         *
-         * Optional? Not once it's been called.
-         *
          * Declares a constructor.
-         *
-         * Complete? Probably.
          */
     private void constructor_declaration() throws Exception {
         if(passFailed) { return; }
@@ -427,10 +407,6 @@ public class SyntaxAnalyzer {
     /**
      * Uses getToken()
      * Ends with: current token is closing brace
-     *
-     * Optional? No.
-     *
-     * Complete? Probably.
      */
     private void method_body() throws Exception {
         if(passFailed) { return; }
@@ -498,10 +474,6 @@ public class SyntaxAnalyzer {
     /**
      * Uses getToken()
      * Use of peek means that this will expect a nextToken()
-     *
-     * Optional? Yes.
-     *
-     * Complete? Probably.
      */
     private void variable_declaration() throws Exception {
         if(passFailed) { return; }
@@ -561,10 +533,6 @@ public class SyntaxAnalyzer {
 
     /**
      * Expects token to be where needed in parameter()
-     *
-     * Optional? No.
-     *
-     * Complete? Probably.
      */
     private void parameter_list(HashMap<String, String> data) throws Exception {
         if(passFailed) { return; }
@@ -602,11 +570,6 @@ public class SyntaxAnalyzer {
 
     /**
      * Expects the token to be in the position required for type()
-     *
-     * Optional? No.
-     *
-     * Complete? Probably.
-     *
      * @return The symid of the parameter that was declared.
      */
     private String parameter() throws Exception {
@@ -711,10 +674,6 @@ public class SyntaxAnalyzer {
 
     /**
      * Uses getToken()
-     *
-     * Optional? No.
-     *
-     * Complete? Hopefully.
      */
     public void statement() throws Exception {
         if(passFailed) { return; }
@@ -830,9 +789,7 @@ public class SyntaxAnalyzer {
     }
 
     /**
-     * Always required.
-     *
-     * Complete? Maybe.
+     * An expression.
      */
     public void expression() throws Exception {
         if(passFailed) { return; }
@@ -989,8 +946,6 @@ public class SyntaxAnalyzer {
      *
      * lex.getToken() should be at the first token of the
      * expression
-     *
-     * Complete? Probably.
      */
     public void argument_list() throws Exception {
         if(passFailed) { return; }
@@ -1013,9 +968,7 @@ public class SyntaxAnalyzer {
     }
 
     /**
-     * Optional only.
-     *
-     * Complete? Probably.
+     * member_refz()
      */
     public void member_refz() throws Exception {
         if(passFailed) { return; }
@@ -1044,8 +997,6 @@ public class SyntaxAnalyzer {
      * Starts by peeking to check for an accepted token.
      * If one is found, it will be consumed, and another
      * method will be called.
-     *
-     * Complete? Probably.
      */
     public void expressionz() throws Exception {
         if(passFailed) { return; }
@@ -1075,8 +1026,6 @@ public class SyntaxAnalyzer {
      * Uses getToken()
      *
      * Requires something after the equal sign.
-     *
-     * Complete? Probably.
      */
     public void assignment_expression() throws Exception {
         if(passFailed) { return; }
@@ -1127,6 +1076,12 @@ public class SyntaxAnalyzer {
         }
     }
 
+    /**
+     * Failure for first pass (syntax)
+     * @param ruleFailed which grammar rule failed
+     * @param expected the expected token
+     * @throws Exception to break out of this pass
+     */
     private void failGrammar(String ruleFailed, String expected) throws Exception {
         Token t = lex.getToken();
 
@@ -1142,6 +1097,11 @@ public class SyntaxAnalyzer {
         throw new Exception();
     }
 
+    /**
+     * Failure for second pass (semantics)
+     * @param failMessage message explaining the failure
+     * @throws Exception Exception to break out of this pass
+     */
     private void failSemantics(String failMessage) throws Exception {
         System.out.println(String.format("Error on line %d: %s",
                 lex.getLineNumber(),
@@ -1150,9 +1110,7 @@ public class SyntaxAnalyzer {
     }
 
     /**
-     * Not optional.
-     *
-     * Complete? Probably.
+     * new_declaration()
      */
     public void new_declaration() throws Exception {
         if(passFailed) { return; }
@@ -1208,12 +1166,7 @@ public class SyntaxAnalyzer {
     }
 
     /**
-     * Optional? No.
-     *
      * Uses getToken()
-     *
-     * Complete? Round 2
-     *
      */
     public void type() throws Exception {
         if(passFailed) { return; }

@@ -1,5 +1,7 @@
 package semantics.record.sar;
 
+import syntax.symbol.SymbolTable;
+
 import java.util.HashMap;
 
 /**
@@ -27,15 +29,19 @@ public class SemanticActionRecord {
 
     @Override
     public String toString() {
-        return new StringBuilder(
-                type.name())
-                .append(subRecords == null ? (" " + data + " ") : "")
-                .append(
-                        subRecords == null ? "" : " " + subRecords.get("id")
-                )
-                .append(
-                        subRecords == null ? "" : " " + subRecords.get("args")
-                )
+        boolean isSymId = RecordType.SYMID.equals(type);
+        StringBuilder sb = new StringBuilder(isSymId ? SymbolTable.get().get(data).kind.name() : type.name());
+        if(isSymId) {
+            sb.append(' ')
+            .append(SymbolTable.get().get(data).value)
+            .append(" of type ")
+            .append(SymbolTable.get().get(data).data.get("type"));
+        }
+        else {
+            sb.append(subRecords == null ? (" " + data + " ") : "");
+        }
+        return sb.append(subRecords == null ? "" : " " + subRecords.get("id"))
+                .append(subRecords == null ? "" : " " + subRecords.get("args"))
                 .toString();
     }
 

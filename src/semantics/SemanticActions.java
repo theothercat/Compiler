@@ -112,7 +112,23 @@ public final class SemanticActions {
             SymbolTableEntry foundFunction = symbolTable.findFunctionInClass(top_sar);
 
             if(foundFunction == null) {
-                throw new SemanticsException("Function " + top_sar.subRecords.get("id") + " with params " + top_sar.subRecords.get("args") + " does not exist");
+                StringBuilder response = new StringBuilder("Function ")
+                        .append(top_sar.subRecords.get("id"))
+                        .append(" with params ")
+                        .append(top_sar.subRecords.get("args"));
+                if(!"[]".equals(top_sar.subRecords.get("args"))) {
+                    response.append(", of type [");
+                    List<String> symids = symbolTable.parseParamIds(top_sar.subRecords.get("args"));
+                    for(int i = 0; i < symids.size(); i++)
+                    {
+                        response.append(symbolTable.get(symids.get(i)).data.get("type"));
+                        if(i < (symids.size() - 1)) {
+                            response.append(", ");
+                        }
+                    }
+                    response.append("]");
+                }
+                throw new SemanticsException(response.append(" does not exist").toString());
             }
             semanticLog.debug("Function found.");
 
@@ -207,11 +223,43 @@ public final class SemanticActions {
 
             SymbolTableEntry foundFunction = symbolTable.findFunction(object, member);
             if(foundFunction == null) {
-                throw new SemanticsException("Function " + member.subRecords.get("id") + " with params " + member.subRecords.get("args") + " does not exist");
+                StringBuilder response = new StringBuilder("Function ")
+                        .append(member.subRecords.get("id"))
+                        .append(" with params ")
+                        .append(member.subRecords.get("args"));
+                if(!"[]".equals(member.subRecords.get("args"))) {
+                    response.append(", of type [");
+                    List<String> symids = symbolTable.parseParamIds(member.subRecords.get("args"));
+                    for(int i = 0; i < symids.size(); i++)
+                    {
+                        response.append(symbolTable.get(symids.get(i)).data.get("type"));
+                        if(i < (symids.size() - 1)) {
+                            response.append(", ");
+                        }
+                    }
+                    response.append("]");
+                }
+                throw new SemanticsException(response.append(" does not exist").toString());
             }
             String accessMod = foundFunction.data.get("accessMod");
             if(!"public".equals(accessMod)) {
-                throw new SemanticsException("Function " + member.subRecords.get("id") + " with params " + member.subRecords.get("args") + " is not public");
+                StringBuilder response = new StringBuilder("Function ")
+                        .append(member.subRecords.get("id"))
+                        .append(" with params ")
+                        .append(member.subRecords.get("args"));
+                if(!"[]".equals(member.subRecords.get("args"))) {
+                    response.append(", of type [");
+                    List<String> symids = symbolTable.parseParamIds(member.subRecords.get("args"));
+                    for(int i = 0; i < symids.size(); i++)
+                    {
+                        response.append(symbolTable.get(symids.get(i)).data.get("type"));
+                        if(i < (symids.size() - 1)) {
+                            response.append(", ");
+                        }
+                    }
+                    response.append("]");
+                }
+                throw new SemanticsException(response.append(" is not public").toString());
             }
             semanticLog.debug("Function found.");
 
@@ -451,28 +499,32 @@ public final class SemanticActions {
 
     public static void atoi() throws SemanticsException {
         semanticLog.debug("atoi, checking if arg is type char");
-        checkType("char");
+        SymbolTableEntry charData = checkType("char");
         semanticLog.debug("atoi, char check passed");
 
         HashMap<String, String> data = new HashMap<String, String>(1);
         data.put("type", "int");
+        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
-                symbolTable.add(SymbolTableEntryType.TEMP_VAR, data).symid,
+                newEntry.symid,
                 RecordType.TEMP_VAR
         ));
+        ICodeGenerator.addQuad("ATOI", charData, (String)null, newEntry);
     }
 
     public static void itoa() throws SemanticsException {
         semanticLog.debug("itoa, checking if arg is type int");
-        checkType("int");
+        SymbolTableEntry intData = checkType("int");
         semanticLog.debug("itoa, int check passed");
 
         HashMap<String, String> data = new HashMap<String, String>(1);
         data.put("type", "char");
+        SymbolTableEntry newEntry = symbolTable.add(SymbolTableEntryType.TEMP_VAR, data);
         semanticRecordStack.push(SemanticActionRecord.getRecord(
-                symbolTable.add(SymbolTableEntryType.TEMP_VAR, data).symid,
+                newEntry.symid,
                 RecordType.TEMP_VAR
         ));
+        ICodeGenerator.addQuad("ITOA", intData, (String)null, newEntry);
     }
 
     public static void BAL() {
@@ -572,7 +624,23 @@ public final class SemanticActions {
 
         SymbolTableEntry foundFunction = symbolTable.findConstructor(identifier.data, argList.data);
         if(foundFunction == null) {
-            throw new SemanticsException("Constructor " + identifier.data + " with params " + argList.data + " does not exist");
+            StringBuilder response = new StringBuilder("Constructor ")
+                    .append(identifier.data)
+                    .append(" with params ")
+                    .append(argList.data);
+            if(!"[]".equals(argList.data)) {
+                response.append(", of type [");
+                List<String> symids = symbolTable.parseParamIds(argList.data);
+                for(int i = 0; i < symids.size(); i++)
+                {
+                    response.append(symbolTable.get(symids.get(i)).data.get("type"));
+                    if(i < (symids.size() - 1)) {
+                        response.append(", ");
+                    }
+                }
+                response.append("]");
+            }
+            throw new SemanticsException(response.append(" does not exist").toString());
         }
         semanticLog.debug("Constructor found.");
 
@@ -745,7 +813,7 @@ public final class SemanticActions {
             throw new SemanticsException("Symid " + s2.data + " not found in symbol table");
         }
 
-        semanticLog.debug("Evaluating expression: " + s2.toString() + " " + op.Symbol + " " + s1.toString());
+        semanticLog.debug("Evaluating expression: (" + s2.toString() + ") " + op.Symbol + " (" + s1.toString() + ")");
 
         String type = op.opResult(rhs, lhs);
         if(type == null) {

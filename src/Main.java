@@ -24,6 +24,7 @@ public class Main {
         SyntaxAnalyzer sa;
         LexicalAnalyzer la;
 
+        ProgramConstants.logLevel = LogLevel.NONE;
         if(args.length > 1) {
             ProgramConstants.logLevel = isDebugArg(args[1]) ? LogLevel.DEBUG : LogLevel.STANDARD;
         }
@@ -40,13 +41,13 @@ public class Main {
             la.closeFile();
 
             TCodeGenerator.produceTargetCode();
+            ICodeGenerator.dumpQuads();
+            TCodeGenerator.dumpQuads();
+            System.out.println("Compilation completed successfully.");
         }
         catch(Exception e) {
-            System.out.println("Exception in main(): ");
-            e.printStackTrace();
+
         }
-        ICodeGenerator.dumpQuads();
-        TCodeGenerator.dumpQuads();
         LogManager.cleanup();
     }
 
