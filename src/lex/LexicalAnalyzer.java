@@ -38,6 +38,7 @@ public class LexicalAnalyzer {
     private static final int READ_AHEAD_LIMIT = 100000;
     private static final Token EMPTY_TOKEN = new Token();
 
+    private static RegularExpression pureNumEx = new RegularExpression("^\\d+$");
     private static RegularExpression numEx = new RegularExpression("^[-+]?\\d+$");
     private static RegularExpression charEx = new RegularExpression("^'\\\\[0abfnrtv&'\"\\\\]'|^'[^'\\\\]'");
     private static RegularExpression identEx = new RegularExpression("^[_a-zA-Z][_a-zA-Z0-9]*$");
@@ -178,11 +179,18 @@ public class LexicalAnalyzer {
             return new Token(s.substring(0,2), TokenType.SYMBOL);
         }
         boolean isNumPossible = false;
-        if(isSymbol(s.charAt(0))) {
-            if(!NUM_TOKENS.contains(s.charAt(0))) {
+        if(NUM_TOKENS.contains(s.charAt(0))) {
+            if(currentToken == null
+                    || TokenType.SYMBOL.equals(currentToken.type)
+                    || TokenType.PUNCTUATION.equals(currentToken.type)) {
+                isNumPossible = true;
+            }
+            else {
                 return new Token(s.substring(0,1), TokenType.SYMBOL);
             }
-            isNumPossible = true;
+        }
+        else if(isSymbol(s.charAt(0))) {
+            return new Token(s.substring(0,1), TokenType.SYMBOL);
         }
         for(int i = 1; i < s.length(); i++){
             if(isNumPossible && i > 1) {

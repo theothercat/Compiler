@@ -1,11 +1,11 @@
-//class Cat {
+class Cat {
 
-//    Cat() { }
+    Cat() { }
 
-//    public int f(int k, int g) {
+    public int f(int k, int g) {
 
-//    }
-//}
+    }
+}
 
 void main() {
 //    Cat y[] = new Cat[5];
@@ -25,36 +25,46 @@ void main() {
 //        cout << ' ';
 //        cout << 'T';
 //    }
-    int x = 5;
-    char c;
+//    int x = 5;
+//    char c;
 
-    if(false)
-        if(x == 1) cout << 'a';
-        else if(x == 2) cout << 'b';
-        else if (x == 3) cout << 'c';
-        else cout << 'd';
+//    if(false)
+//        if(x == 1) cout << 'a';
+//        else if(x == 2) cout << 'b';
+//        else if (x == 3) cout << 'c';
+//        else cout << 'd';
 
-    else if(true) {
-        if(x == 1) cout << 'z';
-        else if(x == 2) cout << 'y';
-        else if (x == 3) cout << 'x';
-    }
-    else
-        if(x == 1) cout << 'm';
-        else if(x == 2) cout << 'n';
-        else if (x == 3) cout << 'o';
-        else cout << 'p';
+//    else if(true) {
+//        if(x == 1) cout << 'z';
+//        else if(x == 2) cout << 'y';
+//        else if (x == 3) cout << 'x';
+//    }
+//    else
+//        if(x == 1) cout << 'm';
+//        else if(x == 2) cout << 'n';
+//        else if (x == 3) cout << 'o';
+//        else cout << 'p';
 
 
-    cout << '\n';
-    cin >> c;
-    while(c != 'q') {
-    cout << c;
-        if(c == '1' || c == '2' || c == '0' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9') {
-            x = atoi(c);
-            cout << x;
-        }
-        cout << '\n';
-        cin >> c;
-    }
+//    cout << '\n';
+//    cin >> c;
+//    while(c != 'q') {
+//    cout << c;
+//        if(c == '1' || c == '2' || c == '0' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9') {
+//            x = atoi(c);
+//            cout << x;
+//        }
+//        cout << '\n';
+//        cin >> c;
+//    }
+
+    int i = +1;
+    char arr[] = new char[3];
+    Cat c = new Cat();
+    arr[i + 1] = 'c';
+    i = 1;
+    cout << arr[i + 1];
+    cout << arr[-3-1];
+    c.f(-3, -4);
+
 }
